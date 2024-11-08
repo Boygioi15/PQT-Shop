@@ -27,6 +27,9 @@ export class User {
   password: string;
 
   @Prop()
+  refreshToken: string;
+
+  @Prop()
   password_reset_code?: string;
 
   @Prop()
