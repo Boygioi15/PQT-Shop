@@ -7,7 +7,6 @@ import { UsersModule } from 'src/users/users.module';
 
 @Module({
   imports: [
-    UsersModule,
     MongooseModule.forFeature([{ name: 'OtpEmail', schema: OtpEmailSchema }]),
   ],
   controllers: [OtpEmailController],

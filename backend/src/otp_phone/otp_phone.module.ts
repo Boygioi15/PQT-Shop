@@ -10,5 +10,6 @@ import { MongooseModule } from '@nestjs/mongoose';
   ],
   controllers: [OtpPhoneController],
   providers: [OtpPhoneService],
+  exports: [OtpPhoneService],
 })
 export class OtpPhoneModule {}

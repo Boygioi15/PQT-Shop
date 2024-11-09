@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateUserDto, RegisterUserDto } from './dto/create-user.dto';
+import { RegisterUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User, UserDocument } from './schema/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
@@ -51,7 +51,11 @@ export class UsersService {
   async findOneByUsername(username: string): Promise<User | null> {
     return this.userModel
       .findOne({
-        $or: [{ phone: username }, { email: username }],
+        $or: [
+          { phone: username },
+          { email: username },
+          { accountName: username },
+        ],
       })
       .exec();
   }
@@ -79,7 +83,7 @@ export class UsersService {
     return hash;
   };
 
-  async register(registerUserDto: RegisterUserDto) {
+  async create(registerUserDto: RegisterUserDto) {
     const hashPassword = this.getHashPassword(registerUserDto.password);
     const isExistEmail = await this.userModel.findOne({
       email: registerUserDto.email,
@@ -91,23 +95,6 @@ export class UsersService {
     }
     const data = await this.userModel.create({
       ...registerUserDto,
-      password: hashPassword,
-    });
-
-    return {
-      _id: data._id,
-    };
-  }
-  async create(createUserDto: CreateUserDto, user: any) {
-    const hashPassword = this.getHashPassword(createUserDto.password);
-    const isExistEmail = await this.userModel.findOne({
-      email: createUserDto.email,
-    });
-    if (isExistEmail) {
-      throw new BadRequestException(`Email: ${createUserDto.email} đã tồn tại`);
-    }
-    let data = await this.userModel.create({
-      ...createUserDto,
       password: hashPassword,
     });
 

@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { MailService } from './mail.service';
-import { MailController } from './mail.controller';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { ConfigService } from '@nestjs/config';
@@ -34,7 +33,7 @@ import { OtpEmailModule } from 'src/otp_email/otp_email.module';
       inject: [ConfigService],
     }),
   ],
-  controllers: [MailController],
   providers: [MailService],
+  exports: [MailService],
 })
 export class MailModule {}

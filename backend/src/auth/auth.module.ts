@@ -7,10 +7,16 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './passport/jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
+import { OtpEmailModule } from 'src/otp_email/otp_email.module';
+import { MailModule } from 'src/mail/mail.module';
+import { OtpPhoneModule } from 'src/otp_phone/otp_phone.module';
 @Module({
   imports: [
     UsersModule,
     PassportModule,
+    OtpEmailModule,
+    MailModule,
+    OtpPhoneModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

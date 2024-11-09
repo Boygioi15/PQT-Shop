@@ -18,19 +18,4 @@ export class OtpPhoneController {
   create(@Body() phone: string) {
     return this.otpPhoneService.createOTP(phone);
   }
-
-  @Public()
-  @Post('send-otp')
-  async sendOtp(@Body('phone') phoneNumber: string) {
-    return await this.otpPhoneService.sendOtp(phoneNumber);
-  }
-
-  @Public()
-  @Post('verify-otp')
-  async verifyOtp(
-    @Body('phone') phoneNumber: string,
-    @Body('otpCode') otpCode: string,
-  ) {
-    return await this.otpPhoneService.verifyOtp(phoneNumber, otpCode);
-  }
 }

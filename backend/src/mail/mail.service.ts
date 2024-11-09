@@ -1,9 +1,5 @@
 import { MailerService } from '@nestjs-modules/mailer';
-import {
-  BadGatewayException,
-  BadRequestException,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { OtpEmailService } from 'src/otp_email/otp_email.service';
 import { UsersService } from 'src/users/users.service';
 
@@ -36,10 +32,5 @@ export class MailService {
     return { message: 'OTP sent successfully' };
   }
 
-  async verifyOtp(email: string, otpCode: string) {
-    const checkOtp = await this.otpEmailService.findOTP(email, otpCode);
-    if (!checkOtp) throw new BadRequestException('Mã OTP không chính xác');
-
-    return true;
-  }
+  //send sp
 }

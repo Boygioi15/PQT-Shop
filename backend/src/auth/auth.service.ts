@@ -4,7 +4,9 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import ms from 'ms';
 import { Response } from 'express';
-import { RegisterUserDto } from 'src/users/dto/create-user.dto';
+import { OtpEmailService } from 'src/otp_email/otp_email.service';
+import { OtpPhoneService } from 'src/otp_phone/otp_phone.service';
+import { NotFoundError } from 'rxjs';
 
 @Injectable()
 export class AuthService {
@@ -12,6 +14,8 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private otpEmailService: OtpEmailService,
+    private otpPhoneService: OtpPhoneService,
   ) {}
 
   async validateUser(username: string, pass: string): Promise<any> {
@@ -28,11 +32,6 @@ export class AuthService {
     }
 
     return null;
-  }
-
-  async register(newUser: RegisterUserDto) {
-    let data = await this.usersService.register({ ...newUser });
-    return data;
   }
 
   async login(user: any, response: Response) {
@@ -120,4 +119,26 @@ export class AuthService {
     });
     return refreshToken;
   };
+
+  async verifyOtpEmail(email: string, otpCode: string) {
+    const checkOtp = await this.otpEmailService.findOTP(email, otpCode);
+    if (!checkOtp) throw new BadRequestException('Mã OTP không chính xác');
+
+    return true;
+  }
+
+  async verifyOtpPhone(phone: string, otpCode: string) {
+    const checkOtp = await this.otpPhoneService.findOTP(phone, otpCode);
+    if (!checkOtp) throw new BadRequestException('Mã OTP không chính xác');
+
+    return { message: 'OTP verified successfully' };
+  }
+
+  async loginWithOtp(phone: string, otpCode: string, response: Response) {
+    await this.verifyOtpPhone(phone, otpCode);
+
+    const user = await this.usersService.findOneByUsername(phone);
+    if (!user) throw new BadRequestException('User not sginup');
+    await this.login(user, response);
+  }
 }

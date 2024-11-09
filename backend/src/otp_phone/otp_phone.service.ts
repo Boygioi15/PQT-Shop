@@ -57,11 +57,4 @@ export class OtpPhoneService {
       throw new BadRequestException('Could not send OTP');
     }
   }
-
-  async verifyOtp(phone: string, otpCode: string) {
-    const checkOtp = await this.findOTP(phone, otpCode);
-    if (!checkOtp) throw new BadRequestException('Mã OTP không chính xác');
-
-    return { message: 'OTP verified successfully' };
-  }
 }
