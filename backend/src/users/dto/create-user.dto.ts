@@ -52,5 +52,6 @@ export class RegisterUserDto {
   @IsNotEmpty({ message: 'password không được để trống' })
   password: string;
 
-  accountName: string;
+  @IsNotEmpty({ message: 'Vui lòng nhập lại mật khẩu' })
+  reEnterPassword: string;
 }

@@ -8,7 +8,6 @@ import {
   Delete,
 } from '@nestjs/common';
 import { OtpPhoneService } from './otp_phone.service';
-import { Public } from 'src/decorator/customize';
 
 @Controller('phone')
 export class OtpPhoneController {

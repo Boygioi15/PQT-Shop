@@ -83,23 +83,43 @@ export class UsersService {
     return hash;
   };
 
-  async create(registerUserDto: RegisterUserDto) {
-    const hashPassword = this.getHashPassword(registerUserDto.password);
-    const isExistEmail = await this.userModel.findOne({
-      email: registerUserDto.email,
-    });
-    if (isExistEmail) {
-      throw new BadRequestException(
-        `Email: ${registerUserDto.email} đã tồn tại`,
-      );
+  async register(registerUserDto: RegisterUserDto) {
+    if (registerUserDto.password !== registerUserDto.reEnterPassword) {
+      return new BadRequestException('Mật khẩu không khớp');
     }
-    const data = await this.userModel.create({
-      ...registerUserDto,
+    const hashPassword = this.getHashPassword(registerUserDto.password);
+    if (registerUserDto.email) {
+      const isExistEmail = await this.userModel.findOne({
+        email: registerUserDto?.email,
+      });
+
+      if (isExistEmail) {
+        throw new BadRequestException(
+          `Email: ${registerUserDto?.email} đã tồn tại`,
+        );
+      }
+    } else {
+      const isExistPhone = await this.userModel.findOne({
+        phone: registerUserDto?.phone,
+      });
+      if (isExistPhone) {
+        throw new BadRequestException(
+          `Phone: ${registerUserDto?.phone} đã tồn tại`,
+        );
+      }
+    }
+
+    const newUser = await this.userModel.create({
+      email: registerUserDto.email,
+      phone: registerUserDto.phone,
       password: hashPassword,
     });
 
     return {
-      _id: data._id,
+      _id: newUser._id,
+      name: newUser.name,
+      email: newUser.email,
+      phone: newUser.phone,
     };
   }
 }

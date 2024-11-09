@@ -3,16 +3,18 @@ import {
   Controller,
   Get,
   Post,
+  Req,
   Request,
   Res,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { Public, ResponseMessage } from 'src/decorator/customize';
+import { Public, ResponseMessage, User } from 'src/decorator/customize';
 import { AuthGuard } from '@nestjs/passport';
 import { Response } from 'express';
 import { MailService } from 'src/mail/mail.service';
 import { OtpPhoneService } from 'src/otp_phone/otp_phone.service';
+import { RegisterUserDto } from 'src/users/dto/create-user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -60,9 +62,31 @@ export class AuthController {
   }
 
   @Public()
-  @Post('sign-up/phone/verify-code')
-  signUp(@Body() body: { phone: string; otpCode: string }) {
-    const { phone, otpCode } = body;
-    return this.authService.verifyOtpPhone(phone, otpCode);
+  @ResponseMessage('Register new user')
+  @Post('sign-up/create-new')
+  signUp(
+    @Body() registerUserDto: RegisterUserDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    return this.authService.registerNewUser(registerUserDto, response);
+  }
+
+  @ResponseMessage('Get user refresh token')
+  @Get('refresh')
+  handleRefreshToken(
+    @Req() req,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const refreshToken = req.cookies['refresh_token'];
+    return this.authService.processNewToken(refreshToken, response);
+  }
+
+  @ResponseMessage('Log out')
+  @Post('log-out')
+  handleLogout(
+    @User() user: any,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    return this.authService.logout(user, response);
   }
 }

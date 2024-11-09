@@ -7,6 +7,7 @@ import { Response } from 'express';
 import { OtpEmailService } from 'src/otp_email/otp_email.service';
 import { OtpPhoneService } from 'src/otp_phone/otp_phone.service';
 import { NotFoundError } from 'rxjs';
+import { RegisterUserDto } from 'src/users/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -52,7 +53,7 @@ export class AuthService {
     //set refresh token at cookies
     response.cookie('refresh_token', refreshToken, {
       httpOnly: true,
-      maxAge: ms(this.configService.get<string>('JWT-REFRESH-EXPIRE_IN')),
+      maxAge: this.configService.get('JWT-REFRESH-EXPIRE_IN'),
     });
 
     return {
@@ -96,7 +97,7 @@ export class AuthService {
 
         response.cookie('refresh_token', refreshToken, {
           httpOnly: true,
-          maxAge: ms(this.configService.get<string>('JWT-REFRESH-EXPIRE_IN')), //milisecond
+          maxAge: this.configService.get('JWT-REFRESH-EXPIRE_IN'), //milisecond
         });
 
         return {
@@ -114,8 +115,7 @@ export class AuthService {
   createRefreshToken = (payload) => {
     const refreshToken = this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT-REFRESH-TOKEN_SECRET'),
-      expiresIn:
-        ms(this.configService.get<string>('JWT-REFRESH-EXPIRE_IN')) / 1000,
+      expiresIn: this.configService.get<string>('JWT-REFRESH-EXPIRE_IN'),
     });
     return refreshToken;
   };
@@ -139,6 +139,12 @@ export class AuthService {
 
     const user = await this.usersService.findOneByUsername(phone);
     if (!user) throw new BadRequestException('User not sginup');
+
     await this.login(user, response);
+  }
+
+  async registerNewUser(registerUserDto: RegisterUserDto, response: Response) {
+    const user = await this.usersService.register(registerUserDto);
+    return this.login(user, response);
   }
 }
