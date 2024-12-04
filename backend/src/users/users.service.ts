@@ -122,4 +122,32 @@ export class UsersService {
       phone: newUser.phone,
     };
   }
+
+  async findOrCreate(userData: {
+    email: string;
+    name: string;
+    googleId?: string;
+    facebookId?: string;
+  }): Promise<UserDocument> {
+    let user;
+
+    if (userData.googleId) {
+      user = await this.userModel.findOne({ googleId: userData.googleId });
+    } else if (userData.facebookId) {
+      user = await this.userModel.findOne({
+        facebookId: userData.facebookId,
+      });
+    }
+
+    if (!user) {
+      user = await this.userModel.create({
+        name: userData.name,
+        email: userData.email,
+        googleId: userData.googleId,
+        facebookId: userData.facebookId,
+      });
+    }
+
+    return user;
+  }
 }

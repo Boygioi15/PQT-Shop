@@ -147,4 +147,47 @@ export class AuthService {
     const user = await this.usersService.register(registerUserDto);
     return this.login(user, response);
   }
+
+  async googleLogin(req) {
+    if (!req.user) {
+      return 'No user from google';
+    }
+
+    const payload = req.user;
+
+    const user = await this.usersService.findOrCreate({
+      email: payload.email,
+      name: payload.name,
+      googleId: payload.id,
+    });
+
+    const token = this.jwtService.sign({
+      id: user._id,
+      email: payload.email,
+      name: payload.name,
+    });
+
+    return { id: user._id, email: payload.email, name: payload.name, token };
+  }
+
+  async facebookLogin(req) {
+    if (!req.user) {
+      return 'No user from facebook';
+    }
+
+    const payload = req.user;
+
+    const user = await this.usersService.findOrCreate({
+      email: payload.email,
+      name: payload.name,
+      facebookId: payload.id,
+    });
+
+    const token = this.jwtService.sign({
+      id: user._id,
+      email: payload.email,
+      name: payload.name,
+    });
+    return { id: user._id, email: payload.email, name: payload.name, token };
+  }
 }

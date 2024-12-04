@@ -20,10 +20,10 @@ export class User {
   @Prop({ unique: true })
   email: string;
 
-  @Prop({ unique: true })
+  @Prop()
   phone: string;
 
-  @Prop({ required: true })
+  @Prop()
   password: string;
 
   @Prop()
@@ -34,6 +34,12 @@ export class User {
 
   @Prop()
   password_reset_expires?: Date;
+
+  @Prop({ unique: true, sparse: true })
+  googleId?: string;
+
+  @Prop({ unique: true, sparse: true })
+  facebookId?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

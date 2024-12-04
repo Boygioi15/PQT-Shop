@@ -16,7 +16,7 @@ import { MailService } from 'src/mail/mail.service';
 import { OtpPhoneService } from 'src/otp_phone/otp_phone.service';
 import { RegisterUserDto } from 'src/users/dto/create-user.dto';
 
-@Controller('auth')
+@Controller('api/auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
@@ -88,5 +88,29 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     return this.authService.logout(user, response);
+  }
+
+  @Get('google')
+  @Public()
+  @UseGuards(AuthGuard('google'))
+  async googleAuth(@Req() req) {}
+
+  @Get('google/callback')
+  @Public()
+  @UseGuards(AuthGuard('google'))
+  async googleAuthRedirect(@Req() req) {
+    return this.authService.googleLogin(req);
+  }
+
+  @Get('facebook')
+  @Public()
+  @UseGuards(AuthGuard('facebook'))
+  async facebookAuth(@Req() req) {}
+
+  @Get('facebook/callback')
+  @Public()
+  @UseGuards(AuthGuard('facebook'))
+  async facebookAuthRedirect(@Req() req) {
+    return this.authService.facebookLogin(req);
   }
 }

@@ -10,6 +10,8 @@ import { PassportModule } from '@nestjs/passport';
 import { OtpEmailModule } from 'src/otp_email/otp_email.module';
 import { MailModule } from 'src/mail/mail.module';
 import { OtpPhoneModule } from 'src/otp_phone/otp_phone.module';
+import { GoogleStrategy } from './passport/google.strategy';
+import { FacebookStrategy } from './passport/facebook.strategy';
 @Module({
   imports: [
     UsersModule,
@@ -29,7 +31,13 @@ import { OtpPhoneModule } from 'src/otp_phone/otp_phone.module';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
+  providers: [
+    AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    GoogleStrategy,
+    FacebookStrategy,
+  ],
   exports: [AuthService],
 })
 export class AuthModule {}
