@@ -2,7 +2,6 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import ms from 'ms';
 import { Response } from 'express';
 import { OtpEmailService } from 'src/otp_email/otp_email.service';
 import { OtpPhoneService } from 'src/otp_phone/otp_phone.service';

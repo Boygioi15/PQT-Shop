@@ -10,6 +10,13 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { MailModule } from './mail/mail.module';
 import { OtpEmailModule } from './otp_email/otp_email.module';
 import { OtpPhoneModule } from './otp_phone/otp_phone.module';
+import { ReviewsModule } from './reviews/reviews.module';
+import { BrandModule } from './brand/brand.module';
+import { OrderModule } from './order/order.module';
+import { ProductModule } from './product/product.module';
+import { CartModule } from './cart/cart.module';
+import { CategoryModule } from './category/category.module';
+import { EventModule } from './event/event.module';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -27,6 +34,13 @@ import { OtpPhoneModule } from './otp_phone/otp_phone.module';
     MailModule,
     OtpEmailModule,
     OtpPhoneModule,
+    ReviewsModule,
+    BrandModule,
+    ProductModule,
+    CartModule,
+    OrderModule,
+    CategoryModule,
+    EventModule,
   ],
   controllers: [AppController],
   providers: [

@@ -9,6 +9,7 @@ import { User, UserDocument } from './schema/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { compareSync, genSaltSync, hashSync } from 'bcrypt';
+import { CartService } from 'src/cart/cart.service';
 
 @Injectable()
 export class UsersService {
@@ -20,7 +21,7 @@ export class UsersService {
 
   // Tìm người dùng theo ID
   async findOne(id: string) {
-    const user = await this.userModel.findById(id).exec();
+    const user = await this.userModel.findById(id);
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
@@ -108,7 +109,6 @@ export class UsersService {
         );
       }
     }
-
     const newUser = await this.userModel.create({
       email: registerUserDto.email,
       phone: registerUserDto.phone,
