@@ -1,11 +1,11 @@
+import React from 'react'
 import ReactDOM from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
-import RouterCustom from "./router";
-import "./style/style.css";
+import { RouterProvider } from 'react-router-dom';
+import {routeHandler} from "./router";
+import "./standard-style/style.css";
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(
-  <BrowserRouter>
-    <RouterCustom />
-  </BrowserRouter>
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+      <RouterProvider router={routeHandler} />
+  </React.StrictMode>
 );

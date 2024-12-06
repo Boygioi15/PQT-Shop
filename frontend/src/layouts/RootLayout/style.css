@@ -1,0 +1,39 @@
+.TopNav{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--primary-color); 
+    color: #fff; 
+    padding: 10px 20px;
+}
+.TopNav_EventBanner {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between text and button */
+  }
+.EventBanner_Description{
+    font-family: "Normal" ;
+    color: black;
+}
+.EventBanner_Description1{
+    margin: 0 auto; /* Push the <p> to the center */
+    font-family: "Normal" ;
+    color: black;
+}
+.EventBanner_Button {
+    font-family: "Normal";
+    background-color: #12283E; /* Navy blue background */
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.EventBanner_Button:hover {
+    color: var(--primary-color)
+}
+  .TopNav_EventBanner {
+    
+  }
+  

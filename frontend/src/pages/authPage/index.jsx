@@ -1,10 +1,11 @@
-import FloatingInput from "../../../component/FloatingInput";
+/*
+import FloatingInput from "../../reusable-components/FloatingInput"
 import loginBackground from "../../../assets/loginBackground.png";
 import logoFacebook from "../../../assets/logoFacebook.png";
 import logoGoogle from "../../../assets/logoGoogle.png";
 import logoPhone from "../../../assets/logoPhone.png";
 
-const LoginPage = ({ loginMethod }) => {
+const AuthPage = ({ loginMethod }) => {
   return (
     <div
       className="min-h-screen bg-white flex flex-col py-8 sm:px-6 lg:px-8 justify-center"
@@ -127,3 +128,4 @@ const LoginPage = ({ loginMethod }) => {
 };
 
 export default LoginPage;
+*/

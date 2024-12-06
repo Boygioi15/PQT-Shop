@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  margin: 0;
+}
+
+body {
+  font-family: "Inter"  
+}
+
+* {
+  padding: 0;
+  margin: 0;
+}
+/*
+------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------
+GLOBAL VARIABLE SECTION
+*/
+@font-face {
+  font-family: "Normal";
+  src: url(../assets/font/static/Inter_24pt-Medium.ttf) format("truetype");
+  font-weight: 100 900; /* Specifies font weights from 100 to 900 */
+  font-style: normal;
+}
+.big-icon{
+  color: black;
+  font-size: 20px;
+  padding: 5px;
+  width: 30px;
+  height: 30px;
+}
+.interactive-icon:hover{
+  background-color: var(--hover-indicator);
+  border-radius: 15px;
+  cursor: pointer
+}
+:root {
+  --primary-color: #6FDD00;
+  --ghosted-color: #666666;
+  --hover-indicator: rgba(255, 255, 255, 0.5); /* 50% opacity */
+}
