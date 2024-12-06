@@ -5,7 +5,11 @@ export default {
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        maincolor: '#55FF06', // Thêm màu chính vào theme (có thể thay đổi mã màu theo ý muốn)
+      },
+    },
   },
   plugins: [],
 };
