@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument, Types } from 'mongoose';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -40,6 +40,9 @@ export class User {
 
   @Prop({ unique: true, sparse: true })
   facebookId?: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'reviews' })
+  cartRef: Types.ObjectId[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
