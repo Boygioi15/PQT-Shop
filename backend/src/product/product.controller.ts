@@ -18,6 +18,7 @@ export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Post()
+  @Public()
   create(@Body() createProductDto: CreateProductDto) {
     return this.productService.create(createProductDto);
   }  
@@ -89,5 +90,17 @@ export class ProductController {
   ) {
     console.log('🚀 ~ ProductController ~ search:', query);
     return this.productService.searchProducts(query, page, limit);
+  }
+
+  @Get('/top-sale')
+  @Public()
+  async getTopSale(@Query('limit') limit: number) {
+    return this.productService.getTopSale({ limit });
+  }
+
+  @Get('/get-new')
+  @Public()
+  async getNewProduct(@Query('limit') limit: number) {
+    return this.productService.getListNewProduct({ limit });
   }
 }

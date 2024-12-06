@@ -216,4 +216,24 @@ export class ProductService {
       return { enough: true, inStorage: inStorage };
     }
   }
+
+  async getListNewProduct({ limit = 10 }) {
+    return await this.productModel
+      .find({
+        isNew: true,
+      })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .populate('brandRef', 'name')
+      .exec();
+  }
+
+  async getTopSale({ limit = 10 }) {
+    return await this.productModel
+      .find()
+      .sort({ sale: -1 })
+      .limit(limit)
+      .populate('brandRef', 'name')
+      .exec();
+  }
 }

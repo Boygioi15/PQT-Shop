@@ -79,6 +79,12 @@ export class Product {
 
   @Prop({ type: Types.ObjectId, ref: 'Brand' })
   brandRef: Types.ObjectId;
+
+  @Prop()
+  isNew: boolean;
+
+  @Prop()
+  sale: number;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);
