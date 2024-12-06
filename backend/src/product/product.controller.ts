@@ -20,8 +20,7 @@ export class ProductController {
   @Post()
   create(@Body() createProductDto: CreateProductDto) {
     return this.productService.create(createProductDto);
-  }
-
+  }  
   @Get()
   findAll() {
     return this.productService.findAll();

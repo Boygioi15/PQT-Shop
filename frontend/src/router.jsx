@@ -1,5 +1,5 @@
 import { Route, Routes, createBrowserRouter } from "react-router-dom";
-import HomePage from "./pages/homePage";
+import HomePage from "./pages/HomePage/HomePage";
 //import AuthPage from "./pages/authPage/index"
 import RootLayout from "./layouts/RootLayout/RootLayout";
 export const routeHandler = createBrowserRouter([

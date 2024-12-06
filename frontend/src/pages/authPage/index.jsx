@@ -1,4 +1,3 @@
-/*
 import FloatingInput from "../../reusable-components/FloatingInput"
 import loginBackground from "../../../assets/loginBackground.png";
 import logoFacebook from "../../../assets/logoFacebook.png";
@@ -128,4 +127,3 @@ const AuthPage = ({ loginMethod }) => {
 };
 
 export default LoginPage;
-*/
