@@ -1,9 +1,11 @@
-const HomePage = () => {
+export default function HomePage(){
+    //
+}
+function BriefProductShowcase(productLists){
+  
   return (
-    <>
-      <a href="/login">Login</a>
-    </>
-  );
-};
+    <div className="briefProductShowcase">
 
-export default HomePage;
+    </div>
+  )
+}
