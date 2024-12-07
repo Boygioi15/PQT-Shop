@@ -1,54 +1,57 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Rating from "../../reusable-components/Rating";
 import ColorCard from "../../reusable-components/ColorCard";
 import SizeCard from "../../reusable-components/SizeCard";
 import QuantitySelector from "../../reusable-components/QuantitySelector";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import {
+  getPriceAndSku,
+  getSizeAndColorOptions,
+  transformProductData,
+} from "../../utils";
 
 const ProductPage = () => {
-  const [selectedCapacityIndex, setSelectedCapacityIndex] = useState(0);
-  const [selectedColorIndex, setSelectedColorIndex] = useState(0);
+  const { productId } = useParams();
   const [quantity, setQuantity] = useState(1);
+  const [colorOptions, setColorOptions] = useState([]);
+  const [sizeOptions, setSizeOptions] = useState([]);
 
-  const colorOptions = [
-    {
-      src: "https://s3-alpha-sig.figma.com/img/1716/729e/e5d47c38c8574c4c80068d49fd8dedc2?Expires=1734307200&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=TiA8W2VdUT7Iw8ud-83vS~f6X2C5HknEmxPimM95OffS-Wdfe-2CxiNiDchRxDf8gdcmyeAla9y17tPIgwRRmKWveIXU8~8BC3uwW4bDskKBheTGGh6yfFOqJqzYDdN1C7GuURHbUn3Iqm61rNhzuOH4R8nrVIm1rtkt3fs2xo8qDe4Cc9wSbuJaIZk~p6wMH2cixyNcJTTbB~BF0dBABfQwS3kjQqLMPis2zX1FDT9gB~eIIE-j2~19JtXSiUq3AyL8n2SYRh0ZIMIIC9Q4DufIpWiRgzdM9q~9SBNJtjgoXp2~7Xw~WdB72ZpJOXlloQ-gOWLfiuz2JI4IhxXJEw__",
-    },
-    {
-      src: "https://s3-alpha-sig.figma.com/img/1716/729e/e5d47c38c8574c4c80068d49fd8dedc2?Expires=1734307200&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=TiA8W2VdUT7Iw8ud-83vS~f6X2C5HknEmxPimM95OffS-Wdfe-2CxiNiDchRxDf8gdcmyeAla9y17tPIgwRRmKWveIXU8~8BC3uwW4bDskKBheTGGh6yfFOqJqzYDdN1C7GuURHbUn3Iqm61rNhzuOH4R8nrVIm1rtkt3fs2xo8qDe4Cc9wSbuJaIZk~p6wMH2cixyNcJTTbB~BF0dBABfQwS3kjQqLMPis2zX1FDT9gB~eIIE-j2~19JtXSiUq3AyL8n2SYRh0ZIMIIC9Q4DufIpWiRgzdM9q~9SBNJtjgoXp2~7Xw~WdB72ZpJOXlloQ-gOWLfiuz2JI4IhxXJEw__",
-    },
-  ];
+  const [selectedCapacityIndex, setSelectedCapacityIndex] = useState(
+    sizeOptions[0]?.label
+  );
+  const [selectedColorIndex, setSelectedColorIndex] = useState(
+    colorOptions[0]?.label
+  );
 
-  const sizeOptions = [
-    {
-      label: "39",
-    },
-    {
-      label: "40",
-    },
-    {
-      label: "41",
-    },
-    {
-      label: "42",
-    },
-    {
-      label: "43",
-    },
-    {
-      label: "44",
-    },
-    {
-      label: "45",
-    },
-  ];
+  console.log("🚀 ~ ProductPage ~   colorOptions[0]:", colorOptions[0]);
+  const [product, setProduct] = useState({});
+  const [price, setPrice] = useState();
+  const [sku, setSku] = useState(1);
+  const [variation, setVariation] = useState([]);
 
+  useEffect(() => {
+    const fetchProduct = async () => {
+      const response = await axios.get(
+        `http://localhost:8000/api/product/fetch/${productId}`
+      );
+      setProduct(response.data);
+      setVariation(transformProductData(response.data));
+      const colorAndSize = getSizeAndColorOptions(response.data);
+      setColorOptions(colorAndSize.colorOptions);
+      setSizeOptions(colorAndSize.sizeOptions);
+    };
+    fetchProduct();
+  }, []);
+
+  useEffect(() => {}, [selectedCapacityIndex, selectedColorIndex, variation]);
   return (
     <div className="lg:max-w-7xl max-w-4xl">
       <div className="grid items-start grid-cols-1 lg:grid-cols-6 gap-12 p-6 rounded-lg bg-white">
         <div className="lg:col-span-3 w-full h-full top-0 text-center relative ">
           <img
-            src="https://s3-alpha-sig.figma.com/img/5fce/f6ca/dc73b3fb8b1261d17c73d55c93a3616e?Expires=1734307200&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=D~9ZhqGhURKUn-6L~IFPSD6DQOQ3DTBulqjhfPWtkh6YwfneFzCFk7AlrmxhtueKeo9Fx0BvNW0F4iQP7dVMi6UGQacyH3~xjVJcYTSKhZkiLyY9ZG0u2DWJt8pLb2mAJU7XMUKmWWk-LDJdVaONS3zRoS9c1jPdo-aNRvap0uDgCeVYDPZLF1r6ESiG3sdIKCGWU0zJGallDuyQBsBdqaa4-iZd~uKX6ytwYY0r6sTIBkgaEUkWri5RxGrVa3XCzur5HVDaevhfzKLJBkz08dDxb0yubR8a0aczzUiuAMbMpn3L6wDVyvWVyw5mgWipK9X1ObYCj04ZrNuehMC-JA__"
-            alt="iPhone 16 Pro Max"
+            src={product.init_ThumnbnailURL}
+            alt={product.name}
             className="object-cover w-full h-full"
           />
         </div>
@@ -58,24 +61,30 @@ const ProductPage = () => {
             TEVA
           </div>
           <h2 className="text-3xl font-extrabold text-gray-800 mt-2">
-            Dép Xỏ Ngón Nam Teva Mush Ii - Đen
+            {product.name}
           </h2>
 
           <div className="flex items-center space-x-2 mt-2">
-            <span className=" underline">Dép xỏ ngón</span>
-            <span className="text-[#666666]">SKU 4168-BKBL</span>
+            <span className=" underline">{product.name}</span>
+            <span className="text-[#666666]">{sku}</span>
           </div>
 
           <div>
             <Rating />
           </div>
           <div className="flex items-center ju space-x-2 mt-3 text-[#EB4335] font-extrabold text-2xl">
-            560.000<span className=" underline">đ</span>
+            {product.price}
+            <span className=" underline">đ</span>
           </div>
           {/* Dung lượng */}
           <div className="mt-8">
-            <h3 className="text-xl font-bold text-gray-800">Dung lượng</h3>
-            <ColorCard
+            <h3 className="text-xl font-bold text-gray-800">Color</h3>
+            {/* <ColorCard
+              options={colorOptions}
+              selectedIndex={selectedColorIndex}
+              onSelectOption={(index) => setSelectedColorIndex(index)}
+            /> */}
+            <SizeCard
               options={colorOptions}
               selectedIndex={selectedColorIndex}
               onSelectOption={(index) => setSelectedColorIndex(index)}
@@ -84,7 +93,7 @@ const ProductPage = () => {
 
           {/* Màu sắc */}
           <div className="mt-8">
-            <h3 className="text-xl font-bold text-gray-800">Màu sắc</h3>
+            <h3 className="text-xl font-bold text-gray-800">Size</h3>
             <SizeCard
               options={sizeOptions}
               selectedIndex={selectedCapacityIndex}

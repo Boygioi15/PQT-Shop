@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import { redirect, useNavigate } from "react-router-dom";
 
 import iconStar from "../../assets/iconStar.png";
@@ -15,9 +15,7 @@ export default function BriefProductCard({
   isSale,
 }) {
   const navigate = useNavigate();
-  const navigateToDetailPage = () => {
-   
-  };
+  const navigateToDetailPage = () => {};
   const [currentImage, setCurrentImage] = useState(imageUrl);
   const handleMouseEnter = () => {
     if (imageUrlHover) {
@@ -60,7 +58,7 @@ export default function BriefProductCard({
         </a>
         <div className="mt-2">
           <p>
-            <span>{price} VNĐ</span>
+            <span>{price} </span>
           </p>
         </div>
         <div className="mt-2 mb-5 flex items-center justify-between">

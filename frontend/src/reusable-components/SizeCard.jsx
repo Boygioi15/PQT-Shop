@@ -7,14 +7,16 @@ const SizeCard = ({ options, selectedIndex, onSelectOption }) => {
         <a
           key={index}
           className={`flex justify-center items-center relative border border-black rounded-[5px] cursor-pointer w-[80px] h-[45px] ${
-            selectedIndex === index ? "border-maincolor" : "border-gray-300"
+            selectedIndex === option.label
+              ? "border-maincolor"
+              : "border-gray-300"
           }`}
-          onClick={() => onSelectOption(index)}
+          onClick={() => onSelectOption(option.label)}
         >
           <span className="text-base font-semibold text-gray-800 p-2">
             {option.label}
           </span>
-          {selectedIndex === index && (
+          {selectedIndex === option.label && (
             <span
               className="absolute top-0 right-0 w-7 h-7 bg-maincolor flex items-center justify-center rounded-tr-[5px]"
               style={{
