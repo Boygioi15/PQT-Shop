@@ -48,7 +48,7 @@ function EventBanner() {
     const fetchEvents = async () => {
       try {
         const response = await axios.get("http://localhost:8000/api/event");
-        setEvents(response.data);
+        setEvents(response.data); // Assigning the fetched list of events to the state
       } catch (error) {
         console.error("Error fetching events:", error);
       }
@@ -127,29 +127,23 @@ function Shortcut() {
     </div>
   );
 }
-function Shortcut() {
+function NormalCategoryShortcut({ label, linkTo }) {
+  return <div className="Shortcut_NormatCategoryShortcut onHover">{label}</div>;
+}
+function DropdownCategoryShortcut({ label }) {
   return (
-    <div className="TopNav_Shortcut">
-      <div className="Shortcut_left">
-        <span className="Shortcut_Homepage">PQTSport</span>
-        <NormalCategoryShortcut label="Tất cả" />
-        <DropdownCategoryShortcut label="Giày" />
-        <DropdownCategoryShortcut label="Dép" />
-        <NormalCategoryShortcut label="Nam" />
-        <NormalCategoryShortcut label="Nữ" />
-      </div>
-      <div className="Shortcut_right">
-        <QuickSearchBar />
-        <IconShortcut
-          initIcon={<FaShoppingCart className="ShortcutIcon" />}
-          number={5}
-        />
-        <IconShortcut initIcon={<FaRegUser className="ShortcutIcon" />} />
-        <IconShortcut
-          initIcon={<FaRegHeart className="ShortcutIcon" />}
-          number={3}
-        />
-      </div>
+    <div className="Shortcut_DropdownCategoryShortcut onHover">
+      {label}
+      <IoIosArrowDown />
+    </div>
+  );
+}
+function QuickSearchBar() {
+  const [text, setText] = useState("");
+  return (
+    <div className="Shortcut_QuickSearchBar">
+      <CiSearch className="ShortcutIcon" />
+      <input />
     </div>
   );
 }
