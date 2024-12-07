@@ -21,7 +21,7 @@ export class ProductController {
   @Public()
   create(@Body() createProductDto: CreateProductDto) {
     return this.productService.create(createProductDto);
-  }  
+  }
   @Get()
   findAll() {
     return this.productService.findAll();

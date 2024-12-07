@@ -218,7 +218,7 @@ export class ProductService {
   }
 
   async getListNewProduct({ limit = 10 }) {
-    return await this.productModel
+    const products = await this.productModel
       .find({
         isNew: true,
       })
@@ -226,14 +226,40 @@ export class ProductService {
       .limit(limit)
       .populate('brandRef', 'name')
       .exec();
+
+    return products.map((product) => {
+      const minPrice = Math.min(
+        ...product.types.flatMap((type) =>
+          type.details.map((detail) => detail.price),
+        ),
+      );
+
+      return {
+        ...product.toObject(),
+        price: minPrice,
+      };
+    });
   }
 
   async getTopSale({ limit = 10 }) {
-    return await this.productModel
+    const products = await this.productModel
       .find()
       .sort({ sale: -1 })
       .limit(limit)
       .populate('brandRef', 'name')
       .exec();
+
+    return products.map((product) => {
+      const minPrice = Math.min(
+        ...product.types.flatMap((type) =>
+          type.details.map((detail) => detail.price),
+        ),
+      );
+
+      return {
+        ...product.toObject(),
+        price: minPrice,
+      };
+    });
   }
 }

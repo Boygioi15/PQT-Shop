@@ -9,17 +9,17 @@ export const routeHandler = createBrowserRouter([
     element: <RootLayout />,
     children: [
       {
-        index: true, 
-        element: <HomePage />
+        index: true,
+        element: <HomePage />,
       },
       {
         path: "auth",
         //element: <AuthPage />
       },
       {
-        path: "/product",
-        element: <ProductPage />
-      }
-    ]
-  }
-])
+        path: "/product/:productId",
+        element: <ProductPage />,
+      },
+    ],
+  },
+]);
