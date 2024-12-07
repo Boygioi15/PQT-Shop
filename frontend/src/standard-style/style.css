@@ -29,6 +29,11 @@ GLOBAL VARIABLE SECTION
   font-style: normal;
 }
 @font-face {
+  font-family: "Thin";
+  src: url(../assets/font/static/Inter_24pt-Thin.ttf) format("truetype");
+  font-style: normal;
+}
+@font-face {
   font-family: "Normal";
   src: url(../assets/font/static/Inter_24pt-Medium.ttf) format("truetype");
   font-style: normal;
@@ -58,5 +63,12 @@ GLOBAL VARIABLE SECTION
 :root {
   --primary-color: #6FDD00;
   --ghosted-color: #C3C3C3;
-  --hover-indicator: rgba(255, 255, 255, 0.5); /* 50% opacity */
+  --link-init-color: #0E88F0;
+  --link-hover-color: #1892FA;
+  --link-click-color: #229CFF;
+  --disabled-color: #C3C3C3;
+  --enabled-color: #068932;
+  --button-hover-color: #10933C;
+  --hover-indicator: rgb(200,200,200); /* 50% opacity */
+  --click-indicator: rgb(150,150,150)
 }

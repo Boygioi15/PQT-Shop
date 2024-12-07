@@ -1,0 +1,96 @@
+.AuthForm{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 50px 40px;
+    background-color: white;
+    border-radius: 25px;
+    gap: 20px;
+    width: 450px;
+}
+.AuthForm .returnIcon{
+    position: absolute;
+    top: 20px;
+    left: 20px;
+}
+.AuthForm .formTitle{
+    font-family: "Title";
+    font-size: 24px;
+    text-align: center;
+}
+.AuthForm .upper{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.AuthForm .Social-Media-Group{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.AuthForm .confirmButton{
+    width: 100%;
+    font-family: "Normal";
+    color: white;
+    background-color: var(--enabled-color);
+    padding: 5px;
+    border-radius: 5px;
+}
+.AuthForm .confirmButton:disabled{
+    background-color: var(--disabled-color);
+}
+.AuthForm .confirmButton:hover{
+    background-color: var(--button-hover-color);
+}
+.AuthForm .confirmButton:disabled{
+    background-color: var(--disabled-color);
+}
+.AuthForm .NavLink{
+    color: var(--link-init-color);
+    align-self: flex-end;
+}
+.AuthForm .NavLink:hover{
+    color: var((--link-hover-color))
+}
+.AuthForm .NavLink:click{
+    color: var((--link-click-color))
+}
+.AuthForm .NavLink:hover {
+    color: darkblue;
+    text-decoration: underline;
+}
+
+.RC_LabeledInput{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.RC_LabeledInput input{
+    font-family: "Normal";
+    border-color: var(--ghosted-color);
+    border-width: 1px;
+    border-radius: 5px;
+    width: 100%;
+    padding: 5px 10px;
+}
+.RC_Divider{
+    align-self: center;
+}
+.RC_SocialMediaLinkbutton{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-radius: 25px;
+    border-color: #333333;
+    border-width: 1px;
+    padding: 3px;
+}
+
+.RC_SocialMediaLinkbutton:hover{
+    background-color: var(--hover-indicator);
+}
+.RC_SocialMediaLinkbutton:active{
+    background-color: var(--click-indicator);
+}

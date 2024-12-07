@@ -6,6 +6,7 @@ import { CiSearch } from "react-icons/ci";
 
 import axios from 'axios'
 import './style.css'
+import { useNavigate } from 'react-router-dom';
 export default function TopNav(){
     return (
         <div>
@@ -83,6 +84,7 @@ function EventBanner(){
       )
 }
 function Shortcut(){
+    const navigate = useNavigate();
     return(
         <div className = "TopNav_Shortcut">
             <div className="Shortcut_left">
@@ -100,7 +102,8 @@ function Shortcut(){
                   number={5}
                 />
                 <IconShortcut 
-                  initIcon={<FaRegUser className='ShortcutIcon'/>}
+                  initIcon={<FaRegUser className='ShortcutIcon' />}
+                  action={()=>navigate("/auth/sign-up")}
                 />
                 <IconShortcut 
                   initIcon={<FaRegHeart className='ShortcutIcon'/>}
@@ -132,9 +135,9 @@ function QuickSearchBar(){
         </div>
     )
 }
-function IconShortcut({initIcon, number}){
+function IconShortcut({initIcon, number, action}){
     return (
-        <div className='Shortcut_Icon onHover'>
+        <div onClick={action} className='Shortcut_Icon onHover'>
             {initIcon}
             {(number && number >0) && (
                 <div>
