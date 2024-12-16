@@ -21,7 +21,7 @@ async function bootstrap() {
   app.use(cookieParser());
 
   //config interceptor
-  //app.useGlobalInterceptors(new TransformInterceptor(reflector));
+  app.useGlobalInterceptors(new TransformInterceptor(reflector));
 
   await app.listen(configService.get<string>('PORT'));
 }

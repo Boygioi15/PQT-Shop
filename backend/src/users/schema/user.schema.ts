@@ -41,7 +41,7 @@ export class User {
   @Prop({ unique: true, sparse: true })
   facebookId?: string;
 
-  @Prop({ type: Types.ObjectId, ref: 'reviews' })
+  @Prop({ type: Types.ObjectId, ref: 'Review' })
   cartRef: Types.ObjectId[];
 }
 

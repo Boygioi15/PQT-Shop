@@ -46,7 +46,7 @@ const ProductPage = () => {
 
   useEffect(() => {}, [selectedCapacityIndex, selectedColorIndex, variation]);
   return (
-    <div className="lg:max-w-7xl max-w-4xl">
+    <div className=" w-full">
       <div className="grid items-start grid-cols-1 lg:grid-cols-6 gap-12 p-6 rounded-lg bg-white">
         <div className="lg:col-span-3 w-full h-full top-0 text-center relative ">
           <img

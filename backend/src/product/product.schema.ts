@@ -71,8 +71,8 @@ export class Product {
   @Prop({ type: [Product_Types], required: true })
   types: Product_Types[]; // Each type will have its own _id
 
-  // @Prop({ type: Types.ObjectId, ref: 'Review' })
-  // reviewsRef: Types.ObjectId[];
+  @Prop({ type: [Types.ObjectId], ref: 'Review', default: [] })
+  reviewsRef: Types.ObjectId[];
 
   @Prop({ required: true })
   gender: GenderEnum;
