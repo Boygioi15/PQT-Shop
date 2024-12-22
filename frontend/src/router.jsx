@@ -1,69 +1,129 @@
-import { Route, Routes, createBrowserRouter } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchAccount } from "./redux/slice/accountSlice";
 
-import RootLayout from "./layouts/RootLayout/RootLayout";
-import AuthLayout from "./layouts/AuthLayout/AuthLayout";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+// Layouts
+import MasterLayout from "./layout/userLayout";
+import AdminLayout from "./layout/adminLayout";
 
-import HomePage from "./pages/HomePage/HomePage";
-import ProductPage from "./pages/productPage";
-import {
-  SignUpPage_Init,
-  SignUpPage_Verify,
-  SignUpPage_VerifySucessful,
-} from "./pages/AuthPages/SignUpPage";
-import { SignInPage_Email } from "./pages/AuthPages/SignInPage";
+// Pages
+import HomePage from "./pages/user/homePage";
+import LoginPage from "./pages/user/loginPage";
+import ProductPage from "./pages/user/productPage";
+import DetailProduct from "./pages/user/detailProduct";
+import CartPage from "./pages/user/cartPage";
+import ProfilePage from "./pages/user/profilePage";
 
-export const routeHandler = createBrowserRouter([
-  {
-    path: "/",
-    element: <RootLayout />,
-    children: [
-      {
-        index: true,
-        element: <HomePage />,
-      },
-      {
-        path: "/product/:productId",
-        element: <ProductPage />,
-      },
-    ],
-  },
-  {
-    path: "/auth",
-    element: <AuthLayout />,
-    children: [
-      {
-        path: "sign-up",
-        element: (
-          <SignUpPage_Init
-            returnLink="/"
-            loginLink="/auth/sign-in"
-            nextLink="/auth/sign-up/verify-code/"
+// Admin Pages (commented out, can be added later)
+import DashBoard from "./pages/admin/dashBoard";
+import OrderListPage from "./pages/admin/orderListPage";
+import ProductPageAdmin from "./pages/admin/productPage";
+
+import OrderHistory from "./component/Profile/OrderList"; // Thêm trang OrderHistory
+
+import { ROUTERS } from "./utils/router";
+import Info from "./component/Profile/Info";
+import Favorites from "./component/Profile/Favorites";
+import Address from "./component/Profile/Address";
+import SearchPage from "./pages/user/searchPage";
+import OrderDetails from "./component/Profile/OrderDetails";
+
+const RouterCustom = () => {
+  const dispatch = useDispatch();
+  const account = useSelector((state) => state.account);
+  useEffect(() => {
+    if (!account || !account.id) {
+      dispatch(fetchAccount());
+    }
+  }, [account, dispatch]);
+
+  return (
+    <>
+      <Routes>
+        {/* User Routes */}
+        <Route path="/" element={<MasterLayout />}>
+          <Route
+            path={ROUTERS.USER.HOME}
+            element={<HomePage />}
+            breadcrumbItems={[{ name: "Home", link: "/" }]} // Truyền breadcrumb cho Home
           />
-        ),
-      },
-      {
-        path: "sign-up/verify-code/:method",
-        element: (
-          <SignUpPage_Verify
-            returnLink="/auth/sign-up"
-            nextLink={"/auth/sign-up/verify-successful"}
+          <Route
+            path={ROUTERS.USER.LOGIN}
+            element={<LoginPage />}
+            breadcrumbItems={[
+              { name: "Home", link: "/" },
+              { name: "Login", link: ROUTERS.USER.LOGIN },
+            ]} // Truyền breadcrumb cho Login
           />
-        ),
-      },
-      {
-        path: "sign-up/verify-successful",
-        element: <SignUpPage_VerifySucessful nextLink="/" />,
-      },
-      {
-        path: "sign-in",
-        element: (
-          <SignInPage_Email signUpLink="/auth/sign-up" homePageLink="/" />
-        ),
-      },
-      {
-        path: "forgot-password",
-        element: <SignUpPage_Init />,
-      },
-    ],
-  },
-]);
+          <Route
+            path={ROUTERS.USER.HOME + "/:categorySlug"}
+            element={<ProductPage />}
+            breadcrumbItems={[
+              { name: "Home", link: "/" },
+              { name: "Products", link: ROUTERS.USER.HOME },
+            ]} // Truyền breadcrumb cho Products
+          />
+          <Route
+            path={ROUTERS.USER.HOME + "/tim-kiem"}
+            element={<SearchPage />}
+            breadcrumbItems={[
+              { name: "Home", link: "/" },
+              { name: "Search", link: ROUTERS.USER.HOME + "/tim-kiem" },
+            ]} // Truyền breadcrumb cho Search
+          />
+          <Route path={ROUTERS.USER.CART} element={<CartPage />} />
+          <Route
+            path="/profile/order-list/detail/:orderId"
+            element={<OrderDetails />}
+          />
+          {/* Profile Routes */}
+          <Route path={ROUTERS.USER.PROFILE} element={<ProfilePage />}>
+            <Route index element={<Info />} />
+            <Route path="" element={<Info />} />
+            <Route path={ROUTERS.USER.ORDER_LIST} element={<OrderHistory />} />
+
+            <Route path={ROUTERS.USER.FAVORITES} element={<Favorites />} />
+            <Route path={ROUTERS.USER.ADDRESS} element={<Address />} />
+          </Route>
+
+          <Route
+            path={ROUTERS.USER.PRODUCT_DETAIL(":productId")}
+            element={<DetailProduct />}
+          />
+        </Route>
+
+        {/* Admin Routes */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route path={ROUTERS.ADMIN.DASHBOARD} element={<DashBoard />} />
+          <Route
+            path={ROUTERS.ADMIN.MANAGE_PRODUCTS}
+            element={<ProductPageAdmin />}
+          />
+          <Route path={ROUTERS.ADMIN.ORDER} element={<OrderListPage />} />
+          <Route
+            path={ROUTERS.ADMIN.MANAGE_PRODUCTS + "/:productType"}
+            element={<ProductPageAdmin />}
+          />
+        </Route>
+
+        {/* Catch-all for undefined routes */}
+        <Route path="*" element={<h1>404 Not Found</h1>} />
+      </Routes>
+      <ToastContainer
+        position="top-right"
+        autoClose={1000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeButton={true}
+        pauseOnHover={true}
+        draggable={true}
+        rtl={false}
+      />
+    </>
+  );
+};
+
+export default RouterCustom;

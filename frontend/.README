@@ -1,0 +1,3 @@
+npm install vite --save-dev --legacy-peer-deps
+npm i
+npm run --save-dev

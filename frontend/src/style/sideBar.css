@@ -1,0 +1,126 @@
+/* Overlay chung */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+  transition: opacity 0.3s ease;
+}
+
+.overlay-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.overlay-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Sidebar chung */
+.sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 40rem;
+  background-color: white;
+  z-index: 999;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+}
+
+.sidebar-open {
+  transform: translateX(0);
+}
+
+.sidebar-close {
+  transform: translateX(100%);
+}
+
+/* Header chung trong Sidebar */
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem; /* 6px tương ứng với p-6 */
+}
+
+.sidebar-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #4a4a4a; /* text-gray-800 */
+}
+
+.close-icon {
+  font-size: 1.875rem; /* 3xl */
+  cursor: pointer;
+  color: #4a4a4a; /* text-gray-600 */
+  transition: color 0.3s ease;
+}
+
+.close-icon:hover {
+  color: #2d2d2d; /* hover:text-gray-800 */
+}
+
+.sidebar-content {
+  overflow-y: auto; /* Bật thanh cun dọc */
+  max-height: 100vh;
+  padding-right: 1rem; /* Tạo khoảng cách để thanh cuộn không đè nội dung */
+}
+
+/* Ẩn thanh cuộn ngang nếu xuất hiện */
+.sidebar-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+.group-list {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto; /* Enables horizontal scrolling */
+  gap: 1rem;
+}
+
+.group-list button {
+  white-space: nowrap; /* Prevents button text from wrapping */
+}
+.group-list::-webkit-scrollbar {
+  height: 0px;
+}
+
+.group-list::-webkit-scrollbar-thumb {
+  background-color: #ddd;
+  border-radius: 1px;
+}
+
+.group-list::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
+.group-name-active {
+  color: #f44336; /* Đỏ */
+  font-weight: bold;
+}
+
+.group-name-inactive {
+  color: #6b7280; /* Xám */
+}
+
+.group-name-button {
+  position: relative;
+  padding: 10px 15px;
+  cursor: pointer;
+  display: block;
+}
+
+.group-name-button:hover {
+  color: #f44336; /* Đỏ khi hover */
+}
