@@ -26,21 +26,22 @@ import {
     createTokenPair
 } from '../auth/authUtils.js';
 import KeyTokenService from './keyToken.service.js';
+
+const isValid = () = {
+
+}
 const newUserService = async ({
     email = null
 }) => {
-    const user = await userModel
-        .findOne({
-            usr_email: email,
-            googleId: null
-        })
-        .lean();
+    const user = await userModel.findOne({
+        usr_email: email,
+        googleId: null
+    }).lean();
 
-    if (user) throw new ErrorResponse('Email is exists');
+    if (user) throw new ErrorResponse('Email already exists');
 
-    // send token in email
     const res = await emailSendToken({
-        email,
+        email
     });
 
     return {
@@ -59,14 +60,14 @@ const checkLoginEmailTokenService = async ({
         otp_email: email,
         otp_token
     } = await checkEmailToken({
-        token,
+        token
     });
-    if (!email) throw new BadRequestError('Token not found ');
+    if (!email) throw new BadRequestError('Token not found');
 
-    const hasuser = await findByEmail({
-        email,
+    const existingUser = await findByEmail({
+        email
     });
-    if (hasuser) throw new BadRequestError('Email is exists');
+    if (existingUser) throw new BadRequestError('Email already exists');
 
     const passwordHash = await bcrypt.hash(getUsernameFromEmail(email), 10);
 
@@ -74,7 +75,7 @@ const checkLoginEmailTokenService = async ({
         usr_name: getUsernameFromEmail(email),
         usr_email: email,
         usr_password: passwordHash,
-        usr_role: '6704099fb8583f3dc7342d12', // user role
+        usr_role: '6704099fb8583f3dc7342d12',
     });
 
     if (newUser) {
@@ -95,13 +96,12 @@ const checkLoginEmailTokenService = async ({
 
         const tokens = await createTokenPair({
                 userId: newUser._id,
-                email,
+                email
             },
             publicKey,
-            privateKey,
+            privateKey
         );
 
-        // set cookies cho client
         res.cookie('refresh_token', tokens.refreshToken, {
             httpOnly: true,
             maxAge: 60 * 60 * 1000,
@@ -118,21 +118,11 @@ const checkLoginEmailTokenService = async ({
             usr_name: newUser.usr_name,
         });
 
-        // Thiết lập để xóa người dùng sau 2 tiếng
         setTimeout(
-            () => {
-                deleteUserIfNotChangedPassword(newUser._id).catch(console.error);
-            },
-            2 * 60 * 60 * 1000,
-        ); // 2 tiếng
+            () => deleteUserIfNotChangedPassword(newUser._id).catch(console.error),
+            2 * 60 * 60 * 1000
+        );
 
-        // return {
-        //     user: getInfoData({
-        //         fields: ['_id', 'usr_name', 'usr_email'],
-        //         object: newUser,
-        //     }),
-        //     accessToken: tokens.accessToken,
-        // };
         return res.redirect(`http://localhost:5173/?user=${newUser._id}&token=${tokens.accessToken}`);
     }
 };
@@ -141,10 +131,10 @@ const deleteUserIfNotChangedPassword = async (userId) => {
     const user = await userModel.findById(userId);
 
     if (user) {
-        const twoHoursAgo = new Date(user.createdAt.getTime() + 2 * 60 * 60 * 1000);
+        const expiryTime = new Date(user.createdAt.getTime() + 2 * 60 * 60 * 1000);
         const now = new Date();
 
-        if (now >= twoHoursAgo && !user.passwordChangedAt) {
+        if (now >= expiryTime && !user.passwordChangedAt) {
             await userModel.findByIdAndDelete(userId);
             console.log(`User with ID ${userId} has been deleted for not changing password.`);
         }
@@ -158,24 +148,23 @@ const changePassWordService = async ({
     reNewPassword
 }) => {
     const foundUser = await findByEmail({
-        email,
+        email
     });
     if (!foundUser) throw new BadRequestError('User is not registered');
 
     const match = await bcrypt.compare(currentPassword, foundUser.usr_password);
-    console.log("🚀 ~ currentPassword:", currentPassword)
     if (!match) throw new AuthFailureError('Authentication error');
 
-    if (newPassword !== reNewPassword) throw new BadRequestError('Passwords are not the same');
+    if (newPassword !== reNewPassword) throw new BadRequestError('Passwords do not match');
 
     const passwordHash = await bcrypt.hash(newPassword, 10);
 
     return await userModel.updateOne({
-        usr_email: email,
+        usr_email: email
     }, {
         usr_password: passwordHash,
         usr_isDefaultPassword: false,
-    }, );
+    });
 };
 
 const findOrCreateUser = async ({
@@ -185,7 +174,6 @@ const findOrCreateUser = async ({
     img
 }) => {
     try {
-        // Logic tìm kiếm người dùng hoặc tạo người dùng mới
         const user = await userModel.findOne({
             googleId
         });
@@ -195,20 +183,20 @@ const findOrCreateUser = async ({
         }
 
         const newUser = await userModel.create({
-            googleId: googleId,
+            googleId,
             usr_email: email,
             usr_name: name,
             usr_avatar: img,
-            usr_password: 'none', // Không có password khi đăng nhập bằng Google
-            usr_role: '6704099fb8583f3dc7342d12', // Có thể thay bằng quyền phù hợp
+            usr_password: 'none',
+            usr_role: '6704099fb8583f3dc7342d12',
         });
 
         return newUser;
     } catch (err) {
         console.error('Error in findOrCreateUser:', err);
-        throw err; // Ném lại lỗi để catch trong hàm gọi
+        throw err;
     }
-}
+};
 
 export {
     newUserService,

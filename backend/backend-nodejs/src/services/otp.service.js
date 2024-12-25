@@ -8,6 +8,35 @@ const generateTokenRandom = () => {
     return token;
 };
 
+const newOtpdw = async ({
+    email
+}) => {
+    const token = generateTokenRandom();
+    const newToken = await otpModel.create({
+        otp_token: token,
+        otp_email: email,
+    });
+    return newToken;
+};
+const checkEmailTokendawd = async ({
+    token
+}) => {
+    const foundToken = await otpModel
+        .findOne({
+            otp_token: token,
+        })
+        .lean();
+
+    if (!foundToken) throw new BadRequestError('Token không hợp lệ');
+
+    await otpModel.deleteOne({
+        otp_token: token
+    });
+
+    return foundToken;
+};
+
+
 const newOtp = async ({
     email
 }) => {
@@ -35,6 +64,8 @@ const checkEmailToken = async ({
 
     return foundToken;
 };
+
+
 export {
     newOtp,
     checkEmailToken
