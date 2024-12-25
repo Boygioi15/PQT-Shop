@@ -8,6 +8,31 @@ import {
     createResource
 } from '../services/rbac.service.js';
 
+const newRoles = async (req, res, next) => {
+    new SuccessResponse({
+        message: 'create role',
+        metadata: await createRole(req.body),
+    }).send(res);
+};
+const newResources = async (req, res, next) => {
+    new SuccessResponse({
+        message: 'create Resource',
+        metadata: await createResource(req.body),
+    }).send(res);
+};
+const listResources = async (req, res, next) => {
+    new SuccessResponse({
+        message: 'listResource listResource',
+        metadata: await getListResource(req.body),
+    }).send(res);
+};
+const listRoles = async (req, res, next) => {
+    new SuccessResponse({
+        message: 'listRole',
+        metadata: await getListRole(req.body),
+    }).send(res);
+};
+
 const newRole = async (req, res, next) => {
     new SuccessResponse({
         message: 'create role',

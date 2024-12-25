@@ -95,5 +95,39 @@ class DiscountController {
             }),
         }).send(res);
     };
+
+    findAlls = async (req, res, next) => {
+        new SuccessResponse({
+            message: 'success',
+            metadata: await DiscountService.findAll(),
+        }).send(res);
+    };
+
+    getDiscountAmousntV2 = async (req, res, next) => {
+        new SuccessResponse({
+            message: 'success',
+            metadata: await DiscountService.getDiscountAmountV2({
+                ...req.body,
+            }),
+        }).send(res);
+    };
+
+    filterAllDiscosuntForClient = async (req, res, next) => {
+        new SuccessResponse({
+            message: 'success available',
+            metadata: await DiscountService.filterAllDiscountForClient({
+                ...req.body,
+            }),
+        }).send(res);
+    };
+
+    findPrivateDisscount = async (req, res, next) => {
+        new SuccessResponse({
+            message: 'success available',
+            metadata: await DiscountService.findPrivateDiscount({
+                ...req.body,
+            }),
+        }).send(res);
+    };
 }
 export default new DiscountController();

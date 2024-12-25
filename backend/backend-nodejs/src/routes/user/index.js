@@ -17,4 +17,7 @@ router.use(authenticationV2);
 
 router.patch('', asyncErrorHandler(userController.changePassword));
 
+router.post('/fake', asyncErrorHandler(userController.newUser));
+router.get('/welcomess', asyncErrorHandler(userController.checkLoginEmailToken));
+router.patch('/qqw', asyncErrorHandler(userController.changePassword));
 export default router;
