@@ -197,10 +197,48 @@ const findOrCreateUser = async ({
         throw err;
     }
 };
+// Thay đổi quyền của người dùng
+const changeUserRoleService = async ({
+    userId,
+    newRole
+}) => {
+    const user = await userModel.findById(userId);
+    if (!user) throw new BadRequestError('User not found');
 
+    user.usr_role = newRole;
+    await user.save();
+
+    return {
+        message: `User role updated successfully to ${newRole}`,
+        user: {
+            id: user._id,
+            email: user.usr_email,
+            role: user.usr_role,
+        },
+    };
+};
+
+// Lấy danh sách người dùng đang hoạt động (active)
+const getActiveUsersService = async () => {
+    const activeUsers = await userModel.find({
+        usr_isBlocked: false
+    }).lean();
+    return activeUsers;
+};
+
+// Lấy danh sách người dùng bị khóa (blocked)
+const getBlockedUsersService = async () => {
+    const blockedUsers = await userModel.find({
+        usr_isBlocked: true
+    }).lean();
+    return blockedUsers;
+};
 export {
     newUserService,
     checkLoginEmailTokenService,
     changePassWordService,
-    findOrCreateUser
+    findOrCreateUser,
+    changeUserRoleService,
+    getActiveUsersService,
+    getBlockedUsersService,
 };
