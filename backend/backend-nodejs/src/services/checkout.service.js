@@ -1,13 +1,7 @@
-import {
-    findCartById
-} from '../models/repositories/cart.repo.js';
-import {
-    BadRequestError
-} from '../core/error.response.js';
+import { findCartById } from '../models/repositories/cart.repo.js';
+import { BadRequestError } from '../core/error.response.js';
 
-import {
-    checkSkuByServer
-} from '../models/repositories/order.repo.js';
+import { checkSkuByServer } from '../models/repositories/order.repo.js';
 import DiscountService from './discount.service.js';
 import userModel from '../models/user.model.js';
 
@@ -16,13 +10,7 @@ class CheckOutService {
      *  shop_discount = [discountId]
      *  products_order = [{ quanity,skuId,spuId,price}]
      */
-    static async checkOutRevew({
-        cartId,
-        userId,
-        isUseLoyalPoint = false,
-        shop_discount,
-        products_order = []
-    }) {
+    static async checkOutRevew({ cartId, userId, isUseLoyalPoint = false, shop_discount, products_order = [] }) {
         // check cart id
         const foundCart = findCartById({
             cartId,
@@ -61,43 +49,19 @@ class CheckOutService {
 
         if (shop_discount.length > 0) {
             let discountAmount = 0;
-            await Promise.all(shop_discount.map(async (discountId) => {
-                console.log("🚀 ~ CheckOutService ~ awaitPromise.all ~ checkProductServer:", checkProductServer)
-                const {
-                    discount
-                } = await DiscountService.getDiscountAmountV2({
-                    userId,
-                    discountId,
-                    products: checkProductServer,
-                });
-                discountAmount += discount
-            }));
+            await Promise.all(
+                shop_discount.map(async (discountId) => {
+                    console.log('🚀 ~ CheckOutService ~ awaitPromise.all ~ checkProductServer:', checkProductServer);
+                    const { discount } = await DiscountService.getDiscountAmountV2({
+                        userId,
+                        discountId,
+                        products: checkProductServer,
+                    });
+                    discountAmount += discount;
+                }),
+            );
             checkOut_order.voucherDiscount = discountAmount;
-
         }
-
-        if (isUseLoyalPoint) {
-            const {
-                usr_loyalPoint
-            } = await userModel.findById(userId).lean()
-            checkOut_order.totalCheckOut = checkOut_order.totalPrice - checkOut_order.productDiscount - checkOut_order.voucherDiscount - usr_loyalPoint;
-        } else {
-            checkOut_order.totalCheckOut = checkOut_order.totalPrice - checkOut_order.productDiscount - checkOut_order.voucherDiscount;
-
-        }
-
-
-
-        return {
-            raw: {
-                shop_discount,
-                products_order,
-            },
-            checkOut_order,
-        };
     }
-
-
-
 }
 export default CheckOutService;

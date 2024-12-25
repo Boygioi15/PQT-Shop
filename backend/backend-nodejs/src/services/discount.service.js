@@ -1,22 +1,9 @@
-import {
-    SEND_NOTIFICATION_TYPE,
-    TYPE_NOTIFICATION
-} from '../constant/index.js';
-import {
-    BadRequestError,
-    NotFoundError
-} from '../core/error.response.js';
+import { SEND_NOTIFICATION_TYPE, TYPE_NOTIFICATION } from '../constant/index.js';
+import { BadRequestError, NotFoundError } from '../core/error.response.js';
 import discountModel from '../models/discount.model.js';
-import {
-    checkDiscountExists,
-    findAllDiscountCodeUnSelect
-} from '../models/repositories/discount.repo.js';
-import {
-    findAllProducts
-} from '../models/repositories/product.repo.js';
-import {
-    sendNotifitoQueue
-} from './rabbitmq.service.js';
+import { checkDiscountExists, findAllDiscountCodeUnSelect } from '../models/repositories/discount.repo.js';
+import { findAllProducts } from '../models/repositories/product.repo.js';
+import { sendNotifitoQueue } from './rabbitmq.service.js';
 
 export default class DiscountService {
     static async createDisCountCode(payload) {
@@ -36,7 +23,7 @@ export default class DiscountService {
             max_uses,
             uses_count,
             max_uses_per_user,
-            isPublic
+            isPublic,
         } = payload;
 
         const foundDiscount = await discountModel.findOne({
@@ -46,283 +33,7 @@ export default class DiscountService {
         if (foundDiscount && foundDiscount.discount_is_active) {
             throw new BadRequestError('Discount exists');
         }
-
-        const newDiscount = await discountModel.create({
-            discount_name: name,
-            discount_description: description,
-            discount_type: type,
-            discount_value: value,
-            discount_code: code,
-            discount_start: new Date(start_date),
-            discount_end: new Date(end_date),
-            discount_max_uses: max_uses,
-            discount_uses_count: uses_count,
-            discount_user_used: [],
-            discount_max_uses_per_user: max_uses_per_user,
-            discount_min_order_value: min_order_value,
-            discount_is_active: is_active,
-            discount_max_value: max_value,
-            discount_applies_to: applies_to,
-            discount_product_ids: applies_to === 'all' ? [] : product_ids,
-            discount_isPublic: isPublic
-        });
-
-        // if ((newDiscount).discount_isPublic) {
-        //     sendNotifitoQueue(SEND_NOTIFICATION_TYPE.BROADCAST, {
-        //         type: TYPE_NOTIFICATION.PROMOTION_NEW,
-        //         senderId: 'system',
-        //         options: {
-        //             discount_name: name
-        //         }
-        //     })
-        // }
-
-        return newDiscount;
-    }
-
-    static async updateDiscountCode(discountId, payload) {
-        const {
-            code,
-            start_date,
-            end_date,
-            is_active,
-            min_order_value,
-            product_ids,
-            applies_to,
-            name,
-            description,
-            type,
-            value,
-            max_value,
-            max_uses,
-            max_uses_per_user,
-            isPublic
-        } = payload;
-
-        // Tìm mã giảm giá dựa vào discountId
-        const foundDiscount = await discountModel.findById(discountId);
-
-        if (!foundDiscount) {
-            throw new BadRequestError('Discount not found');
-        }
-
-        // Nếu mã mới đã tồn tại và trùng với mã khác
-        if (code && code !== foundDiscount.discount_code) {
-            const existingCode = await discountModel.findOne({
-                discount_code: code
-            });
-            if (existingCode) {
-                throw new BadRequestError('Discount code already exists');
-            }
-        }
-
-        // Cập nhật thông tin mã giảm giá
-        Object.assign(foundDiscount, {
-            discount_code: code || foundDiscount.discount_code,
-            discount_name: name || foundDiscount.discount_name,
-            discount_description: description || foundDiscount.discount_description,
-            discount_type: type || foundDiscount.discount_type,
-            discount_value: value || foundDiscount.discount_value,
-            discount_start: start_date ? new Date(start_date) : foundDiscount.discount_start,
-            discount_end: end_date ? new Date(end_date) : foundDiscount.discount_end,
-            discount_max_uses: max_uses || foundDiscount.discount_max_uses,
-            discount_max_uses_per_user: max_uses_per_user || foundDiscount.discount_max_uses_per_user,
-            discount_min_order_value: min_order_value || foundDiscount.discount_min_order_value,
-            discount_is_active: is_active !== undefined ? is_active : foundDiscount.discount_is_active,
-            discount_max_value: max_value || foundDiscount.discount_max_value,
-            discount_applies_to: applies_to || foundDiscount.discount_applies_to,
-            discount_product_ids: applies_to === 'all' ? [] : product_ids || foundDiscount.discount_product_ids,
-            discount_isPublic: isPublic || foundDiscount.isPublic
-        });
-
-        // Lưu thay đổi vào database
-        await foundDiscount.save();
-
-        // Gửi thông báo nếu cần thiết
-        if (foundDiscount.discount_is_active && applies_to === 'all') {
-            sendNotifitoQueue(SEND_NOTIFICATION_TYPE.BROADCAST, {
-                type: TYPE_NOTIFICATION.PROMOTION_UPDATE,
-                senderId: 'system',
-                options: {
-                    discount_name: foundDiscount.discount_name,
-                },
-            });
-        }
-
-        return foundDiscount;
-    }
-
-    // user
-    static async getAllProdcutWithDiscountCode({
-        code,
-        userId,
-        limit,
-        page
-    }) {
-        const foundDiscount = await discountModel
-            .findOne({
-                discount_code: code,
-            })
-            .lean();
-
-        if (!foundDiscount && !foundDiscount?.discount_is_active) {
-            throw new BadRequestError('Discount not exists');
-        }
-
-        const {
-            discount_applies_to,
-            discount_product_ids
-        } = foundDiscount;
-
-        let products;
-        if (discount_applies_to === 'all') {
-            // get all prodcut
-            products = await findAllProducts({
-                filter: {
-                    isPublished: true,
-                },
-                limit: +limit,
-                page: +page,
-                sort: 'ctime',
-                select: ['prodcut_name'],
-            });
-        }
-        if (discount_applies_to === 'specific') {
-            // get some product
-            products = await findAllProducts({
-                filter: {
-                    isPublished: true,
-                    _id: {
-                        $in: discount_product_ids,
-                    },
-                },
-                limit: +limit,
-                page: +page,
-                sort: 'ctime',
-                select: ['product_name'],
-            });
-        }
-        return products;
-    }
-
-    // get all discount of shop
-    static async getAllDiscountCodeByShop({
-        limit,
-        page
-    }) {
-        const discounts = await findAllDiscountCodeUnSelect({
-            limit: +limit,
-            page: +page,
-            filter: {
-                discount_is_active: true,
-            },
-            unSelect: ['__v'],
-            model: discountModel,
-        });
-        return discounts;
-    }
-
-    // apply discount code
-
-    /**
-     *
-     *  products:[{
-     *      productId, quantity,name,price
-     *    }]
-     *
-     */
-    static async getDiscountAmount({
-        codeId,
-        userId,
-        products
-    }) {
-        const foundDiscount = await checkDiscountExists({
-            filter: {
-                discount_code: codeId,
-            },
-        });
-
-        if (!foundDiscount) {
-            throw new BadRequestError('Discount not exists');
-        }
-
-        const {
-            discount_is_active,
-            discount_max_uses,
-            discount_start,
-            discount_end,
-            discount_min_order_value,
-            discount_max_uses_per_user,
-            discount_user_used,
-            discount_type,
-            discount_value,
-            discount_max_value,
-        } = foundDiscount;
-
-        if (!discount_is_active) throw new NotFoundError('discount exprire');
-        if (!discount_max_uses) throw new NotFoundError('discount are out');
-
-        if (new Date() < new Date(discount_start) || new Date() > new Date(discount_end)) {
-            throw new NotFoundError('discount exprire');
-        }
-
-        // check gia tri toi thieu cua don hang
-        let totalOrder = 0;
-        if (discount_min_order_value > 0) {
-            totalOrder = products.reduce((acc, product) => {
-                return acc + product.quantity * product.price;
-            }, 0);
-
-            if (totalOrder < discount_min_order_value) {
-                throw new NotFoundError(`discount require a minium order value of ${discount_min_order_value}`);
-            }
-        }
-
-        // check so lan su dung doi voi 1 user
-        if (discount_max_uses_per_user > 0) {
-            let count_uses = discount_user_used.reduce((acc, id) => {
-                if (id === userId) {
-                    return acc + 1;
-                }
-            }, 0);
-            if (count_uses >= discount_max_uses_per_user) throw new NotFoundError(`you have used it all `);
-        }
-
-        // check xem discount nay là fix_amount,..
-        let amount = discount_type === 'fixed_amount' ? discount_value : totalOrder * (discount_value / 100);
-
-        // check gia tri toi da
-        amount = amount > discount_max_value ? discount_max_value : amount;
-
-        return {
-            totalOrder,
-            totalPrice: totalOrder - amount,
-            discount: amount,
-        };
-    }
-
-    static async deleteDiscountCode({
-        codeId
-    }) {
-        const deleted = await discountModel.deleteOne({
-            discount_code: codeId,
-        });
-
-        return deleted;
-    }
-
-    static async cancelDiscountCode({
-        codeId,
-        userId
-    }) {
-        const foundDiscount = await checkDiscountExists({
-            filter: {
-                discount_code: codeId,
-            },
-        });
-        if (!foundDiscount) throw new NotFoundError('Discount not exists');
-
-        const result = await discountModel.findByIdAndUpdate(foundDiscount._id, {
+        tModel.findByIdAndUpdate(foundDiscount._id, {
             $pull: {
                 discount_user_used: userId,
             },
@@ -336,30 +47,31 @@ export default class DiscountService {
     }
 
     static async findAll() {
-        return await discountModel.find({
-            discount_is_active: true,
-        }).lean();
+        return await discountModel
+            .find({
+                discount_is_active: true,
+            })
+            .lean();
     }
 
     static async validateDiscount({
         selectedProducts, //{spuId,skuId,price,quantity}
         discountId,
-        checkOutInfo
+        checkOutInfo,
     }) {
         const discount = await discountModel.findById(discountId);
 
-        if (discount.discount_applies_to === "specific") {
+        if (discount.discount_applies_to === 'specific') {
             const productIds = discount.discount_product_ids;
 
             // Extract productIds from selectedProduct
-            const spuIds = selectedProducts.map(selectedProduct => selectedProduct.spuId);
+            const spuIds = selectedProducts.map((selectedProduct) => selectedProduct.spuId);
 
             // Check if all productIds from selectedProduct match those in the discount
-            const isMatch = spuIds.every(spuId => productIds.includes(spuId));
+            const isMatch = spuIds.every((spuId) => productIds.includes(spuId));
 
             if (!isMatch) return false;
         }
-
     }
 
     static async getDiscountAmountV2({
@@ -368,31 +80,28 @@ export default class DiscountService {
         products, // [{spuId, skuId, price, quantity}]
     }) {
         const discount = await discountModel.findById(discountId);
-        if (!discount) throw new BadRequestError("Not found discount");
+        if (!discount) throw new BadRequestError('Not found discount');
 
         const now = new Date();
         const currentDate = new Date(now.getTime() + 7 * 60 * 60 * 1000);
 
-        if (currentDate < discount.discount_start ||
-            currentDate > discount.discount_end) {
-            throw new BadRequestError("Voucher này đã hết hạn")
+        if (currentDate < discount.discount_start || currentDate > discount.discount_end) {
+            throw new BadRequestError('Voucher này đã hết hạn');
         }
 
         // 3. Kiểm tra số lượng sử dụng tối đa
-        if (discount.discount_max_uses !== null &&
-            discount.discount_uses_count >= discount.discount_max_uses) {
-            throw new BadRequestError("Voucher này đã hế lượt dụng")
-
+        if (discount.discount_max_uses !== null && discount.discount_uses_count >= discount.discount_max_uses) {
+            throw new BadRequestError('Voucher này đã hế lượt dụng');
         }
 
         // 4. Kiểm tra số lần sử dụng của user
         if (discount.discount_max_uses_per_user && userId) {
             const userUsedCount = discount.discount_user_used.filter(
-                used => used.userId.toString() === userId.toString()
+                (used) => used.userId.toString() === userId.toString(),
             ).length;
 
             if (userUsedCount >= discount.discount_max_uses_per_user) {
-                throw new BadRequestError("You have used it all");
+                throw new BadRequestError('You have used it all');
             }
         }
 
@@ -409,26 +118,25 @@ export default class DiscountService {
         let discountAmount = 0;
 
         // Tính giảm giá cho toàn bộ đơn hàng
-        if (discount.discount_applies_to === "all") {
-
-            if (discount.discount_type === "fixed_amount") {
+        if (discount.discount_applies_to === 'all') {
+            if (discount.discount_type === 'fixed_amount') {
                 discountAmount = discount.discount_value * products.length;
             } else {
                 discountAmount = totalOrderValue * (discount.discount_value / 100) * products.length;
             }
         } else {
             // Tính giảm giá cho sản phẩm cụ thể
-            if (discount.discount_type === "fixed_amount") {
+            if (discount.discount_type === 'fixed_amount') {
                 // Đếm số sản phẩm hợp lệ
-                const eligibleProducts = products.filter(product =>
-                    discount.discount_product_ids.includes(product.spuId)
+                const eligibleProducts = products.filter((product) =>
+                    discount.discount_product_ids.includes(product.spuId),
                 );
                 discountAmount = discount.discount_value * eligibleProducts.length;
-            } else if (discount.discount_type === "percentage") {
+            } else if (discount.discount_type === 'percentage') {
                 // Tính tổng giá trị của các sản phẩm hợp lệ
                 const eligibleAmount = products.reduce((total, product) => {
                     if (discount.discount_product_ids.includes(product.spuId)) {
-                        return total + (product.price * product.quantity);
+                        return total + product.price * product.quantity;
                     }
                     return total;
                 }, 0);
@@ -455,33 +163,31 @@ export default class DiscountService {
         // 1. Lấy tất cả discount đang active
         const allDiscounts = await discountModel.find({
             discount_is_active: true,
-            discount_isPublic: true
+            discount_isPublic: true,
         });
 
         const availableDiscounts = [];
         const now = new Date();
         const currentDate = new Date(now.getTime() + 7 * 60 * 60 * 1000);
-        console.log("🚀 ~ DiscountService ~ currentDate:", currentDate)
+        console.log('🚀 ~ DiscountService ~ currentDate:', currentDate);
 
         for (const discount of allDiscounts) {
             // 2. Kiểm tra thời gian hiệu lực
-            if (currentDate < discount.discount_start ||
-                currentDate > discount.discount_end) {
-                console.log("From 1")
+            if (currentDate < discount.discount_start || currentDate > discount.discount_end) {
+                console.log('From 1');
                 continue;
             }
 
             // 3. Kiểm tra số lượng sử dụng tối đa
-            if (discount.discount_max_uses !== null &&
-                discount.discount_uses_count >= discount.discount_max_uses) {
-                console.log("From 2")
+            if (discount.discount_max_uses !== null && discount.discount_uses_count >= discount.discount_max_uses) {
+                console.log('From 2');
                 continue;
             }
 
             // 4. Kiểm tra số lần sử dụng của user
             if (discount.discount_max_uses_per_user && userId) {
                 const userUsedCount = discount.discount_user_used.filter(
-                    used => used.userId.toString() === userId.toString()
+                    (used) => used.userId.toString() === userId.toString(),
                 ).length;
 
                 if (userUsedCount >= discount.discount_max_uses_per_user) {
@@ -491,38 +197,35 @@ export default class DiscountService {
 
             // 5. Kiểm tra giá trị đơn hàng tối thiểu
             const orderValue = products.reduce((total, product) => {
-                return total + (product.price * product.quantity);
+                return total + product.price * product.quantity;
             }, 0);
 
-            if (discount.discount_min_order_value &&
-                orderValue < discount.discount_min_order_value) {
+            if (discount.discount_min_order_value && orderValue < discount.discount_min_order_value) {
                 continue;
             }
 
             // 6. Kiểm tra sản phẩm áp dụng
-            if (discount.discount_applies_to === "specific") {
-                const productIds = products.map(p => p.spuId);
-                const isValidProduct = productIds.some(id =>
-                    discount.discount_product_ids.includes(id)
-                );
+            if (discount.discount_applies_to === 'specific') {
+                const productIds = products.map((p) => p.spuId);
+                const isValidProduct = productIds.some((id) => discount.discount_product_ids.includes(id));
 
-                console.log("🚀 ~ DiscountService ~ isValidProduct:", isValidProduct)
+                console.log('🚀 ~ DiscountService ~ isValidProduct:', isValidProduct);
                 if (!isValidProduct) continue;
             }
 
             // 7. Tính toán số tiền được giảm
             let discountAmount = 0;
-            if (discount.discount_type === "fixed_amount") {
+            if (discount.discount_type === 'fixed_amount') {
                 // Đếm số sản phẩm hợp lệ
-                const eligibleProducts = products.filter(product =>
-                    discount.discount_product_ids.includes(product.spuId)
+                const eligibleProducts = products.filter((product) =>
+                    discount.discount_product_ids.includes(product.spuId),
                 );
                 discountAmount = discount.discount_value * eligibleProducts.length;
-            } else if (discount.discount_type === "percentage") {
+            } else if (discount.discount_type === 'percentage') {
                 // Tính tổng giá trị của các sản phẩm hợp lệ
                 const eligibleAmount = products.reduce((total, product) => {
                     if (discount.discount_product_ids.includes(product.spuId)) {
-                        return total + (product.price * product.quantity);
+                        return total + product.price * product.quantity;
                     }
                     return total;
                 }, 0);
@@ -533,9 +236,9 @@ export default class DiscountService {
             availableDiscounts.push({
                 ...discount.toObject(),
                 discountAmount,
-                numberOfEligibleProducts: products.filter(product =>
-                    discount.discount_product_ids.includes(product.spuId)
-                ).length
+                numberOfEligibleProducts: products.filter((product) =>
+                    discount.discount_product_ids.includes(product.spuId),
+                ).length,
             });
         }
 
@@ -549,32 +252,30 @@ export default class DiscountService {
     }) {
         const allDiscounts = await discountModel.find({
             discount_is_active: true,
-            discount_isPublic: true
+            discount_isPublic: true,
         });
 
         const availableDiscounts = await this.findAvailableDiscounts({
             userId,
-            products
+            products,
         });
 
-        const availableDiscountIds = new Set(availableDiscounts.map(d => d._id.toString()));
+        const availableDiscountIds = new Set(availableDiscounts.map((d) => d._id.toString()));
 
         const unAvailableDiscounts = allDiscounts.filter(
-            discount => !availableDiscountIds.has(discount._id.toString())
+            (discount) => !availableDiscountIds.has(discount._id.toString()),
         );
 
         return {
             availableDiscounts,
-            unAvailableDiscounts
+            unAvailableDiscounts,
         };
     }
 
-    static async findPrivateDiscount({
-        code
-    }) {
+    static async findPrivateDiscount({ code }) {
         return await discountModel.find({
             discount_code: code,
-            discount_isPublic: false
-        })
+            discount_isPublic: false,
+        });
     }
 }

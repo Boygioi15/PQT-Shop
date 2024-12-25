@@ -197,61 +197,6 @@ export default class CommentService {
 
         return true;
     }
-
-    static async likeComment(req, commentId) {
-        try {
-            const userId = req.user.userId;
-
-            // Kiểm tra comment tồn tại
-            const comment = await commentModel.findById(commentId);
-            if (!comment) throw BadRequestError('Comment is not exist\!')
-
-            // Kiểm tra xem user đã like chưa
-            const isLiked = comment.comment_user_likes.includes(userId);
-
-            let updatedComment;
-            if (isLiked) {
-                // Nếu đã like thì remove like
-                updatedComment = await commentModel.findByIdAndUpdate(
-                    commentId, {
-                        $pull: {
-                            comment_user_likes: userId
-                        },
-                        $inc: {
-                            comment_likes: -1
-                        }
-                    }, {
-                        new: true
-                    }
-                );
-
-                return {
-                    liked: false,
-                    likeCount: updatedComment.comment_likes
-                }
-            } else {
-                // Nếu chưa like thì thêm like
-                updatedComment = await commentModel.findByIdAndUpdate(
-                    commentId, {
-                        $addToSet: {
-                            comment_user_likes: userId
-                        },
-                        $inc: {
-                            comment_likes: 1
-                        }
-                    }, {
-                        new: true
-                    }
-                );
-
-                return {
-                    liked: true,
-                    likeCount: updatedComment.comment_likes
-                }
-            }
-        } catch (error) {
-
-        }
     };
 
 }
