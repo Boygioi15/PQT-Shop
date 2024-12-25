@@ -1,67 +1,62 @@
-import {
-    SuccessResponse
-} from '../core/success.response.js';
-
-import {
-    CartService
-} from '../services/cart.service.js';
+import { SuccessResponse } from '../core/success.response.js';
+import { CartService } from '../services/cart.service.js';
+import multer from 'multer';
+import cors from 'cors';
 
 class CartController {
-    addToCart = async (req, res, next) => {
-        new SuccessResponse({
-            message: 'success',
-            metadata: await CartService.addToCart(req.body),
-        }).send(res);
-    };
+    // Add an item to the cart
 
-    update = async (req, res, next) => {
-        new SuccessResponse({
-            message: 'success',
-            metadata: await CartService.addToCartV2(req.body),
-        }).send(res);
-    };
+    //Reorganize the cart feature, update cart
+    async addToCart(req, res, next) {
+        try {
+            const result = await CartService.addToCart(req.body);
+            new SuccessResponse({
+                message: 'Item added to cart successfully',
+                metadata: result,
+            }).send(res);
+        } catch (error) {
+            next(error);
+        }
+    }
 
-    delete = async (req, res, next) => {
-        new SuccessResponse({
-            message: 'success',
-            metadata: await CartService.deleteUserCart(req.body),
-        }).send(res);
-    };
+    // Update an item in the cart
+    async updateCart(req, res, next) {
+        try {
+            const result = await CartService.updateCart(req.body);
+            new SuccessResponse({
+                message: 'Cart updated successfully',
+                metadata: result,
+            }).send(res);
+        } catch (error) {
+            next(error);
+        }
+    }
 
-    showCart = async (req, res, next) => {
-        new SuccessResponse({
-            message: 'success',
-            metadata: await CartService.showCart(req.query),
-        }).send(res);
-    };
+    // Remove an item from the cart
+    async deleteFromCart(req, res, next) {
+        try {
+            const result = await CartService.deleteUserCart(req.body);
+            new SuccessResponse({
+                message: 'Item removed from cart successfully',
+                metadata: result,
+            }).send(res);
+        } catch (error) {
+            next(error);
+        }
+    }
 
-    replaceItem = async (req, res, next) => {
-        new SuccessResponse({
-            message: 'success',
-            metadata: await CartService.replaceItemInCart(req.body),
-        }).send(res);
-    };
-
-    getCartBUserId = async (req, res, next) => {
-        new SuccessResponse({
-            message: 'success',
-            metadata: await CartService.getCartByUserId(req.body),
-        }).send(res);
-    };
-
-    getCartForLocal = async (req, res, next) => {
-        new SuccessResponse({
-            message: 'success',
-            metadata: await CartService.getProductInforForLocal(req.body),
-        }).send(res);
-    };
-
-    addToCartFromLocal = async (req, res, next) => {
-        new SuccessResponse({
-            message: 'success',
-            metadata: await CartService.addToCartFromLocal(req.body),
-        }).send(res);
-    };
-
+    // Show the cart contents
+    async showCart(req, res, next) {
+        try {
+            const result = await CartService.showCart(req.query);
+            new SuccessResponse({
+                message: 'Cart retrieved successfully',
+                metadata: result,
+            }).send(res);
+        } catch (error) {
+            next(error);
+        }
+    }
 }
+
 export default new CartController();
