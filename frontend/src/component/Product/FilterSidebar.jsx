@@ -18,23 +18,6 @@ const FilterSidebar = ({ minPrice, maxPrice, setMinPrice, setMaxPrice }) => {
     return MIN;
   };
 
-  const handleThumbMove = (e, thumb) => {
-    const positionX = e.type.includes("mouse")
-      ? e.clientX
-      : e.touches[0].clientX;
-    const newValue = getPercentageFromPosition(positionX);
-
-    if (thumb === "min") {
-      if (newValue < maxPrice && newValue >= MIN) {
-        setMinPrice(newValue);
-      }
-    } else {
-      if (newValue > minPrice && newValue <= MAX) {
-        setMaxPrice(newValue);
-      }
-    }
-  };
-
   const handleThumbStart = (e, thumb) => {
     e.preventDefault();
     const moveEvent = e.type.includes("mouse") ? "mousemove" : "touchmove";

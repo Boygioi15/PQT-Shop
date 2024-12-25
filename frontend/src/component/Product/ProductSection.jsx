@@ -52,20 +52,6 @@ const ProductSection = ({ title }) => {
     };
   }, []);
 
-  const scrollLeft = () => {
-    scrollRef.current.scrollBy({
-      left: -cardWidth * totalProductsToShow,
-      behavior: "smooth",
-    });
-  };
-
-  const scrollRight = () => {
-    scrollRef.current.scrollBy({
-      left: cardWidth * totalProductsToShow,
-      behavior: "smooth",
-    });
-  };
-
   return (
     <div className="p-6 relative shadow-2xl bg-white rounded-lg">
       <h2 className="text-2xl font-bold mb-6 text-black">{title}</h2>
