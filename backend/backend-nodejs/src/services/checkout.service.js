@@ -62,6 +62,26 @@ class CheckOutService {
             );
             checkOut_order.voucherDiscount = discountAmount;
         }
+
+        if (isUseLoyalPoint) {
+            const { usr_loyalPoint } = await userModel.findById(userId).lean();
+            checkOut_order.totalCheckOut =
+                checkOut_order.totalPrice -
+                checkOut_order.productDiscount -
+                checkOut_order.voucherDiscount -
+                usr_loyalPoint;
+        } else {
+            checkOut_order.totalCheckOut =
+                checkOut_order.totalPrice - checkOut_order.productDiscount - checkOut_order.voucherDiscount;
+        }
+
+        return {
+            raw: {
+                shop_discount,
+                products_order,
+            },
+            checkOut_order,
+        };
     }
 }
 export default CheckOutService;

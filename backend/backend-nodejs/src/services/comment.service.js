@@ -1,17 +1,8 @@
-import {
-    TYPE_NOTIFICATION
-} from '../constant/index.js';
-import {
-    BadRequestError,
-    NotFoundError
-} from '../core/error.response.js';
+import { TYPE_NOTIFICATION } from '../constant/index.js';
+import { BadRequestError, NotFoundError } from '../core/error.response.js';
 import commentModel from '../models/comment.model.js';
-import {
-    findProduct
-} from '../models/repositories/product.repo.js';
-import {
-    sendNotifitoQueue
-} from './rabbitmq.service.js';
+import { findProduct } from '../models/repositories/product.repo.js';
+import { sendNotifitoQueue } from './rabbitmq.service.js';
 
 /*
 {
@@ -21,12 +12,7 @@ Key feature: + add comment [admin/user]
 }
 */
 export default class CommentService {
-    static async createComment({
-        productId,
-        userId,
-        content,
-        parentCommentId = null
-    }) {
+    static async createComment({ productId, userId, content, parentCommentId = null }) {
         const comment = new commentModel({
             comment_productId: productId,
             comment_userId: userId,
@@ -45,32 +31,40 @@ export default class CommentService {
             rightValue = parentComment.comment_right;
 
             // update many comment
-            await commentModel.updateMany({
-                comment_productId: productId,
-                comment_right: {
-                    $gte: rightValue,
+            await commentModel.updateMany(
+                {
+                    comment_productId: productId,
+                    comment_right: {
+                        $gte: rightValue,
+                    },
                 },
-            }, {
-                $inc: {
-                    comment_right: 2,
+                {
+                    $inc: {
+                        comment_right: 2,
+                    },
                 },
-            }, );
+            );
 
-            await commentModel.updateMany({
-                comment_productId: productId,
-                comment_left: {
-                    $gt: rightValue,
+            await commentModel.updateMany(
+                {
+                    comment_productId: productId,
+                    comment_left: {
+                        $gt: rightValue,
+                    },
                 },
-            }, {
-                $inc: {
-                    comment_left: 2,
+                {
+                    $inc: {
+                        comment_left: 2,
+                    },
                 },
-            }, );
+            );
         } else {
-            const maxValueRight = await commentModel.findOne({
+            const maxValueRight = await commentModel.findOne(
+                {
                     comment_productId: productId,
                 },
-                'comment_right', {
+                'comment_right',
+                {
                     sort: {
                         comment_right: -1,
                     },
@@ -99,12 +93,7 @@ export default class CommentService {
         return comment;
     }
 
-    static async getCommenByParentId({
-        productId,
-        parentCommentId = null,
-        limit = 50,
-        offset = 0
-    }) {
+    static async getCommenByParentId({ productId, parentCommentId = null, limit = 50, offset = 0 }) {
         if (parentCommentId) {
             const parent = await commentModel.findById(parentCommentId);
             if (!parent) throw new NotFoundError('Not found parent comment');
@@ -119,9 +108,10 @@ export default class CommentService {
                     comment_right: {
                         $lt: parent.comment_right,
                     },
-                }).populate({
+                })
+                .populate({
                     path: 'comment_userId',
-                    select: 'usr_avatar usr_name'
+                    select: 'usr_avatar usr_name',
                 })
                 .sort({
                     comment_left: 1,
@@ -134,9 +124,10 @@ export default class CommentService {
             .find({
                 comment_productId: productId,
                 comment_parentId: parentCommentId,
-            }).populate({
+            })
+            .populate({
                 path: 'comment_userId',
-                select: 'usr_avatar usr_name'
+                select: 'usr_avatar usr_name',
             })
             .sort({
                 createdAt: -1,
@@ -144,10 +135,7 @@ export default class CommentService {
         return comments;
     }
 
-    static async deleteComments({
-        commentId,
-        productId
-    }) {
+    static async deleteComments({ commentId, productId }) {
         const foundProduct = await findProduct({
             product_id: productId,
             unSelect: [],
@@ -173,30 +161,92 @@ export default class CommentService {
             },
         });
 
-        await commentModel.updateMany({
-            comment_productId: productId,
-            comment_right: {
-                $gt: rightValue,
+        await commentModel.updateMany(
+            {
+                comment_productId: productId,
+                comment_right: {
+                    $gt: rightValue,
+                },
             },
-        }, {
-            $inc: {
-                comment_right: -width,
+            {
+                $inc: {
+                    comment_right: -width,
+                },
             },
-        }, );
+        );
 
-        await commentModel.updateMany({
-            comment_productId: productId,
-            comment_left: {
-                $gt: rightValue,
+        await commentModel.updateMany(
+            {
+                comment_productId: productId,
+                comment_left: {
+                    $gt: rightValue,
+                },
             },
-        }, {
-            $inc: {
-                comment_left: -width,
+            {
+                $inc: {
+                    comment_left: -width,
+                },
             },
-        }, );
+        );
 
         return true;
     }
-    };
 
+    static async likeComment(req, commentId) {
+        try {
+            const userId = req.user.userId;
+
+            // Kiểm tra comment tồn tại
+            const comment = await commentModel.findById(commentId);
+            if (!comment) throw BadRequestError('Comment is not exist!');
+
+            // Kiểm tra xem user đã like chưa
+            const isLiked = comment.comment_user_likes.includes(userId);
+
+            let updatedComment;
+            if (isLiked) {
+                // Nếu đã like thì remove like
+                updatedComment = await commentModel.findByIdAndUpdate(
+                    commentId,
+                    {
+                        $pull: {
+                            comment_user_likes: userId,
+                        },
+                        $inc: {
+                            comment_likes: -1,
+                        },
+                    },
+                    {
+                        new: true,
+                    },
+                );
+
+                return {
+                    liked: false,
+                    likeCount: updatedComment.comment_likes,
+                };
+            } else {
+                // Nếu chưa like thì thêm like
+                updatedComment = await commentModel.findByIdAndUpdate(
+                    commentId,
+                    {
+                        $addToSet: {
+                            comment_user_likes: userId,
+                        },
+                        $inc: {
+                            comment_likes: 1,
+                        },
+                    },
+                    {
+                        new: true,
+                    },
+                );
+
+                return {
+                    liked: true,
+                    likeCount: updatedComment.comment_likes,
+                };
+            }
+        } catch (error) {}
+    }
 }
