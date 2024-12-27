@@ -5,33 +5,11 @@ import {
     createRole,
     getListResource,
     getListRole,
-    createResource
+    createResource,
+    getListRoleForSelect,
+    getAllRoleWithGrant,
+    updateRolePermission
 } from '../services/rbac.service.js';
-
-const newRoles = async (req, res, next) => {
-    new SuccessResponse({
-        message: 'create role',
-        metadata: await createRole(req.body),
-    }).send(res);
-};
-const newResources = async (req, res, next) => {
-    new SuccessResponse({
-        message: 'create Resource',
-        metadata: await createResource(req.body),
-    }).send(res);
-};
-const listResources = async (req, res, next) => {
-    new SuccessResponse({
-        message: 'listResource listResource',
-        metadata: await getListResource(req.body),
-    }).send(res);
-};
-const listRoles = async (req, res, next) => {
-    new SuccessResponse({
-        message: 'listRole',
-        metadata: await getListRole(req.body),
-    }).send(res);
-};
 
 const newRole = async (req, res, next) => {
     new SuccessResponse({
@@ -58,9 +36,40 @@ const listRole = async (req, res, next) => {
     }).send(res);
 };
 
+
+
+///
+
+
+
+const listRoleForDisplay = async (req, res, next) => {
+    new SuccessResponse({
+        message: 'listRole',
+        metadata: await getListRoleForSelect(req.body),
+    }).send(res);
+};
+
+const allRoleWithGrant = async (req, res, next) => {
+    new SuccessResponse({
+        message: 'listRole',
+        metadata: await getAllRoleWithGrant(),
+    }).send(res);
+};
+
+
+const updateRole = async (req, res, next) => {
+    new SuccessResponse({
+        message: 'update role',
+        metadata: await updateRolePermission(req.body),
+    }).send(res);
+};
+
 export {
     newRole,
     newResource,
     listRole,
-    listResource
+    listResource,
+    listRoleForDisplay,
+    allRoleWithGrant,
+    updateRole
 };

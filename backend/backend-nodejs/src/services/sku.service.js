@@ -31,6 +31,7 @@ export class SkuService {
                 product_id: spu_id,
             };
         });
+
         const newSkus = skuModel.create(convert_sku_list);
 
         await updateDefaultSku({
@@ -38,114 +39,6 @@ export class SkuService {
         })
 
         return newSkus;
-    }
-    static async updateSkud({
-        spu_id,
-        product_variations,
-        product_name,
-        sku_list
-    }) {
-        const convert_sku_list = Promise.all(sku_list.map(async (sku) => {
-            await skuModel.findOneAndUpdate({
-                sku_index: sku.sku_index,
-                product_id: spu_id
-            }, {
-                ...sku,
-                sku_name: product_name + createSkuName(product_variations, sku),
-                sku_slug: slugify(product_name + createSkuName(product_variations, sku)),
-            })
-        }));
-    }
-    static async deleteSkud({
-        spuId,
-        skuId
-    }) {
-        return await skuModel.deleteOne({
-            _id: skuId,
-            product_id: spuId
-        })
-    }
-
-
-    static async getOneSkud({
-        sku_id,
-        product_id
-    }) {
-        //read cachhe
-
-        const sku = await skuModel
-            .findOne({
-                _id: sku_id,
-                product_id,
-            })
-            .lean();
-
-        if (sku) {
-            // setCache
-        }
-        return _.omit(sku, ['__v', 'isDeleted', 'updatedAt', 'createdAt']);
-    }
-
-    static async allSkuBySpud({
-        product_id
-    }) {
-        // Use Promise.all for concurrent checks and avoid separate database queries
-        const [foundProduct, allSku] = await Promise.all([
-            spuModel.findOne({
-                _id: product_id
-            }).lean(),
-            skuModel.find({
-                product_id
-            }).lean()
-        ]);
-
-        if (!foundProduct) throw new BadRequestError('Spu not exists');
-
-        // Use Promise.all with concurrent price fetching
-        const skus = await Promise.all(allSku.map(async (sku) => ({
-            ...sku,
-            sku_price: await getPriceSku(sku._id)
-        })));
-
-        return skus;
-    }
-
-    static async setDefaultSkud({
-        isDefault,
-        sku_id
-    }) {
-        const foundSku = await findSkuById(sku_id);
-        if (!foundSku) throw new BadRequestError('Not found sku');
-
-        await skuModel.findByIdAndUpdate(sku_id, {
-            sku_default: isDefault,
-        });
-
-        const foundParentSpu = await findSpuById(foundSku.product_id);
-        if (!foundParentSpu) throw new BadRequestError('Not found SPU');
-
-        await spuModel.findByIdAndUpdate(foundSku.product_id, {
-            product_price: foundSku.sku_price,
-        });
-        return true;
-    }
-
-    static async allSkuBySpuForAdmind({
-        product_id
-    }) {
-        const [foundProduct, allSku] = await Promise.all([
-            spuModel.findOne({
-                _id: product_id
-            }).lean(),
-            skuModel.find({
-                product_id
-            }).lean()
-        ]);
-
-        if (!foundProduct) throw new BadRequestError('Spu not exists');
-
-
-        return allSku;
     }
 
     static async updateSku({
@@ -165,6 +58,7 @@ export class SkuService {
             })
         }));
     }
+
     static async deleteSku({
         spuId,
         skuId
@@ -174,7 +68,6 @@ export class SkuService {
             product_id: spuId
         })
     }
-
 
     static async getOneSku({
         sku_id,
@@ -256,4 +149,43 @@ export class SkuService {
 
         return allSku;
     }
+
+    static updateStockSKU = async (skuId, quantity, mongoSession = null) => {
+        try {
+            if (quantity <= 0) {
+                throw new Error('Số lượng cần giảm phải lớn hơn 0.');
+            }
+
+            const result = await skuModel.findOneAndUpdate({
+                _id: skuId,
+
+            }, {
+                $inc: {
+                    sku_stock: -quantity,
+                    sku_quantitySold: quantity
+                }
+            }, {
+                session: mongoSession,
+                new: true
+            });
+
+
+            if (!result) {
+                throw new Error('Không đủ tồn kho hoặc sản phẩm không tồn tại.');
+            }
+
+            return {
+                success: true,
+                message: 'Tồn kho đã được cập nhật.',
+                data: result,
+            };
+        } catch (error) {
+            return {
+                success: false,
+                message: error.message,
+            };
+        }
+    };
+
+
 }

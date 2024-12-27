@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import Comment from "./Comment";
 import NewComment from "./NewComment";
 import { createComment, getListCommentBySpuId } from "../../../config/api";
 import { useSelector } from "react-redux";
@@ -36,7 +35,11 @@ const CommentSection = ({ productId }) => {
   return (
     <div className="space-y-10">
       <div>
-        <NewComment onSend={handleSendNewComment} />
+        <NewComment
+          onSend={handleSendNewComment}
+          spuId={productId}
+          handleGetListComment={handleGetListComment}
+        />
       </div>
 
       <div className="flex flex-col gap-4">

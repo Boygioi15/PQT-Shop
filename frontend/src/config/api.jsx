@@ -18,10 +18,35 @@ export const callLoginGG = () => {
 export const callAccount = async () => {
   return axios.get("/auth/account");
 };
+export const changePassword = async (
+  email,
+  currentPassword,
+  newPassword,
+  reNewPassword
+) => {
+  return axios.patch("/user", {
+    email,
+    currentPassword,
+    newPassword,
+    reNewPassword,
+  });
+};
 
 /*Category*/
 export const getAllCategory = async () => {
   return axios.get("/category/all");
+};
+export const getCategoryById = async (id) => {
+  return axios.get(`/category/find-one/${id}`);
+};
+export const createCategory = async (newCategory) => {
+  return axios.post("/category", { ...newCategory });
+};
+export const deleteCategory = async (id) => {
+  return axios.delete(`/category/${id}`);
+};
+export const updateCategory = async (id, newCategory) => {
+  return axios.patch(`/category/${id}`, { ...newCategory });
 };
 
 /*Product*/
@@ -140,6 +165,108 @@ export const getCheckout = async ({
   });
 };
 
+//Image
+export const getImageLink = async (formData) => {
+  try {
+    const response = await axios.post("upload/product/thumb", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data", // Đảm bảo content-type là multipart/form-data
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error("Lỗi khi gửi ảnh:", error);
+    throw error;
+  }
+};
+
+//ProductStock
+export const getAllProduct = async () => {
+  return axios.get("/product/spu/get-all");
+};
+export const getPublishedProduct = async () => {
+  return axios.get("/product/spu/get-published");
+};
+export const getDraftProduct = async () => {
+  return axios.get("/product/spu/get-draft");
+};
+export const publishProcduct = async (id) => {
+  return axios.get(`/product/publish/${id}`);
+};
+export const unPublishProcduct = async (id) => {
+  return axios.get(`/product/unpublish/${id}`);
+};
+export const deleteProduct = async (id) => {
+  return axios.delete(`/product/spu/delete/${id}`);
+};
+
+//ProductAdd
+export const creatNewProduct = async (productData) => {
+  return axios.post("/product/spu/new", { ...productData });
+};
+export const editNewProduct = async (productData, id) => {
+  return axios.patch(`/product/spu/update/${id}`, { ...productData });
+};
+//Admin
+export const getAdminAllProduct = async (spuIds) => {
+  return axios.post("/product/list-detail-product", { spuIds });
+};
+
+//Top Product
+export const getTopProduct = async () => {
+  return axios.get("/product/top-products");
+};
+
+//FlashSale
+export const creatNewFlashSale = async (flashSaleData) => {
+  return axios.post("/promotion", { ...flashSaleData });
+};
+export const EditFlashSale = async (flashSaleData, promId) => {
+  return axios.patch("/promotion", { ...flashSaleData, promId });
+};
+export const getFlashSale = async (promId) => {
+  return axios.get(`/promotion/get-one/${promId}`);
+};
+export const getListFlashSale = async (eventType) => {
+  return axios.post("/promotion/get-list", { eventType });
+};
+export const toggleFlashSale = async (promId) => {
+  return axios.patch(`/promotion/toggle-disable/${promId}`);
+};
+export const filterProductFlashSale = async (
+  startTime,
+  endTime,
+  categoryId,
+  product_name
+) => {
+  return axios.post("/product/spu/filter-for-promotion", {
+    startTime,
+    endTime,
+    categoryId,
+    product_name,
+  });
+};
+
+//Voucher
+export const createNewVoucher = async (voucherData) => {
+  return axios.post("/discount", { ...voucherData });
+};
+export const editVoucher = async (voucherData, id) => {
+  return axios.patch(`/discount/${id}`, { ...voucherData });
+};
+
+//Order
+export const getAllOrder = async () => {
+  return axios.get("/order/get-all-for-admin");
+};
+
+export const changeOrderStatus = async (orderId, status) => {
+  return axios.post("/order/change-status", { orderId, status });
+};
+
+export const checkPurchase = async ({ userId, spuId }) => {
+  return axios.post(`/order/check-purchase`, { userId, spuId });
+};
 // comment
 
 export const getListCommentBySpuId = async ({
@@ -162,12 +289,14 @@ export const createComment = async ({
   productId,
   userId,
   content,
+  rating = 0,
   parentCommentId = null,
 }) => {
   return axios.post("/comment", {
     productId,
     userId,
     content,
+    rating,
     parentCommentId,
   });
 };
@@ -176,6 +305,20 @@ export const toggleLikeComment = async (commentId) => {
   return axios.put(`/comment/${commentId}/like`);
 };
 
+export const checkExistCommentofPurchaser = async ({ userId, productId }) => {
+  return axios.post(`/comment/check-has-purchased`, { userId, productId });
+};
+
+export const ratingCount = async ({ productId }) => {
+  return axios.get(`/comment/rating-count/${productId}`);
+};
+
+export const totalRatingRateComment = async ({ productId }) => {
+  return axios.get(`/comment/total-rating-comment/${productId}`);
+};
+export const getCommentWithRating = async ({ productId }) => {
+  return axios.get(`/comment/with-rating/${productId}`);
+};
 // flash sale
 
 export const getFlashSaleActive = async () => {
@@ -184,6 +327,20 @@ export const getFlashSaleActive = async () => {
 
 export const findOnePromotion = async (promotionId) => {
   return axios.get(`/promotion/find-one/${promotionId}`);
+};
+
+// promotion event
+
+export const getOneNearestPromotionEvent = async () => {
+  return axios.get(`/promotion/get-event`);
+};
+
+export const getPromotionById = async (id) => {
+  return axios.get(`/promotion/get-event/${id}`);
+};
+
+export const geLisPromotionEvent = async () => {
+  return axios.get(`/promotion/get-events`);
 };
 
 //voucher
@@ -201,4 +358,145 @@ export const getListVoucherPrivate = async ({ code }) => {
 
 export const getDiscountAmmountV2 = async (discountId, products) => {
   return axios.post(`/discount/amountV2`, { discountId, products });
+};
+
+// order
+export const createOrder = async ({
+  cartId,
+  userId,
+  products_order,
+  shop_discount,
+  user_payment,
+  user_address,
+  payment_method,
+  isUseLoyalPoint,
+  orderNote,
+}) => {
+  return axios.post(`/order`, {
+    cartId,
+    userId,
+    products_order,
+    user_payment,
+    user_address,
+    payment_method,
+    shop_discount,
+    isUseLoyalPoint,
+    orderNote,
+  });
+};
+
+export const getListOrder = async ({ userId, status }) => {
+  return axios.post(`/order/find-all/${userId}`, {
+    params: {
+      status,
+    },
+  });
+};
+
+export const getOneOrder = async ({ orderId }) => {
+  return axios.get(`/order/${orderId}`);
+};
+
+export const cancelOrder = async ({ orderId }) => {
+  return axios.delete(`/order/${orderId}`);
+};
+export const getOneOrderForAdmin = async ({ orderId }) => {
+  return axios.get(`/order/get-one-for-admin/${orderId}`);
+};
+export const getCountOrderStatus = async () => {
+  return axios.get("/order/count-order");
+};
+
+//address
+export const addNewUserAddress = async ({ id, address }) => {
+  return axios.post(`/user/address`, { id, address });
+};
+
+export const getListUserAddress = async ({ id }) => {
+  return axios.get(`/user/address/${id}`);
+};
+
+export const getUserDefaultAddress = async ({ id }) => {
+  return axios.get(`/user/default/address/${id}`);
+};
+
+export const updateProfile = async ({
+  usr_name,
+  usr_phone,
+  usr_email,
+  usr_img,
+  usr_sex,
+  usr_date_of_birth,
+}) => {
+  return axios.put(`/user/profile`, {
+    usr_name,
+    usr_phone,
+    usr_email,
+    usr_img,
+    usr_sex,
+    usr_date_of_birth,
+  });
+};
+
+// role permission
+export const getAllReources = async () => {
+  return axios.get(`/rbac/resources`);
+};
+
+export const getAllRole = async () => {
+  return axios.get(`/rbac/list/roles-for-admin`);
+};
+
+export const createRole = async ({
+  name,
+  slug = null,
+  description,
+  grants = [],
+}) => {
+  return axios.post(`/rbac/role`, { name, slug, description, grants });
+};
+
+export const updateRole = async ({
+  id,
+  name = null,
+  slug = null,
+  description = null,
+  grants,
+}) => {
+  return axios.patch(`/rbac/role`, { id, name, slug, description, grants });
+};
+export const changeRole = async (userId, roleId) => {
+  return axios.post(`/user/change-role`, { userId, roleId });
+};
+
+//User
+export const getAllUsers = async (query = {}) => {
+  return axios.get(`/user/find-all`, { params: query });
+};
+export const getListRole = async () => {
+  return axios.get("/rbac/list/roles");
+};
+export const lockUser = async (userId, status) => {
+  return axios.post("/user/change-status", { userId, status });
+};
+
+//recommentd
+export const getRecommendForDetailProductPage = async ({ productId }) => {
+  return axios.get(`/product/recommendations/detail-product/${productId}`);
+};
+
+export const getRecommendTrending = async () => {
+  return axios.get(`/product/recommendations/trending`);
+};
+
+export const getRecommendForHomePage = async () => {
+  return axios.get(`/product/recommendations/home-page`);
+};
+
+export const getRecommendForCartPage = async () => {
+  return axios.get(`/product/recommendations/cart`);
+};
+
+export const getRecommendForProfilePage = async () => {
+  return axios.get(`/product/recommendations/profile`);
 };

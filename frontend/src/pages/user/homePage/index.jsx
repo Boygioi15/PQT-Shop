@@ -4,7 +4,9 @@ import ProductCategory from "../../../component/Product/Category/ProductCategory
 import DiscountProduct from "../../../component/Product/DiscountProduct";
 import ProductSection from "../../../component/Product/ProductSection";
 import FlashSale from "../../../component/Product/FlashSale";
-
+import RecommendSection from "../../../component/RecommendSection/RecommendSection";
+import { useSelector } from "react-redux";
+import RecommendSectionTrending from "../../../component/RecommendSection/RecommendSectionTrending";
 const HomePage = () => {
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
@@ -16,6 +18,9 @@ const HomePage = () => {
       localStorage.setItem("user_id", userId);
     }
   }, [location]);
+
+  const isAuthenticated = useSelector((state) => state.account.isAuthenticated);
+
   return (
     <div className="space-y-8">
       {/* Banner */}
@@ -32,6 +37,15 @@ const HomePage = () => {
       <div>
         <DiscountProduct />
       </div>
+      {isAuthenticated ? (
+        <div>
+          <RecommendSection />
+        </div>
+      ) : (
+        <div>
+          <RecommendSectionTrending />
+        </div>
+      )}
       <div>
         <ProductSection title={"Điện thoại xịn - Công nghệ hàng đầu"} />
       </div>

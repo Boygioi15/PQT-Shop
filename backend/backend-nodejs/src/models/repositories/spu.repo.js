@@ -1,21 +1,16 @@
 import {
     PRODUCT_STATUS
 } from '../../constant/index.js';
-import {
-    getSelectData
-} from '../../utils/index.js';
+
 import {
     productModel
 } from '../product.model.js';
-import promotionModel from '../promotion.model.js';
 import spuModel from '../spu.model.js';
 import {
     findSkuById,
     getLowestPriceSku
 } from './sku.repo.js';
-import {
-    BadRequestError
-} from '../../core/error.response.js'
+
 import sendSyncMessage from '../../../test/rabbitmq/sync-data.producerDLX.js';
 const findSpuById = async (spuId) => {
     return await spuModel.findById(spuId).lean();
@@ -26,13 +21,16 @@ const querySpu = async ({
     sort = {
         created_At: -1,
     },
-    limit,
-    skip,
+    limit = 10,
+    offset = 0
 }) => {
+    // Get total count for pagination info
+    const totalCount = await spuModel.countDocuments(query);
+
     const spus = await spuModel
         .find(query)
         .sort(sort)
-        .skip(skip)
+        .skip(offset)
         .limit(limit)
         .populate({
             path: 'product_category',
@@ -42,16 +40,57 @@ const querySpu = async ({
         .lean()
         .exec();
 
-    const spuswithPrice = await Promise.all(spus.map(async spu => {
+    const spusWithPrice = await Promise.all(spus.map(async spu => {
         return {
             ...spu,
             product_price: await getPriceSpu(spu._id)
         }
     }));
 
-    return spuswithPrice;
+    // Return data with pagination metadata
+    return {
+        data: spusWithPrice,
+        pagination: {
+            total: totalCount,
+            limit,
+            offset
+        }
+    };
 };
+const querySpuV2 = async ({
+    query,
+    sort = {
+        created_At: -1,
+    },
+    limit = 10,
+    offset = 0
+}) => {
+    // Get total count for pagination info
+    const totalCount = await spuModel.countDocuments(query);
 
+    const spus = await spuModel
+        .find(query)
+        .sort(sort)
+        .skip(offset)
+        .limit(limit)
+        .populate({
+            path: 'product_category',
+            select: 'category_name',
+        })
+        .select('-isDraft -isPublished -isDeleted -updatedAt -__v')
+        .lean()
+        .exec();
+
+    const spusWithPrice = await Promise.all(spus.map(async spu => {
+        return {
+            ...spu,
+            product_price: await getPriceSpu(spu._id)
+        }
+    }));
+
+    // Return data with pagination metadata
+    return spusWithPrice
+};
 
 const publishSpu = async ({
     product_id
@@ -119,7 +158,7 @@ const unPublishSpu = async ({
         isDraft: true,
         isPublished: false
     }
-    console.log("🚀 ~ ok:", ok)
+
     sendSyncMessage({
         action: "update",
         data: {
@@ -343,6 +382,11 @@ const buildQueryForClient = async ({
     return query;
 }
 
+const updateRatingSpu = async (spuId, newRatingAvg) => {
+    return await spuModel.findByIdAndUpdate(spuId, {
+        product_ratingAverage: newRatingAvg
+    })
+}
 export {
     findSpuById,
     publishSpu,
@@ -354,5 +398,7 @@ export {
     getSpuByIds,
     getPriceSpu,
     querySpu,
-    buildQueryForClient
+    buildQueryForClient,
+    querySpuV2,
+    updateRatingSpu
 };

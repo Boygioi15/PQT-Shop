@@ -1,6 +1,11 @@
-import { CREATED, SuccessResponse } from '../core/success.response.js';
+import {
+    CREATED,
+    SuccessResponse
+} from '../core/success.response.js';
 import AccessService from '../services/access.service.js';
-import { AttributeGroupService } from '../services/attributeGroup.service.js';
+import {
+    AttributeGroupService
+} from '../services/attributeGroup.service.js';
 
 class AttributeGroupController {
     create = async (req, res, next) => {

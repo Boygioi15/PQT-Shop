@@ -26,22 +26,21 @@ import {
     createTokenPair
 } from '../auth/authUtils.js';
 import KeyTokenService from './keyToken.service.js';
-
-const isValid = () = {
-
-}
 const newUserService = async ({
     email = null
 }) => {
-    const user = await userModel.findOne({
-        usr_email: email,
-        googleId: null
-    }).lean();
+    const user = await userModel
+        .findOne({
+            usr_email: email,
+            googleId: null
+        })
+        .lean();
 
-    if (user) throw new ErrorResponse('Email already exists');
+    if (user) throw new ErrorResponse('Email is exists');
 
+    // send token in email
     const res = await emailSendToken({
-        email
+        email,
     });
 
     return {
@@ -60,14 +59,14 @@ const checkLoginEmailTokenService = async ({
         otp_email: email,
         otp_token
     } = await checkEmailToken({
-        token
+        token,
     });
-    if (!email) throw new BadRequestError('Token not found');
+    if (!email) throw new BadRequestError('Token not found ');
 
-    const existingUser = await findByEmail({
-        email
+    const hasuser = await findByEmail({
+        email,
     });
-    if (existingUser) throw new BadRequestError('Email already exists');
+    if (hasuser) throw new BadRequestError('Email is exists');
 
     const passwordHash = await bcrypt.hash(getUsernameFromEmail(email), 10);
 
@@ -75,7 +74,7 @@ const checkLoginEmailTokenService = async ({
         usr_name: getUsernameFromEmail(email),
         usr_email: email,
         usr_password: passwordHash,
-        usr_role: '6704099fb8583f3dc7342d12',
+        usr_role: '6704099fb8583f3dc7342d12', // user role
     });
 
     if (newUser) {
@@ -96,14 +95,16 @@ const checkLoginEmailTokenService = async ({
 
         const tokens = await createTokenPair({
                 userId: newUser._id,
-                email
+                email: newUser.usr_email,
+                phone: newUser.usr_phone,
+                role: newUser.usr_role,
             },
             publicKey,
-            privateKey
+            privateKey,
         );
 
+        // set cookies cho client
         res.cookie('refresh_token', tokens.refreshToken, {
-            httpOnly: true,
             maxAge: 60 * 60 * 1000,
         });
 
@@ -118,11 +119,21 @@ const checkLoginEmailTokenService = async ({
             usr_name: newUser.usr_name,
         });
 
+        // Thiết lập để xóa người dùng sau 2 tiếng
         setTimeout(
-            () => deleteUserIfNotChangedPassword(newUser._id).catch(console.error),
-            2 * 60 * 60 * 1000
-        );
+            () => {
+                deleteUserIfNotChangedPassword(newUser._id).catch(console.error);
+            },
+            2 * 60 * 60 * 1000,
+        ); // 2 tiếng
 
+        // return {
+        //     user: getInfoData({
+        //         fields: ['_id', 'usr_name', 'usr_email'],
+        //         object: newUser,
+        //     }),
+        //     accessToken: tokens.accessToken,
+        // };
         return res.redirect(`http://localhost:5173/?user=${newUser._id}&token=${tokens.accessToken}`);
     }
 };
@@ -131,10 +142,10 @@ const deleteUserIfNotChangedPassword = async (userId) => {
     const user = await userModel.findById(userId);
 
     if (user) {
-        const expiryTime = new Date(user.createdAt.getTime() + 2 * 60 * 60 * 1000);
+        const twoHoursAgo = new Date(user.createdAt.getTime() + 2 * 60 * 60 * 1000);
         const now = new Date();
 
-        if (now >= expiryTime && !user.passwordChangedAt) {
+        if (now >= twoHoursAgo && !user.passwordChangedAt) {
             await userModel.findByIdAndDelete(userId);
             console.log(`User with ID ${userId} has been deleted for not changing password.`);
         }
@@ -148,23 +159,24 @@ const changePassWordService = async ({
     reNewPassword
 }) => {
     const foundUser = await findByEmail({
-        email
+        email,
     });
     if (!foundUser) throw new BadRequestError('User is not registered');
 
     const match = await bcrypt.compare(currentPassword, foundUser.usr_password);
-    if (!match) throw new AuthFailureError('Authentication error');
 
-    if (newPassword !== reNewPassword) throw new BadRequestError('Passwords do not match');
+    if (!match) throw new BadRequestError('Sai mật khẩu');
+
+    if (newPassword !== reNewPassword) throw new BadRequestError('Passwords are not the same');
 
     const passwordHash = await bcrypt.hash(newPassword, 10);
 
     return await userModel.updateOne({
-        usr_email: email
+        usr_email: email,
     }, {
         usr_password: passwordHash,
         usr_isDefaultPassword: false,
-    });
+    }, );
 };
 
 const findOrCreateUser = async ({
@@ -174,6 +186,7 @@ const findOrCreateUser = async ({
     img
 }) => {
     try {
+        // Logic tìm kiếm người dùng hoặc tạo người dùng mới
         const user = await userModel.findOne({
             googleId
         });
@@ -183,62 +196,275 @@ const findOrCreateUser = async ({
         }
 
         const newUser = await userModel.create({
-            googleId,
+            googleId: googleId,
             usr_email: email,
             usr_name: name,
             usr_avatar: img,
-            usr_password: 'none',
-            usr_role: '6704099fb8583f3dc7342d12',
+            usr_password: 'none', // Không có password khi đăng nhập bằng Google
+            usr_role: '6704099fb8583f3dc7342d12', // Có thể thay bằng quyền phù hợp
         });
 
         return newUser;
     } catch (err) {
         console.error('Error in findOrCreateUser:', err);
-        throw err;
+        throw err; // Ném lại lỗi để catch trong hàm gọi
+    }
+}
+
+const getListAddress = async ({
+    id
+}) => {
+    try {
+        const user = await userModel.findById(id); // Assuming 'User' is the model for the 'userSchema'
+        if (!user) {
+            throw new Error('User not found');
+        }
+        return user.usr_address; // Return the addresses, including fullAddress
+    } catch (error) {
+        console.error("Error fetching addresses:", error);
+        throw error;
     }
 };
-// Thay đổi quyền của người dùng
-const changeUserRoleService = async ({
-    userId,
-    newRole
+
+const addNewAddress = async ({
+    id,
+    address
 }) => {
-    const user = await userModel.findById(userId);
-    if (!user) throw new BadRequestError('User not found');
+    try {
+        const user = await userModel.findById(id);
+        if (!user) {
+            throw new Error('User not found');
+        }
 
-    user.usr_role = newRole;
-    await user.save();
+        const {
+            fullName,
+            phone,
+            city,
+            district,
+            ward,
+            specificAddress,
+            isDefault
+        } = address;
+        if (!fullName || !phone || !city || !district || !ward || !specificAddress) {
+            throw new Error('Missing required address fields');
+        }
 
-    return {
-        message: `User role updated successfully to ${newRole}`,
-        user: {
+        const fullAddress = `${specificAddress}, ${ward}, ${district}, ${city}`;
+
+        // Add the new address with the full address to the user object
+        user.usr_address.push({
+            fullName,
+            phone,
+            city,
+            district,
+            ward,
+            specificAddress,
+            isDefault,
+            fullAddress, // Store the full address
+        });
+
+        await user.save();
+        return user.usr_address;
+    } catch (error) {
+        console.error("Error adding new address:", error);
+        throw error;
+    }
+};
+
+const getDefaultAddress = async ({
+    id
+}) => {
+    try {
+        const user = await userModel.findById(id); // Assuming 'User' is the model for the 'userSchema'
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        // Find the default address from the user's addresses
+        const defaultAddress = user.usr_address.find(address => address.isDefault === true);
+
+        if (!defaultAddress) {
+            throw new Error('No default address found');
+        }
+
+        return defaultAddress; // Return the default address
+    } catch (error) {
+        console.error("Error fetching default address:", error);
+        throw error;
+    }
+};
+
+const updateLoyaltyPoints = async (userId, points) => {
+    try {
+
+        const user = await userModel.findByIdAndUpdate(
+            userId, {
+                $inc: {
+                    usr_loyalPoint: points
+                }
+            }, {
+                new: true
+            }
+        );
+
+        if (!user) {
+            throw new Error('Người dùng không tồn tại.');
+        }
+
+        return {
+            success: true,
+            message: `Cộng ${points} điểm thành công.`,
+            data: user,
+        };
+    } catch (error) {
+        throw new Error(`Lỗi khi cập nhật điểm: ${error.message}`);
+    }
+};
+
+const resetLoyaltyPoints = async (userId) => {
+    try {
+        const user = await userModel.findByIdAndUpdate(
+            userId, {
+                usr_loyalPoint: 0
+            }, {
+                new: true
+            }
+        );
+
+        if (!user) {
+            throw new Error('Người dùng không tồn tại.');
+        }
+
+        return {
+            success: true,
+            message: 'Reset điểm loyalty thành công.',
+            data: user,
+        };
+    } catch (error) {
+        throw new Error(`Lỗi khi reset điểm: ${error.message}`);
+    }
+};
+
+const updateProfileService = async ({
+    id,
+    usr_name,
+    usr_phone,
+    usr_email,
+    usr_img,
+    usr_sex,
+    usr_date_of_birth
+}) => {
+    console.log("🚀 ~ id:", id)
+    try {
+        const user = await userModel.findById(id);
+        if (!user) {
+            throw new Error("User not found");
+        }
+
+        if (usr_name) user.usr_name = usr_name;
+        if (usr_phone) user.usr_phone = usr_phone;
+        if (usr_email) user.usr_email = usr_email;
+        if (usr_img) user.usr_avatar = usr_img;
+        if (usr_sex) user.usr_sex = usr_sex;
+        if (usr_date_of_birth) user.usr_date_of_birth = usr_date_of_birth;
+        await user.save();
+
+        return {
             id: user._id,
-            email: user.usr_email,
-            role: user.usr_role,
-        },
-    };
+            usr_name: user.usr_name,
+            usr_phone: user.usr_phone,
+            usr_email: user.usr_email,
+            usr_avatar: user.usr_avatar,
+            usr_sex: user.usr_sex,
+            usr_date_of_birth: user.usr_date_of_birth,
+        };
+    } catch (error) {
+        console.error("Error updating user profile:", error);
+        throw error;
+    }
 };
 
-// Lấy danh sách người dùng đang hoạt động (active)
-const getActiveUsersService = async () => {
-    const activeUsers = await userModel.find({
-        usr_isBlocked: false
-    }).lean();
-    return activeUsers;
+const getListUser = async (filters = {}) => {
+    const {
+        name,
+        role
+    } = filters;
+
+    const query = {};
+    if (name) {
+        query.usr_name = {
+            $regex: name,
+            $options: 'i'
+        };
+    }
+    if (role) {
+        query.usr_role = role;
+    }
+
+    try {
+        // Query the database with filters
+        const users = await userModel.find(query).populate('usr_role', 'rol_name');
+        return users;
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        throw new Error('Failed to fetch users.');
+    }
 };
 
-// Lấy danh sách người dùng bị khóa (blocked)
-const getBlockedUsersService = async () => {
-    const blockedUsers = await userModel.find({
-        usr_isBlocked: true
-    }).lean();
-    return blockedUsers;
+const changeUserStatus = async ({
+    userId,
+    status
+}) => {
+    if (!['active', 'block'].includes(status)) {
+        throw new Error('Invalid status value');
+    }
+
+    const updatedUser = await userModel.findByIdAndUpdate(
+        userId, {
+            usr_status: status
+        }, {
+            new: true
+        }
+    );
+
+    if (!updatedUser) {
+        throw new Error('User not found');
+    }
+
+    return updatedUser;
 };
+
+const changeUserRole = async ({
+    userId,
+    roleId
+}) => {
+    const updatedUser = await userModel.findByIdAndUpdate(
+        userId, {
+            usr_role: roleId
+        }, {
+            new: true
+        }
+    );
+
+    if (!updatedUser) {
+        throw new Error('User not found');
+    }
+
+    return updatedUser;
+};
+
 export {
     newUserService,
     checkLoginEmailTokenService,
     changePassWordService,
     findOrCreateUser,
-    changeUserRoleService,
-    getActiveUsersService,
-    getBlockedUsersService,
+    addNewAddress,
+    getListAddress,
+    getDefaultAddress,
+    updateLoyaltyPoints,
+    resetLoyaltyPoints,
+    updateProfileService,
+    getListUser,
+    changeUserStatus,
+    changeUserRole
 };

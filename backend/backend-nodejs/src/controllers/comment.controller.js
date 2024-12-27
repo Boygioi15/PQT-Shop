@@ -42,5 +42,40 @@ class CommentController {
         }).send(res);
     };
 
+    checkCommentByPurchaser = async (req, res, next) => {
+        new SuccessResponse({
+            message: 'like comment success',
+            metadata: await commentService.checkCommentByPurchaser({
+                ...req.body
+            }),
+        }).send(res);
+    };
+
+    getRatingCounts = async (req, res, next) => {
+        new SuccessResponse({
+            message: 'get rating conut',
+            metadata: await commentService.getRatingCounts({
+                ...req.params
+            }),
+        }).send(res);
+    };
+
+    getTotalCommentsAndRatings = async (req, res, next) => {
+        new SuccessResponse({
+            message: 'get rating conut',
+            metadata: await commentService.getTotalCommentsAndRatings({
+                ...req.params
+            }),
+        }).send(res);
+    };
+
+    getReviewProductById = async (req, res, next) => {
+        new SuccessResponse({
+            message: 'get ',
+            metadata: await commentService.getReviewProductById({
+                ...req.params
+            }),
+        }).send(res);
+    };
 }
 export default new CommentController();

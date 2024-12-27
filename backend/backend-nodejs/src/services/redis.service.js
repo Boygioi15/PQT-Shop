@@ -43,12 +43,14 @@ const acquireLock = async ({
         }
     }
 };
+
 const releaseLock = async (keylock) => {
     const {
         instanceRedis: redisClient
     } = getRedis();
     return await redisClient.del(keylock);
 };
+
 const acquireLockV2 = async ({
     skuId,
     quantity
@@ -62,7 +64,6 @@ const acquireLockV2 = async ({
     const expireTime = 3000;
 
     for (let i = 0; i < retryTimes; i++) {
-        ///  tạo 1 key, thằng nào cầm key thì được vào thanh toán
         const result = await redisClient.setNX(key, 'locked');
 
         if (result === true) {
@@ -70,6 +71,7 @@ const acquireLockV2 = async ({
                 skuId,
                 quantity,
             });
+
             if (isReservation.modifiedCount) {
                 await redisClient.pExpire(key, expireTime);
                 return key;

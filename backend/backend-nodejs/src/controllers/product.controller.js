@@ -104,7 +104,7 @@ class ProductController {
         new SuccessResponse({
             message: 'publish spu',
             metadata: await SpuService.publishSpu({
-                product_id: req.params.id,
+                spuId: req.params.id,
             }),
         }).send(res);
     };
@@ -113,15 +113,22 @@ class ProductController {
         new SuccessResponse({
             message: 'unPublish spu',
             metadata: await SpuService.unPublishSpu({
-                product_id: req.params.id,
+                spuId: req.params.id,
             }),
         }).send(res);
     };
 
     getBestSoldSpuEachCategory = async (req, res, next) => {
         new SuccessResponse({
-            message: 'get success',
+            message: 'get success đâsd',
             metadata: await SpuService.getBestSoldSpuEachCategory(),
+        }).send(res);
+    };
+
+    getProductForHomePage = async (req, res, next) => {
+        new SuccessResponse({
+            message: 'get success đâsd',
+            metadata: await SpuService.getProductForHomePage(),
         }).send(res);
     };
 
@@ -131,48 +138,6 @@ class ProductController {
             metadata: await SpuService.findAllPublishSpu({}),
         }).send(res);
     };
-
-    getAllSpus = async (req, res, next) => {
-        new SuccessResponse({
-            message: 'Get list  spu',
-            metadata: await SpuService.findAllSpu({}),
-        }).send(res);
-    };
-
-    getAllDraftSpus = async (req, res, next) => {
-        new SuccessResponse({
-            message: 'Get list draft spu ',
-            metadata: await SpuService.findAlLDraftSpu({}),
-        }).send(res);
-    };
-
-    findAllSpuWithConditiosn = async (req, res, next) => {
-        new SuccessResponse({
-            message: 'Get list spu ',
-            metadata: await SpuService.findAllSpuWithCondition({
-                ...req.query
-            }),
-        }).send(res);
-    };
-
-    getListProdcutDetailsForsAdmin = async (req, res, next) => {
-        new SuccessResponse({
-            message: 'Get list spu ',
-            metadata: await SpuService.getListProdcutDetailsForAdmin({
-                ...req.body,
-            }),
-        }).send(res);
-    };
-
-    filterSpuForPromostion = async (req, res, next) => {
-        new SuccessResponse({
-            message: 'Fiter list spu ',
-            metadata: await SpuService.filterSpuForPromotion({
-                ...req.body,
-            }),
-        }).send(res);
-    };
-
 
     getAllSpu = async (req, res, next) => {
         new SuccessResponse({

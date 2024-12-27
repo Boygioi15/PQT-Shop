@@ -19,17 +19,38 @@ import ProfilePage from "./pages/user/profilePage";
 
 // Admin Pages (commented out, can be added later)
 import DashBoard from "./pages/admin/dashBoard";
-import OrderListPage from "./pages/admin/orderListPage";
-import ProductPageAdmin from "./pages/admin/productPage";
 
 import OrderHistory from "./component/Profile/OrderList"; // Thêm trang OrderHistory
-
 import { ROUTERS } from "./utils/router";
 import Info from "./component/Profile/Info";
-import Favorites from "./component/Profile/Favorites";
+import Favorites from "./component/Profile/ChangePass";
 import Address from "./component/Profile/Address";
 import SearchPage from "./pages/user/searchPage";
+import AddProductPage from "./pages/admin/addProductPage";
+import StockPage from "./pages/admin/stockPage";
+import FlashSalePage from "./pages/admin/flashSalePage";
+import FlashSaleCreate from "./pages/admin/flashSaleCreate";
+import EventPage from "./pages/admin/eventPage";
+import EventCreate from "./pages/admin/eventCreate";
+import VoucherPage from "./pages/admin/voucherPage";
+import VoucherCreate from "./pages/admin/voucherCreate";
+import OrderPage from "./pages/admin/orderPage";
+import FeedBackPage from "./pages/admin/feedBackPage";
 import OrderDetails from "./component/Profile/OrderDetails";
+import OrderSuccess from "./pages/user/order/OrderSuccess";
+import OrderFailed from "./pages/user/order/OrderFailed";
+import OrderDetailPage from "./pages/admin/orderDetailPage";
+import PromotionPage from "./pages/user/eventPage";
+import AccessDenied from "./pages/Other/AccessDenyPage";
+import NotFound from "./pages/Other/NotFound";
+import RolePermission from "./pages/admin/rolePermission";
+import CustomerPage from "./pages/admin/userPage";
+import UserPage from "./pages/admin/userPage";
+import CategoryCreate from "./pages/admin/categoryCreate";
+import CategoryPage from "./pages/admin/categoryPage";
+import AdminProfilePage from "./pages/admin/adminProfilePage";
+import TopProductPage from "./pages/admin/topProductPage";
+import ChangePass from "./component/Profile/ChangePass";
 
 const RouterCustom = () => {
   const dispatch = useDispatch();
@@ -45,47 +66,28 @@ const RouterCustom = () => {
       <Routes>
         {/* User Routes */}
         <Route path="/" element={<MasterLayout />}>
-          <Route
-            path={ROUTERS.USER.HOME}
-            element={<HomePage />}
-            breadcrumbItems={[{ name: "Home", link: "/" }]} // Truyền breadcrumb cho Home
-          />
-          <Route
-            path={ROUTERS.USER.LOGIN}
-            element={<LoginPage />}
-            breadcrumbItems={[
-              { name: "Home", link: "/" },
-              { name: "Login", link: ROUTERS.USER.LOGIN },
-            ]} // Truyền breadcrumb cho Login
-          />
+          <Route path={ROUTERS.USER.HOME} element={<HomePage />} />
+          <Route path={ROUTERS.USER.LOGIN} element={<LoginPage />} />
           <Route
             path={ROUTERS.USER.HOME + "/:categorySlug"}
             element={<ProductPage />}
-            breadcrumbItems={[
-              { name: "Home", link: "/" },
-              { name: "Products", link: ROUTERS.USER.HOME },
-            ]} // Truyền breadcrumb cho Products
           />
           <Route
             path={ROUTERS.USER.HOME + "/tim-kiem"}
             element={<SearchPage />}
-            breadcrumbItems={[
-              { name: "Home", link: "/" },
-              { name: "Search", link: ROUTERS.USER.HOME + "/tim-kiem" },
-            ]} // Truyền breadcrumb cho Search
           />
           <Route path={ROUTERS.USER.CART} element={<CartPage />} />
           <Route
-            path="/profile/order-list/detail/:orderId"
+            path="/profile/order-list/:orderId"
             element={<OrderDetails />}
           />
+
           {/* Profile Routes */}
           <Route path={ROUTERS.USER.PROFILE} element={<ProfilePage />}>
             <Route index element={<Info />} />
             <Route path="" element={<Info />} />
             <Route path={ROUTERS.USER.ORDER_LIST} element={<OrderHistory />} />
-
-            <Route path={ROUTERS.USER.FAVORITES} element={<Favorites />} />
+            <Route path={ROUTERS.USER.CHANGE_PASS} element={<ChangePass />} />
             <Route path={ROUTERS.USER.ADDRESS} element={<Address />} />
           </Route>
 
@@ -93,25 +95,56 @@ const RouterCustom = () => {
             path={ROUTERS.USER.PRODUCT_DETAIL(":productId")}
             element={<DetailProduct />}
           />
+          <Route path={"/promotion/:id"} element={<PromotionPage />} />
         </Route>
 
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLayout />}>
-          <Route path={ROUTERS.ADMIN.DASHBOARD} element={<DashBoard />} />
+          <Route path="/admin/profile" element={<AdminProfilePage />} />
+          <Route path="/admin/dashboard" element={<DashBoard />} />
+          <Route path="/admin/products/add" element={<AddProductPage />} />
+          <Route path="/admin/products/edit/:id" element={<AddProductPage />} />
+          <Route path="/admin/category" element={<CategoryPage />} />
+          <Route path="/admin/category-create" element={<CategoryCreate />} />
+          <Route path="/admin/category-edit/:id" element={<CategoryCreate />} />
+          <Route path="/admin/top-products" element={<TopProductPage />} />
+          <Route path="/admin/flash-sale" element={<FlashSalePage />} />
           <Route
-            path={ROUTERS.ADMIN.MANAGE_PRODUCTS}
-            element={<ProductPageAdmin />}
+            path="/admin/flash-sale/create"
+            element={<FlashSaleCreate />}
           />
-          <Route path={ROUTERS.ADMIN.ORDER} element={<OrderListPage />} />
           <Route
-            path={ROUTERS.ADMIN.MANAGE_PRODUCTS + "/:productType"}
-            element={<ProductPageAdmin />}
+            path="/admin/flash-sale/edit/:id"
+            element={<FlashSaleCreate />}
           />
+          <Route path="/admin/event" element={<EventPage />} />
+          <Route path="/admin/event/create" element={<EventCreate />} />
+          <Route path="/admin/event/edit/:id" element={<EventCreate />} />
+          <Route path="/admin/voucher" element={<VoucherPage />} />
+          <Route
+            path="/admin/voucher/create/:type"
+            element={<VoucherCreate />}
+          />
+          <Route path="/admin/voucher/edit/:id" element={<VoucherCreate />} />
+          <Route path="/admin/orders" element={<OrderPage />} />
+          <Route
+            path="/admin/orders/detail/:orderId"
+            element={<OrderDetailPage />}
+          />
+          <Route path="/admin/stock" element={<StockPage />} />
+          <Route path="/admin/feedback" element={<FeedBackPage />} />
+
+          <Route path="/admin/role-permission" element={<RolePermission />} />
+          <Route path="/admin/users" element={<UserPage />} />
         </Route>
 
-        {/* Catch-all for undefined routes */}
-        <Route path="*" element={<h1>404 Not Found</h1>} />
+        <Route path="/order/order-success/:id" element={<OrderSuccess />} />
+        <Route path="/order/order-failed" element={<OrderFailed />} />
+
+        <Route path="/access-denied" element={<AccessDenied />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
+
       <ToastContainer
         position="top-right"
         autoClose={1000}

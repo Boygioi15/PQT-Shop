@@ -2,31 +2,40 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import FilterSidebar from "../../../component/Product/FilterSidebar";
 import ProductItem from "../../../component/Product/ProductItem";
-import SortButton from "../../../component/Product/SortButton"; // Import SortButton
-import { SortOptions } from "../../../component/Product/SortButton/sortOption"; // Import constants
+import SortButton from "../../../component/Product/SortButton";
+import { SortOptions } from "../../../component/Product/SortButton/sortOption";
 import { filterProduct } from "../../../config/api";
+import { AiOutlineLeft, AiOutlineRight } from "react-icons/ai";
+
+const ITEMS_PER_PAGE = 3;
 
 const ProductPage = () => {
   const { categorySlug } = useParams();
-
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(50000000);
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
   const [productList, setProductList] = useState([]);
-  console.log("🚀 ~ ProductPage ~ productList:", productList);
   const [selectedOption, setSelectedOption] = useState(SortOptions.newest);
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
 
   const handleGetListProduct = async () => {
-    setLoading(true); // Start loading
+    setLoading(true);
+    const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
     const response = await filterProduct({
       categorySlug,
       minPrice,
       maxPrice,
       sortBy: selectedOption,
+      limit: ITEMS_PER_PAGE,
+      offset: offset,
     });
+
     if (response && response.status === 200) {
-      const products = response.metadata.map((product) => ({
+      const products = response.metadata.data.map((product) => ({
         id: product._id,
         name: product?.product_name,
         imageSrc: product?.product_thumb,
@@ -35,18 +44,21 @@ const ProductPage = () => {
       }));
 
       setProductList(products);
+      setTotal(response.metadata.pagination.total);
+      setTotalPages(
+        Math.ceil(response.metadata.pagination.total / ITEMS_PER_PAGE)
+      );
     }
-    setLoading(false); // Stop loading
+    setLoading(false);
   };
 
-  // Hàm xử lý mở/đóng dropdown
   const toggleSortDropdown = () => {
     setIsSortDropdownOpen((prev) => !prev);
   };
 
   useEffect(() => {
     handleGetListProduct();
-  }, [categorySlug, minPrice, maxPrice, selectedOption]);
+  }, [categorySlug, minPrice, maxPrice, selectedOption, currentPage]); // Thêm currentPage vào dependencies
 
   return (
     <section className="bg-[#f3f4f6] antialiased">
@@ -80,19 +92,66 @@ const ProductPage = () => {
                 Không tìm thấy sản phẩm nào
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-2">
-                {productList.map((product) => (
-                  <ProductItem
-                    key={product.id}
-                    product={product}
-                    isEdit={false}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-2">
+                  {productList.map((product) => (
+                    <ProductItem
+                      key={product.id}
+                      product={product}
+                      isEdit={false}
+                    />
+                  ))}
+                </div>
+
+                <ul className="flex space-x-5 justify-center mt-6">
+                  <li
+                    className={`flex items-center justify-center bg-gray-100 w-9 h-9 rounded-md cursor-pointer ${
+                      currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                    onClick={() =>
+                      currentPage > 1 && setCurrentPage(currentPage - 1)
+                    }
+                  >
+                    <AiOutlineLeft className="text-gray-500" />
+                  </li>
+
+                  {Array.from(
+                    { length: totalPages },
+                    (_, index) => index + 1
+                  ).map((page) => (
+                    <li
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`flex items-center justify-center w-9 h-9 rounded-md cursor-pointer ${
+                        currentPage === page
+                          ? "bg-blue-500 text-white"
+                          : "text-gray-800 hover:bg-gray-200"
+                      }`}
+                    >
+                      {page}
+                    </li>
+                  ))}
+
+                  <li
+                    className={`flex items-center justify-center bg-gray-100 w-9 h-9 rounded-md cursor-pointer ${
+                      currentPage === totalPages
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }`}
+                    onClick={() =>
+                      currentPage < totalPages &&
+                      setCurrentPage(currentPage + 1)
+                    }
+                  >
+                    <AiOutlineRight className="text-gray-500" />
+                  </li>
+                </ul>
+              </>
             )}
           </div>
         </div>
       </div>
+      <div className="py-10"></div>
     </section>
   );
 };

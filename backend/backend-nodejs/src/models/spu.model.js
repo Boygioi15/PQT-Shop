@@ -19,6 +19,10 @@ const productSchema = new Schema({
         type: String,
         required: true,
     },
+    product_more_imgs: {
+        type: Array,
+        required: true,
+    },
     product_slug: {
         type: String,
     },
@@ -93,13 +97,11 @@ const productSchema = new Schema({
         type: Boolean,
         default: true,
         index: true,
-        select: false,
     },
     isPublished: {
         type: Boolean,
         default: false,
         index: true,
-        select: false,
     },
     isDeleted: {
         type: Boolean,

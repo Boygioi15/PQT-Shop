@@ -70,9 +70,9 @@ const Header = () => {
 
   return (
     <>
-      <div className="w-full top-0 left-0 z-[40] sticky">
+      <div className="w-full top-0 left-0 z-10 sticky shadow-md ">
         <div
-          className="py-4 lg:flex justify-between items-center bg-[#f3f4f6] relative"
+          className="py-4 px-4 sm:px-6 md:px-12 lg:px-16  lg:flex justify-between items-center bg-[#f3f4f6] relative"
           ref={headerRef} // Attach ref to the header
         >
           {/* Logo and Menu */}
@@ -106,13 +106,6 @@ const Header = () => {
                 <a href={link.link}>{link.name}</a>
               </li>
             ))}
-            {isAuthenticated && (
-              <li className="font-extrabold text-3xl my-7 lg:my-0">
-                <Link to="/favorites">
-                  <AiOutlineHeart />
-                </Link>
-              </li>
-            )}
 
             <li className="font-extrabold text-3xl my-7 lg:my-0 relative">
               <Link to="/cart">
@@ -120,7 +113,6 @@ const Header = () => {
                 {(cart_products.length > 0 || localCartItems.length > 0) && (
                   <span className="absolute top-0 right-0 text-[0.6rem] bg-red-500 text-white rounded-full w-3.5 h-3.5 flex items-center justify-center">
                     {cart_products.length + localCartItems.length}{" "}
-                    {/* Tổng số lượng sản phẩm */}
                   </span>
                 )}
               </Link>
@@ -137,7 +129,7 @@ const Header = () => {
                     {mockNotifications.length}
                   </span>
                 </Link>
-                {/* Hiển thị dropdown khi hover */}
+
                 {notifyIsOpen && (
                   <NotificationMenu notifications={mockNotifications} />
                 )}

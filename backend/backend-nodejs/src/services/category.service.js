@@ -6,6 +6,7 @@ export class CategoryService {
     static async createCategory({
         name,
         description,
+        thumb = null,
         parentId
     }) {
         const foungCategory = await categoryModel
@@ -14,11 +15,12 @@ export class CategoryService {
             })
             .lean();
         if (foungCategory) throw new BadRequestError('Name of category is exists');
-
+        if (parentId === "") parentId = null
         const newCategory = await categoryModel.create({
             category_name: name,
             category_description: description,
-            category_parent_Id: parentId,
+            category_parentId: parentId,
+            category_img: thumb
         });
 
         return newCategory;
@@ -27,7 +29,8 @@ export class CategoryService {
     static async updateCategory({
         categoryId,
         name,
-        description
+        description,
+        thumb
     }) {
         const category = await categoryModel.findById(categoryId);
         if (!category) {
@@ -36,6 +39,7 @@ export class CategoryService {
 
         category.category_name = name;
         category.category_description = description;
+        category.category_img = thumb
 
         const updatedCategory = await category.save();
 
@@ -60,7 +64,7 @@ export class CategoryService {
             .find({
                 category_parentId: parentId,
             })
-            .select('category_name category_description category_slug');
+            .select('category_name category_description category_slug category_img');
 
         return Promise.all(
             subCategories.map(async (subCategory) => {
@@ -99,6 +103,8 @@ export class CategoryService {
                         category_description: 1,
                         category_slug: 1,
                         category_img: 1,
+                        category_parentId: 1,
+                        _id: 1,
                         children: [] // Tránh hiển thị children cho các danh mục con ở đây
                     }
                 }
@@ -115,6 +121,12 @@ export class CategoryService {
             })
             .select('category_name category_description category_slug category_img')
             .lean();
+    }
+
+    static async findOne({
+        id
+    }) {
+        return await categoryModel.findById(id);
     }
 
 }

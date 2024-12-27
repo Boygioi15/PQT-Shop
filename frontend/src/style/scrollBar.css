@@ -1,7 +1,7 @@
 /* Thêm vào tệp CSS của bạn */
 ::-webkit-scrollbar {
   width: 5px; /* Độ rộng thanh cuộn dọc */
-  height: 5px; /* Độ cao thanh cuộn ngang */
+  height: 10px; /* Độ cao thanh cuộn ngang */
 }
 
 ::-webkit-scrollbar-thumb {

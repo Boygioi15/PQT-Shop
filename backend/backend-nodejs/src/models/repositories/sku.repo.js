@@ -1,3 +1,6 @@
+import {
+    BadRequestError
+} from '../../core/error.response.js';
 import promotionModel from '../promotion.model.js';
 import skuModel from '../sku.model.js';
 import spuModel from '../spu.model.js';
@@ -96,6 +99,7 @@ const reservationSku = async ({
     quantity
 }) => {
     const foundSku = await skuModel.findById(skuId);
+    console.log("🚀 ~ foundSku.sku_stock:", foundSku.sku_stock)
 
     if (!foundSku || foundSku.sku_stock >= quantity) {
         return await skuModel.updateOne({
@@ -256,6 +260,7 @@ const getThumbFromSpu = async (skuId) => {
     // Nếu không tìm thấy ảnh, trả về null
     return null;
 };
+
 const getLowestPriceSku = async (spuId) => {
     // Lấy thông tin SPU
     const spu = await spuModel.findById(spuId).lean();
@@ -266,6 +271,8 @@ const getLowestPriceSku = async (spuId) => {
         product_id: spuId
     }).lean();
     if (!skus || skus.length === 0) {
+        console.log("🚀 ~ getLowestPriceSku ~ spuId:", spuId)
+
         throw new BadRequestError("No SKUs found for this product");
     }
 

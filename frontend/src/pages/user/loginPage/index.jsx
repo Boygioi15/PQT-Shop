@@ -1,5 +1,5 @@
 import { memo, useState } from "react";
-import { useNavigate } from "react-router-dom"; // Thêm import cho useNavigate
+import { Navigate, useNavigate } from "react-router-dom"; // Thêm import cho useNavigate
 import {
   addToCartFromLocal,
   callLogin,
@@ -20,6 +20,12 @@ const LoginPage = () => {
   const localCartItems = useSelector((state) => state.cart?.localCartItems);
   const navigate = useNavigate(); // Khai báo useNavigate
   const dispatch = useDispatch();
+
+  const isAuthenticated = useSelector((state) => state.account.isAuthenticated);
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault(); // Ngăn chặn hành vi mặc định của form
     try {

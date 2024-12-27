@@ -84,12 +84,6 @@ const SideBar = ({ isOpen, setIsOpen }) => {
           {/* Additional Actions */}
           <div className="grid grid-cols-3 gap-4 mt-4 border-t">
             <a
-              href="/favorites"
-              className="flex items-center justify-center gap-2 font-bold hover:bg-gray-200 p-2 rounded transition-colors duration-300"
-            >
-              <AiOutlineHeart className="text-2xl" />
-            </a>
-            <a
               href="/cart"
               className="flex items-center justify-center gap-2 font-bold hover:bg-gray-200 p-2 rounded transition-colors duration-300"
             >

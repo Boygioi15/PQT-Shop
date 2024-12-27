@@ -56,6 +56,60 @@ const FlashSale = () => {
     }
   }, [timeLeft]);
 
+  // Tính toán số giờ, phút, giây còn lại
+  const formatTime = (time) => {
+    const hours = Math.floor(time / 3600);
+    const minutes = Math.floor((time % 3600) / 60);
+    const seconds = time % 60;
+    return `${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+  };
+
+  useEffect(() => {
+    const updateCardWidth = () => {
+      if (scrollRef.current) {
+        const firstCard = scrollRef.current.firstChild;
+        if (firstCard) {
+          setCardWidth(firstCard.offsetWidth + 16); // Tính chiều rộng của card và khoảng cách
+        }
+      }
+    };
+
+    const handleResize = () => {
+      // Điều chỉnh số lượng sản phẩm hiển thị dựa vào kích thước màn hình
+      if (window.innerWidth < 640) {
+        // sm: Dưới 640px
+        setTotalProductsToShow(1); // Hiển thị 1 sản phẩm
+      } else if (window.innerWidth < 800) {
+        // md: Từ 640px đến dưới 768px
+        setTotalProductsToShow(2); // Hiển thị 2 sản phẩm
+      } else if (window.innerWidth < 1180) {
+        // lg: Từ 768px đến dưới 1024px
+        setTotalProductsToShow(3); // Hiển thị 3 sản phẩm
+      } else {
+        // xl: Từ 1024px đến dưới 1280px
+        setTotalProductsToShow(4); // Hiển thị 4 sản phẩm
+      }
+      updateCardWidth();
+    };
+
+    // Cập nhật chiều rộng và số lượng sản phẩm khi component mount
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  const scrollLeft = () => {
+    scrollRef.current.scrollBy({
+      left: -cardWidth * totalProductsToShow,
+      behavior: "smooth",
+    });
+  };
+
   const scrollRight = () => {
     scrollRef.current.scrollBy({
       left: cardWidth * totalProductsToShow,

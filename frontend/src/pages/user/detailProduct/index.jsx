@@ -2,14 +2,20 @@ import React, { useState, useRef, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import ProductPrice from "../../../component/Product/ProductPrice"; // Import PromotionComponent
 import ProductSideBar from "../../../component/Product/ProductSideBar";
-import RatingStat from "../../../component/Product/Feedback/RatingStat";
 import CommentSection from "../../../component/Product/Feedback/CommentSection";
-import { addToCart, getProduct } from "../../../config/api";
+import {
+  addToCart,
+  checkPurchase,
+  getProduct,
+  totalRatingRateComment,
+} from "../../../config/api";
 import { FaCheck } from "react-icons/fa";
 import ProductDescription from "../../../component/Product/ProductDescription";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { fetchCart, addToLocalCart } from "../../../redux/slice/cartSlice";
+import RatingStar from "../../../component/Product/Feedback/RatingStar";
+import RecommendSectionForDetailPage from "../../../component/RecommendSection/RecommendSectionDetailProruct";
 
 const DetailProduct = () => {
   const { productId } = useParams();
@@ -23,25 +29,43 @@ const DetailProduct = () => {
   const [selectedVariants, setSelectedVariants] = useState(
     skus.find((sku) => sku.sku_default)?.sku_index || [0, 0]
   );
+  const [totalreviews, setTotalReviews] = useState({});
   const [selectedImage, setSelectedImage] = useState();
-
+  const [moreImgs, setMoreImgs] = useState();
   const commentSectionRef = useRef(null);
   const ratingStatRef = useRef(null);
 
   const selectedSku = skus.find((sku) =>
     sku.sku_index.every((index, i) => index === selectedVariants[i])
   );
-
+  const collectProductImages = (product) => {
+    const moreImgs = product.product_more_imgs || [];
+    const variationImgs =
+      product.product_variations?.flatMap(
+        (variation) => variation.images || []
+      ) || [];
+    const allImages = [...new Set([...moreImgs, ...variationImgs])];
+    return allImages;
+  };
+  const getToTalReviewAndComment = async () => {
+    const response = await totalRatingRateComment({ productId });
+    if (response.status === 200) {
+      const numberOfComment = response.metadata.totalComments;
+      const numberOfRating = response.metadata.ratingCounts.length;
+      setTotalReviews({
+        numberOfComment,
+        numberOfRating,
+      });
+    }
+  };
   const handleGetProduct = async () => {
     setLoading(true);
     const response = await getProduct(productId);
     if (response.metadata && response.status === 200) {
-      console.log(
-        "🚀 ~ handleGetProduct ~ response.metadata:",
-        response.metadata
-      );
       setSkus(response.metadata.sku_list);
       setSpu(response.metadata.spu_info);
+      setMoreImgs(collectProductImages(response.metadata.spu_info));
+      setSelectedImage(collectProductImages(response.metadata.spu_info)[0]);
     }
     setLoading(false);
   };
@@ -85,7 +109,8 @@ const DetailProduct = () => {
 
   useEffect(() => {
     handleGetProduct();
-  }, []);
+    getToTalReviewAndComment();
+  }, [productId]);
 
   useEffect(() => {
     if (selectedSku?.sku_imgs?.length > 0) {
@@ -139,7 +164,7 @@ const DetailProduct = () => {
                 </div>
 
                 <div className="mt-6 flex flex-wrap justify-center gap-6 mx-auto">
-                  {selectedSku?.sku_imgs.map((src, index) => (
+                  {moreImgs.map((src, index) => (
                     <div
                       key={index}
                       className={`w-24 h-20 flex items-center justify-center rounded-lg p-4 cursor-pointer transition-all duration-300 ${
@@ -182,14 +207,14 @@ const DetailProduct = () => {
                     className="text-mainColor cursor-pointer"
                     onClick={scrollToRatingStat}
                   >
-                    2 đánh giá
+                    {totalreviews.numberOfRating} đánh giá
                   </span>
                   <span className="text-gray-600">|</span>
                   <span
                     className="text-mainColor cursor-pointer"
                     onClick={scrollToComments}
                   >
-                    193 bình luận
+                    {totalreviews.numberOfComment} bình luận
                   </span>
                 </div>
 
@@ -221,9 +246,17 @@ const DetailProduct = () => {
                               : "border-gray-300"
                           }`}
                               disabled={!isAvailable}
-                              onClick={() =>
-                                handleVariantChange(variationIndex, optionIndex)
-                              }
+                              onClick={() => {
+                                handleVariantChange(
+                                  variationIndex,
+                                  optionIndex
+                                );
+                                if (variation.images.length > 0) {
+                                  setSelectedImage(
+                                    variation.images[optionIndex]
+                                  );
+                                }
+                              }}
                             >
                               {variation.images.length > 0 && (
                                 <img
@@ -300,13 +333,15 @@ const DetailProduct = () => {
 
             <div className="mt-16 bg-white border-2  rounded-lg p-6 space-y-10">
               <div ref={ratingStatRef}>
-                <RatingStat />
+                <RatingStar
+                  numberOfRating={totalreviews.numberOfRating}
+                  spuId={spu._id}
+                />
               </div>
               <div ref={commentSectionRef}>
                 <CommentSection productId={productId} />
               </div>
             </div>
-            {/* Sidebar */}
 
             <ProductSideBar
               productAttributes={spu?.product_attributes}
@@ -316,6 +351,9 @@ const DetailProduct = () => {
           </div>
         </div>
       )}
+      <div className="py-10">
+        <RecommendSectionForDetailPage productId={productId} />
+      </div>
     </>
   );
 };

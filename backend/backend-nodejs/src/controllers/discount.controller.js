@@ -96,35 +96,10 @@ class DiscountController {
         }).send(res);
     };
 
-    findAlls = async (req, res, next) => {
-        new SuccessResponse({
-            message: 'success',
-            metadata: await DiscountService.findAll(),
-        }).send(res);
-    };
-
-    getDiscountAmousntV2 = async (req, res, next) => {
-        new SuccessResponse({
-            message: 'success',
-            metadata: await DiscountService.getDiscountAmountV2({
-                ...req.body,
-            }),
-        }).send(res);
-    };
-
-    filterAllDiscosuntForClient = async (req, res, next) => {
+    test = async (req, res, next) => {
         new SuccessResponse({
             message: 'success available',
-            metadata: await DiscountService.filterAllDiscountForClient({
-                ...req.body,
-            }),
-        }).send(res);
-    };
-
-    findPrivateDisscount = async (req, res, next) => {
-        new SuccessResponse({
-            message: 'success available',
-            metadata: await DiscountService.findPrivateDiscount({
+            metadata: await DiscountService.addDiscountUserUsage({
                 ...req.body,
             }),
         }).send(res);

@@ -11,7 +11,7 @@ import PaymentMethodChart from '../../../component/admin/dashBoard/chart/Payment
 
 const DashBoard = () => {
   return (
-    <main className="flex-1 p-6">
+    <main className="flex-1">
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {/* Dashboard Cards */}
         <DashboardCard title="Total Users" total="150" rate="5%" levelUp={true}>

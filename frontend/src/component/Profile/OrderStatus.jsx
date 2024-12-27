@@ -1,12 +1,27 @@
 import React from "react";
-import { FaClipboardCheck, FaBox, FaHandsHelping } from "react-icons/fa";
+import {
+  FaClipboardCheck,
+  FaBox,
+  FaHandsHelping,
+  FaShippingFast,
+} from "react-icons/fa";
 
 const OrderStatus = ({ currentStatus }) => {
   // Mapping trạng thái với icon và nhãn
   const steps = [
-    { label: "Đặt hàng", icon: <FaClipboardCheck />, status: "ordered" },
+    {
+      label: "Xác nhận đơn hàng",
+      icon: <FaClipboardCheck />,
+      status: "confirmed",
+    },
     { label: "Đang xử lý", icon: <FaBox />, status: "processing" },
-    { label: "Hoàn tất", icon: <FaHandsHelping />, status: "completed" },
+
+    { label: "Đang giao", icon: <FaShippingFast />, status: "shipped" },
+    {
+      label: "Giao hàng thành công",
+      icon: <FaHandsHelping />,
+      status: "delivered",
+    },
   ];
 
   // Lấy index của trạng thái hiện tại để kiểm tra trạng thái trước đó

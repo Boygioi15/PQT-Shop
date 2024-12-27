@@ -18,6 +18,23 @@ const FilterSidebar = ({ minPrice, maxPrice, setMinPrice, setMaxPrice }) => {
     return MIN;
   };
 
+  const handleThumbMove = (e, thumb) => {
+    const positionX = e.type.includes("mouse")
+      ? e.clientX
+      : e.touches[0].clientX;
+    const newValue = getPercentageFromPosition(positionX);
+
+    if (thumb === "min") {
+      if (newValue < maxPrice && newValue >= MIN) {
+        setMinPrice(newValue);
+      }
+    } else {
+      if (newValue > minPrice && newValue <= MAX) {
+        setMaxPrice(newValue);
+      }
+    }
+  };
+
   const handleThumbStart = (e, thumb) => {
     e.preventDefault();
     const moveEvent = e.type.includes("mouse") ? "mousemove" : "touchmove";
@@ -63,7 +80,7 @@ const FilterSidebar = ({ minPrice, maxPrice, setMinPrice, setMaxPrice }) => {
   };
 
   return (
-    <aside className="hidden lg:block w-1/4 p-4 rounded-lg shadow-md bg-white sticky top-16 h-max">
+    <aside className="hidden lg:block w-1/4 p-4 rounded-lg shadow-md bg-white sticky top-16 h-max my-14">
       <h3 className="text-lg font-semibold text-gray-900 mb-4">
         Bộ lọc tìm kiếm
       </h3>
@@ -160,17 +177,6 @@ const FilterSidebar = ({ minPrice, maxPrice, setMinPrice, setMaxPrice }) => {
         </div>
 
         {/* Other Filters */}
-        <div>
-          <h4 className="font-semibold text-sm text-gray-700 mb-2">
-            Tính năng đặc biệt
-          </h4>
-          <div className="flex flex-col space-y-1">
-            <label>
-              <input type="checkbox" className="mr-2" />
-              Sạc không dây
-            </label>
-          </div>
-        </div>
       </div>
     </aside>
   );

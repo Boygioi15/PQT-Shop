@@ -7,10 +7,10 @@ import {
 } from "../../../config/api";
 import { formatDistance } from "date-fns";
 import { useSelector } from "react-redux";
-const CommentItem = ({ comment, depth = 0 }) => {
-  console.log("🚀 ~ CommentItem ~ depth:", depth);
-  const userId = useSelector((state) => state.account?.user?._id);
 
+const CommentItem = ({ comment, depth = 0 }) => {
+  console.log("🚀 ~ CommentItem ~ comment:", comment);
+  const userId = useSelector((state) => state.account?.user?._id);
   const [showReplies, setShowReplies] = useState(false);
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [replyText, setReplyText] = useState("");
@@ -46,7 +46,6 @@ const CommentItem = ({ comment, depth = 0 }) => {
       productId: comment.comment_productId,
       parentCommentId: comment._id,
     });
-    console.log("🚀 ~ handleGetListComment ~ response:", response);
 
     if (response.status === 200) {
       setReplies(response.metadata);
@@ -66,92 +65,95 @@ const CommentItem = ({ comment, depth = 0 }) => {
     }
   };
 
-  const indentClasses = [
-    "ml-8 mt-3",
-    "ml-16 mt-3",
-    "ml-24 mt-3",
-    "ml-32 mt-3",
-    "ml-40 mt-3",
-  ];
-  const indentClass =
-    depth > 0 && depth < indentClasses.length ? indentClasses[depth] : "";
+  const indentClass = depth > 0 ? `ml-${Math.min(depth * 8, 40)} mt-4` : "";
 
   return (
-    <div className={`flex flex-col ${indentClass}`}>
-      <div className="flex items-start">
+    <div className={`group flex flex-col ${indentClass} animate-fadeIn`}>
+      <div className="flex items-start space-x-4 p-4 rounded-lg hover:bg-gray-50 transition-colors duration-200">
         <img
           src={comment?.comment_userId?.usr_avatar}
-          className="w-12 h-12 rounded-full border-2 border-white"
-          alt="Reviewer"
+          className="w-10 h-10 rounded-full border-2 border-white shadow-sm object-cover flex-shrink-0 transition-transform duration-200 group-hover:scale-105"
+          alt={comment?.comment_userId?.usr_name}
         />
-        <div className="ml-3 w-full">
-          <h4 className="text-sm font-bold text-gray-800">
-            {comment?.comment_userId?.usr_name}
-          </h4>
-          <div className="flex space-x-1 mt-1">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className={`w-4 h-4 ${
-                  i < 3 ? "text-blue-600" : "text-[#CED5D8]"
-                }`}
-                fill={i < 3 ? "currentColor" : "none"}
-              />
-            ))}
-            <p className="text-xs !ml-2 font-semibold text-gray-800">
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center space-x-2">
+            <h4 className="text-sm font-semibold text-gray-900 truncate">
+              {comment?.isFromSystem
+                ? "Từ hệ thống"
+                : comment?.comment_userId?.usr_name}
+            </h4>
+            <span className="text-xs text-gray-500">•</span>
+            <p className="text-xs text-gray-500">
               {formatDistance(new Date(comment.createdAt), new Date(), {
                 addSuffix: true,
               })}
             </p>
           </div>
-          <p className="text-pretty mt-2 text-gray-800">
+
+          {comment.comment_rating > 0 && (
+            <div className="flex space-x-0.5 mt-1">
+              {[...Array(5)].map((_, i) => (
+                <Star
+                  key={i}
+                  className={`w-4 h-4 ${
+                    i < comment.comment_rating
+                      ? "text-yellow-400"
+                      : "text-gray-300"
+                  }`}
+                  fill={i < comment.comment_rating ? "currentColor" : "none"}
+                />
+              ))}
+            </div>
+          )}
+
+          <p className="mt-2 text-sm text-gray-700 whitespace-pre-line">
             {comment?.comment_content}
           </p>
-          <div className="flex space-x-4 mt-4">
+
+          <div className="flex items-center space-x-3 mt-3">
             <button
               onClick={handleLikeComment}
-              className={`flex flex-row justify-center items-center gap-2 px-2 py-1 text-sm 
-        ${
-          isLiked
-            ? "text-blue-600 border-blue-600"
-            : "text-gray-600 hover:text-blue-600 border-[#d1d5db]"
-        } 
-        border-2 rounded-full`}
+              className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200
+                ${
+                  isLiked
+                    ? "bg-blue-50 text-blue-600 hover:bg-blue-100"
+                    : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                }`}
             >
               <ThumbsUp
-                className={`w-4 h-4 
-          ${isLiked ? "fill-blue-600" : ""}
-        `}
+                className={`w-4 h-4 mr-1.5 ${isLiked ? "fill-blue-600" : ""}`}
               />
-              {likeCount}
+              <span>{likeCount}</span>
             </button>
+
             <button
               onClick={() => setShowReplyForm(!showReplyForm)}
-              className="flex flex-row justify-center items-center gap-2 px-2 py-1 text-sm text-gray-600 hover:text-blue-600 border-2 rounded-full border-[#d1d5db]"
+              className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-gray-50 text-gray-600 hover:bg-gray-100 transition-all duration-200"
             >
-              <Reply className="w-4 h-4" />
-              Trả lời
+              <Reply className="w-4 h-4 mr-1.5" />
+              <span>Trả lời</span>
             </button>
           </div>
 
           {showReplyForm && (
-            <div className="mt-4 border-t pt-4">
+            <div className="mt-4 space-y-3">
               <textarea
                 value={replyText}
                 onChange={(e) => setReplyText(e.target.value)}
                 placeholder="Nhập phản hồi của bạn..."
-                className="w-full p-2 border rounded-md min-h-[100px] text-sm"
+                className="w-full p-3 text-sm text-gray-700 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 min-h-[100px] resize-none"
               />
-              <div className="flex justify-end space-x-2 mt-2">
+              <div className="flex justify-end space-x-2">
                 <button
                   onClick={() => setShowReplyForm(false)}
-                  className="px-3 py-1 text-sm text-gray-600 border rounded-md"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors duration-200"
                 >
                   Hủy
                 </button>
                 <button
                   onClick={handleReplySubmit}
-                  className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md"
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors duration-200"
                 >
                   Gửi
                 </button>
@@ -161,12 +163,13 @@ const CommentItem = ({ comment, depth = 0 }) => {
 
           {haveReplyComment && (
             <button
-              onClick={() => handleGetListComment()}
-              className="flex items-center text-sm text-blue-600 mt-2 hover:underline"
+              onClick={handleGetListComment}
+              className="inline-flex items-center mt-3 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors duration-200"
             >
               <ChevronDown
-                className={`mr-1 transform ${showReplies ? "rotate-180" : ""}`}
-                size={16}
+                className={`w-4 h-4 mr-1 transition-transform duration-200 ${
+                  showReplies ? "rotate-180" : ""
+                }`}
               />
               {showReplies ? "Ẩn" : "Xem"} phản hồi
             </button>
@@ -174,10 +177,13 @@ const CommentItem = ({ comment, depth = 0 }) => {
         </div>
       </div>
 
-      {showReplies &&
-        replies.map((reply, index) => (
-          <CommentItem key={index} comment={reply} depth={depth + 1} />
-        ))}
+      {showReplies && replies.length > 0 && (
+        <div className="space-y-4 mt-2">
+          {replies.map((reply, index) => (
+            <CommentItem key={index} comment={reply} depth={depth + 1} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

@@ -122,7 +122,7 @@ const SalesChart = ({ seriesDataRevenue, seriesDataSales, seriesNameRevenue, ser
   };
 
   return (
-    <div className="col-span-12 rounded-[14px] border border-stroke bg-white px-5 pt-7 pb-5 shadow-default sm:px-7 xl:col-span-8 ">
+    <div className="rounded-[14px] border border-stroke bg-white px-5 pt-7 pb-5 shadow-default sm:px-7 xl:col-span-8 ">
       {/* Title Section */}
       <div className="flex flex-wrap items-start justify-between gap-3 sm:flex-nowrap">
         <div className="flex w-full flex-wrap gap-3 sm:gap-5">

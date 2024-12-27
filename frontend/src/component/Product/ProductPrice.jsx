@@ -22,6 +22,8 @@ const ProductPrice = ({
     if (promotionId && promotionId !== "") {
       try {
         const response = await findOnePromotion(promotionId);
+        console.log("🚀 ~ getPromotion ~ response:", response);
+        if (response.metadata.eventType === "Custom") return;
         setPromotion(response.metadata);
       } catch (error) {
         console.error("Error fetching promotion:", error);
@@ -58,6 +60,14 @@ const ProductPrice = ({
                   <span className="text-2xl font-bold text-gray-800">
                     {formatVND(priceAfterDiscount)}
                   </span>
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-500 line-through">
+                      {formatVND(originalPrice)}
+                    </span>
+                    <span className="text-sm text-red-600 ml-2">
+                      {calculateDiscount()}%
+                    </span>
+                  </div>
                 </div>
               </div>
               <div className="flex items-center justify-start mt-2 bg-[#fffbe5] rounded-full px-3 py-2 w-max">

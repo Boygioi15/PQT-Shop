@@ -1,24 +1,33 @@
 import { useRef, useEffect, useState } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import ProductItem from "./ProductItem"; // Đảm bảo đường dẫn đúng với vị trí của ProductCard
+import { getOneNearestPromotionEvent } from "../../config/api";
 
 const DiscountProduct = () => {
   const scrollRef = useRef(null);
   const [cardWidth, setCardWidth] = useState(0);
   const [totalProductsToShow, setTotalProductsToShow] = useState(4); // Mặc định 4 sản phẩm trên md
+  const [listProduct, setListProduct] = useState([]);
+  const [promotion, setPromotion] = useState(null);
 
-  const product = {
-    id: "123",
-    imageSrc:
-      "https://cdn2.fptshop.com.vn/unsafe/360x0/filters:quality(100)/iphone_16_pro_37987b6def.png",
-    link: "",
-    name: "Iphone",
-    productPrice: {
-      orignalPrice: 11000,
-      priceAfterDiscount: 1000,
-      discount: 100,
-    },
-  };
+  useEffect(() => {
+    const fetchOneNearestPromotionEvent = async () => {
+      const response = await getOneNearestPromotionEvent();
+      if (response.status === 200) {
+        setPromotion(response.metadata);
+        const products = response.metadata.appliedProduct.map((product) => ({
+          id: product._id,
+          name: product?.product_name,
+          imageSrc: product?.product_thumb,
+          productPrice: product?.product_price,
+          link: `/products/${product?.product_slug}`,
+        }));
+
+        setListProduct(products);
+      }
+    };
+    fetchOneNearestPromotionEvent();
+  }, []);
 
   useEffect(() => {
     const updateCardWidth = () => {
@@ -72,46 +81,49 @@ const DiscountProduct = () => {
   };
 
   return (
-    <div
-      className="p-4 relative rounded-lg"
-      style={{
-        backgroundImage:
-          'url("https://img.lovepik.com/background/20211021/large/lovepik-background-of-black-line-science-and-technology-image_500425114.jpg")',
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
-      <h2 className="text-2xl font-bold mb-4 text-white">
-        Mua Online giá siêu rẻ
-      </h2>
-      <button
-        onClick={scrollLeft}
-        className="absolute left-0 top-1/2 transform -translate-y-1/2 text-white text-2xl pl-2 z-10 rounded-full shadow-md"
-      >
-        <FaChevronLeft />
-      </button>
-      <div className="flex space-x-4 overflow-hidden px-4" ref={scrollRef}>
-        {[...Array(10)].map((_, index) => (
-          <div
-            key={index}
-            className="flex-none"
-            style={{
-              width: `calc((100% - ${
-                16 * (totalProductsToShow - 1)
-              }px) / ${totalProductsToShow})`,
-            }}
+    <>
+      {promotion !== null && (
+        <div
+          className="p-4 relative rounded-lg"
+          style={{
+            backgroundImage: `url(https://img.lovepik.com/background/20211021/large/lovepik-background-of-black-line-science-and-technology-image_500425114.jpg)`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
+          <h2 className="text-2xl font-bold mb-4 text-white">
+            {promotion.prom_name}
+          </h2>
+          <button
+            onClick={scrollLeft}
+            className="absolute left-0 top-1/2 transform -translate-y-1/2 text-white text-2xl pl-2 z-10 rounded-full shadow-md"
           >
-            <ProductItem product={product} isForShow={true} />
+            <FaChevronLeft />
+          </button>
+          <div className="flex space-x-4 overflow-hidden px-4" ref={scrollRef}>
+            {listProduct.map((value, index) => (
+              <div
+                key={index}
+                className="flex-none"
+                style={{
+                  width: `calc((100% - ${
+                    16 * (totalProductsToShow - 1)
+                  }px) / ${totalProductsToShow})`,
+                }}
+              >
+                <ProductItem product={value} isForShow={true} />
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-      <button
-        onClick={scrollRight}
-        className="absolute right-0 top-1/2 transform -translate-y-1/2 text-white text-2xl pr-2  rounded-full shadow-md"
-      >
-        <FaChevronRight />
-      </button>
-    </div>
+          <button
+            onClick={scrollRight}
+            className="absolute right-0 top-1/2 transform -translate-y-1/2 text-white text-2xl pr-2  rounded-full shadow-md"
+          >
+            <FaChevronRight />
+          </button>
+        </div>
+      )}
+    </>
   );
 };
 

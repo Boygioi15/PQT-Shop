@@ -62,8 +62,29 @@ class AccessController {
     async googleLogin(req, res, next) {
         passport.authenticate('google', {
             scope: ['profile', 'email']
-        })(req, res);
+        }, (err, user, info) => {
+            if (err) {
+                console.error('Authentication error:', err); // Log lỗi chi tiết
+                return next(err); // Chuyển lỗi sang middleware xử lý lỗi
+            }
+            if (!user) {
+                console.warn('No user found:', info); // Log thêm thông tin
+                return res.status(401).json({
+                    message: 'Authentication failed',
+                    info
+                });
+            }
+            // Thành công
+            req.logIn(user, (loginErr) => {
+                if (loginErr) {
+                    console.error('Login error:', loginErr);
+                    return next(loginErr);
+                }
+                res.redirect('/'); // Redirect hoặc xử lý logic sau khi đăng nhập thành công
+            });
+        })(req, res, next); // Thêm `next` vào đây
     }
+
 
     async googleCallback(req, res) {
         passport.authenticate('google', {
@@ -71,6 +92,7 @@ class AccessController {
         })(req, res, async () => {
             try {
                 const foundUser = req.user;
+                console.log("🚀 ~ AccessController ~ googleCallback ~ foundUser:", foundUser)
 
                 const {
                     publicKey,
@@ -90,6 +112,8 @@ class AccessController {
                 const tokens = await createTokenPair({
                         userId: foundUser._id,
                         email: foundUser.usr_email,
+                        phone: foundUser.usr_phone,
+                        role: foundUser.usr_role,
                     },
                     publicKey,
                     privateKey,
@@ -97,7 +121,6 @@ class AccessController {
 
                 // set cookies cho client
                 res.cookie('refresh_token', tokens.refreshToken, {
-                    httpOnly: true,
                     maxAge: 60 * 60 * 1000,
                 });
 

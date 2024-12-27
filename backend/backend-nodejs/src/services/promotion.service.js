@@ -22,6 +22,13 @@ class PromotionService {
         startTime,
         endTime,
     }) {
+        if (eventType === "Flash sale") {
+            const check = isTimeSlotAvailable(startTime, endTime)
+            if (!check) {
+                throw BadRequestError("Lỗi: Trùng thời gian flash sale")
+            }
+        }
+
         const newPromotion = new promotionModel({
             prom_name,
             prom_banner,
@@ -120,11 +127,11 @@ class PromotionService {
     }
 
 
-    static async getOnePromotiond(id) {
+    static async getOnePromotion(id) {
         return await promotionModel.findById(id);
     }
 
-    static async deletePromotiond(promotionId) {
+    static async deletePromotion(promotionId) {
 
         const deletedPromotion = await promotionModel.findByIdAndDelete(promotionId);
 
@@ -136,7 +143,7 @@ class PromotionService {
 
     }
 
-    static async getSpuInPromotiond({
+    static async getSpuInPromotion({
         startTime,
         endTime
     }) {
@@ -148,158 +155,6 @@ class PromotionService {
         }
 
         return [];
-    }
-
-    static async deleteFlashSale(promotionId) {
-        const deletedPromotion = await promotionModel.findByIdAndDelete(promotionId);
-
-        if (!deletedPromotion) {
-            throw new NotFoundError('Promotion not found');
-        }
-
-        return deletedPromotion;
-
-    }
-
-    static async getListFlashSaled() {
-        return await promotionModel.find({
-            eventType: 'Flash sale'
-        })
-    }
-
-    static getActiveFlashSaled = async () => {
-        try {
-            const currentTime = new Date();
-            currentTime.setHours(currentTime.getHours() + 7); // Thêm 7 giờ để chuyển sang múi giờ VN (UTC+7)
-            const activePromotions = await promotionModel.find({
-                status: 'active',
-                disable: false,
-                eventType: 'Flash sale',
-                startTime: {
-                    $lte: currentTime
-                },
-                endTime: {
-                    $gte: currentTime
-                },
-            }).lean();
-
-            if (activePromotions.length > 0) {
-                const spus = await this.getSpuFormPromotion(activePromotions[0].appliedProduct);
-                return {
-                    ...activePromotions[0],
-                    appliedProduct: spus
-                };
-            }
-
-            const oneDayLater = new Date(currentTime.getTime() + 24 * 60 * 60 * 1000);
-
-            const closestPromotion = await promotionModel.find({
-                    disable: false,
-                    eventType: 'Flash sale',
-                    startTime: {
-                        $gte: currentTime, // Thời gian bắt đầu phải từ hiện tại trở đi
-                        $lte: oneDayLater, // Thời gian bắt đầu không vượt quá 1 ngày
-                    }
-                })
-                .sort({
-                    startTime: 1
-                })
-                .limit(1)
-                .lean();
-
-            if (closestPromotion.length > 0) {
-                const spus = await this.getSpuFormPromotion(closestPromotion[0].appliedProduct);
-                return {
-                    ...closestPromotion[0],
-                    appliedProduct: spus
-                };
-            }
-
-            throw new NotFoundError("Not find any Flash sale");
-        } catch (error) {
-            console.error('Error fetching promotion:', error);
-            throw error;
-        }
-    };
-
-    static updateAppliedQuantityd = async (promotionId, skuId, quantityPurchased) => {
-        // Tìm chương trình khuyến mãi có promotionId
-        const promotion = await promotionModel.findById(promotionId);
-        if (!promotion) {
-            throw new BadRequestError("Promotion not found");
-        }
-
-        // Tìm chương trình khuyến mãi có skuId trong danh sách 'appliedProduct'
-        let appliedProduct = null;
-        for (const product of promotion.appliedProduct) {
-            appliedProduct = product.sku_list.find(sku => sku.skuId.toString() === skuId.toString());
-            if (appliedProduct) {
-                break;
-            }
-        }
-
-        if (!appliedProduct) {
-            throw new BadRequestError("SKU not found in the promotion");
-        }
-
-        // Kiểm tra số lượng đã áp dụng và giới hạn số lượng giảm giá
-        const {
-            appliedQuantity,
-            quantityLimit
-        } = appliedProduct;
-        if (appliedQuantity + quantityPurchased > quantityLimit) {
-            throw new BadRequestError("Exceeded quantity limit for the promotion");
-        }
-
-        // Cập nhật số lượng đã áp dụng
-        appliedProduct.appliedQuantity += quantityPurchased;
-
-        // Cập nhật lại chương trình khuyến mãi trong cơ sở dữ liệu
-        await promotion.save();
-
-        return {
-            message: "Applied quantity updated successfully",
-            appliedQuantity: appliedProduct.appliedQuantity,
-            quantityLimit: appliedProduct.quantityLimit,
-        };
-    };
-
-    static getSpuFormPromotiond = async (appliedProducts) => {
-        if (!appliedProducts || appliedProducts.length === 0) {
-            throw new BadRequestError("No applied products found");
-        }
-
-        const spuIds = appliedProducts.map(product => product.spuId);
-
-        const spus = await spuModel.find({
-            _id: {
-                $in: spuIds
-            }
-        }).lean();
-
-        if (!spus || spus.length === 0) {
-            throw new BadRequestError("No SPUs found for the provided promotion");
-        }
-        const {
-            totalQuantityLimit,
-            totalAppliedQuantity
-        } = await getTotalQuantityAppliedAndLimit(appliedProducts)
-        const spuswithPrice = await Promise.all(spus.map(async spu => {
-            return {
-                ...spu,
-                product_price: await getPriceSpu(spu._id),
-                totalQuantityLimit,
-                totalAppliedQuantity
-            }
-        }));
-
-        return spuswithPrice;
-    };
-
-    static findOnePromotion({
-        promotionId
-    }) {
-        return promotionModel.findById(promotionId).lean();
     }
 
     static async deleteFlashSale(promotionId) {
@@ -374,47 +229,47 @@ class PromotionService {
         }
     };
 
-    static updateAppliedQuantity = async (promotionId, skuId, quantityPurchased) => {
-        // Tìm chương trình khuyến mãi có promotionId
-        const promotion = await promotionModel.findById(promotionId);
-        if (!promotion) {
-            throw new BadRequestError("Promotion not found");
-        }
+    // static updateAppliedQuantity = async (promotionId, skuId, quantityPurchased) => {
+    //     // Tìm chương trình khuyến mãi có promotionId
+    //     const promotion = await promotionModel.findById(promotionId);
+    //     if (!promotion) {
+    //         throw new BadRequestError("Promotion not found");
+    //     }
 
-        // Tìm chương trình khuyến mãi có skuId trong danh sách 'appliedProduct'
-        let appliedProduct = null;
-        for (const product of promotion.appliedProduct) {
-            appliedProduct = product.sku_list.find(sku => sku.skuId.toString() === skuId.toString());
-            if (appliedProduct) {
-                break;
-            }
-        }
+    //     // Tìm chương trình khuyến mãi có skuId trong danh sách 'appliedProduct'
+    //     let appliedProduct = null;
+    //     for (const product of promotion.appliedProduct) {
+    //         appliedProduct = product.sku_list.find(sku => sku.skuId.toString() === skuId.toString());
+    //         if (appliedProduct) {
+    //             break;
+    //         }
+    //     }
 
-        if (!appliedProduct) {
-            throw new BadRequestError("SKU not found in the promotion");
-        }
+    //     if (!appliedProduct) {
+    //         throw new BadRequestError("SKU not found in the promotion");
+    //     }
 
-        // Kiểm tra số lượng đã áp dụng và giới hạn số lượng giảm giá
-        const {
-            appliedQuantity,
-            quantityLimit
-        } = appliedProduct;
-        if (appliedQuantity + quantityPurchased > quantityLimit) {
-            throw new BadRequestError("Exceeded quantity limit for the promotion");
-        }
+    //     // Kiểm tra số lượng đã áp dụng và giới hạn số lượng giảm giá
+    //     const {
+    //         appliedQuantity,
+    //         quantityLimit
+    //     } = appliedProduct;
+    //     if (appliedQuantity + quantityPurchased > quantityLimit) {
+    //         throw new BadRequestError("Exceeded quantity limit for the promotion");
+    //     }
 
-        // Cập nhật số lượng đã áp dụng
-        appliedProduct.appliedQuantity += quantityPurchased;
+    //     // Cập nhật số lượng đã áp dụng
+    //     appliedProduct.appliedQuantity += quantityPurchased;
 
-        // Cập nhật lại chương trình khuyến mãi trong cơ sở dữ liệu
-        await promotion.save();
+    //     // Cập nhật lại chương trình khuyến mãi trong cơ sở dữ liệu
+    //     await promotion.save();
 
-        return {
-            message: "Applied quantity updated successfully",
-            appliedQuantity: appliedProduct.appliedQuantity,
-            quantityLimit: appliedProduct.quantityLimit,
-        };
-    };
+    //     return {
+    //         message: "Applied quantity updated successfully",
+    //         appliedQuantity: appliedProduct.appliedQuantity,
+    //         quantityLimit: appliedProduct.quantityLimit,
+    //     };
+    // };
 
     static getSpuFormPromotion = async (appliedProducts) => {
         if (!appliedProducts || appliedProducts.length === 0) {
@@ -436,6 +291,7 @@ class PromotionService {
             totalQuantityLimit,
             totalAppliedQuantity
         } = await getTotalQuantityAppliedAndLimit(appliedProducts)
+
         const spuswithPrice = await Promise.all(spus.map(async spu => {
             return {
                 ...spu,
@@ -453,5 +309,174 @@ class PromotionService {
     }) {
         return promotionModel.findById(promotionId).lean();
     }
+
+    static updateAppliedQuantity = async ({
+        promotionId,
+        spuId,
+        skuId,
+        quantity
+    }) => {
+        try {
+            if (promotionId === null) return;
+            const result = await promotionModel.findOneAndUpdate({
+                _id: promotionId
+            }, {
+                $inc: {
+                    'appliedProduct.$[spu].sku_list.$[sku].appliedQuantity': quantity
+                },
+            }, {
+                arrayFilters: [{
+                        'spu.spuId': spuId
+                    },
+                    {
+                        'sku.skuId': skuId
+                    },
+                ],
+                new: true,
+            });
+
+
+            if (!result) {
+                throw new Error('Không tìm thấy SPU hoặc SKU tương ứng trong khuyến mãi.');
+            }
+
+            return {
+                success: true,
+                message: 'Số lượng đã bán được cập nhật thành công.',
+                data: result,
+            };
+        } catch (error) {
+            return {
+                success: false,
+                message: error.message,
+            };
+        }
+    };
+
+
+    static getOnePromotionEvent = async () => {
+        try {
+            const currentTime = new Date();
+            currentTime.setHours(currentTime.getHours() + 7);
+            const promotionEvent = await promotionModel
+                .findOne({
+                    eventType: "Custom",
+                    disable: false,
+                    startTime: {
+                        $lte: currentTime
+                    },
+                    endTime: {
+                        $gte: currentTime
+                    },
+                })
+                .sort({
+                    createdAt: -1,
+                })
+                .lean();
+
+            if (!promotionEvent) {
+                throw new NotFoundError("Không tìm thấy sự kiện khuyến mãi phù hợp.");
+            }
+
+            const spuIds = promotionEvent.appliedProduct.map(product => product.spuId);
+
+            const spus = await spuModel.find({
+                _id: {
+                    $in: spuIds
+                }
+            }).lean();
+
+            if (!spus || spus.length === 0) {
+                throw new BadRequestError("No SPUs found for the provided promotion");
+            }
+
+            const spuswithPrice = await Promise.all(spus.map(async spu => {
+                return {
+                    ...spu,
+                    product_price: await getPriceSpu(spu._id),
+                }
+            }));
+
+            return {
+                ...promotionEvent,
+                appliedProduct: spuswithPrice
+            };
+
+
+        } catch (error) {
+            throw new Error(`Lỗi khi lấy sự kiện khuyến mãi: ${error.message}`);
+        }
+    };
+
+    static getPromotionEventList = async ({
+        eventType = "Custom"
+    }) => {
+        try {
+            const currentTime = new Date();
+            currentTime.setHours(currentTime.getHours() + 7);
+            const promotionEvents = await promotionModel
+                .find({
+                    eventType: eventType,
+                    disable: false,
+                    startTime: {
+                        $lte: currentTime
+                    },
+                    endTime: {
+                        $gte: currentTime
+                    },
+                })
+                .sort({
+                    createdAt: -1,
+                })
+                .lean();
+            return promotionEvents
+        } catch (error) {
+            throw new Error(`Lỗi khi lấy danh sách sự kiện khuyến mãi: ${error.message}`);
+        }
+    };
+
+    static getOnePromotionEventById = async ({
+        promotionId
+    }) => {
+        try {
+            const currentTime = new Date();
+            currentTime.setHours(currentTime.getHours() + 7);
+            const promotionEvent = await promotionModel.findById(promotionId).lean();
+
+            if (!promotionEvent) {
+                throw new NotFoundError("Không tìm thấy sự kiện khuyến mãi phù hợp.");
+            }
+
+            const spuIds = promotionEvent.appliedProduct.map(product => product.spuId);
+
+            const spus = await spuModel.find({
+                _id: {
+                    $in: spuIds
+                }
+            }).lean();
+
+            if (!spus || spus.length === 0) {
+                throw new BadRequestError("No SPUs found for the provided promotion");
+            }
+
+            const spuswithPrice = await Promise.all(spus.map(async spu => {
+                return {
+                    ...spu,
+                    product_price: await getPriceSpu(spu._id),
+                }
+            }));
+
+            return {
+                ...promotionEvent,
+                appliedProduct: spuswithPrice
+            };
+
+
+        } catch (error) {
+            throw new Error(`Lỗi khi lấy sự kiện khuyến mãi: ${error.message}`);
+        }
+    };
+
+
 }
 export default PromotionService;

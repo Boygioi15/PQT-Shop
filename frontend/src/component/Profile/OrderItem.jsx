@@ -1,33 +1,46 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { formatDate } from "../../utils";
 
-const OrderItem = ({ order }) => {
+const OrderItem = ({ order, statusMap }) => {
+  const {
+    order_checkout,
+    order_payment,
+    order_products,
+    order_status,
+    order_shipping,
+    createdAt,
+  } = order;
   return (
     <div className="bg-white rounded-md p-4 shadow-md">
       {/* Header Section */}
       <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-3">
         <div className="flex items-center">
           <div>
-            <p className="text-sm text-gray-800 font-bold">{order.date}</p>
+            <p className="text-sm text-gray-800 font-bold">
+              {formatDate(createdAt)}
+            </p>
             <p className="text-sm text-gray-600 font-medium">
-              {order.items.length} sản phẩm
+              {order_products.length} sản phẩm
             </p>
           </div>
         </div>
         <div>
-          <span className="w-2 h-2 text-center font-extrabold text-green-600 mr-2">•</span>
+          <span className="w-2 h-2 text-center font-extrabold text-green-600 mr-2">
+            •
+          </span>
           <span className="text-sm text-green-600 font-bold">
-            {order.status}
+            {statusMap[order_status]}
           </span>
         </div>
       </div>
 
       {/* Items Section */}
       <div className="space-y-3">
-        {order.items.map((item) => (
-          <div key={item.id} className="flex items-center">
+        {order_products.map((item, index) => (
+          <div key={index} className="flex items-center">
             <img
-              src={item.image}
+              src={item.thumb}
               alt={item.name}
               className="w-16 h-16 rounded-md border border-gray-300"
             />
@@ -38,7 +51,7 @@ const OrderItem = ({ order }) => {
               </p>
             </div>
             <div className="ml-auto text-sm font-semibold text-gray-800">
-              {item.price.toLocaleString("vi-VN", {
+              {item.priceAfterDiscount.toLocaleString("vi-VN", {
                 style: "currency",
                 currency: "VND",
               })}
@@ -52,7 +65,7 @@ const OrderItem = ({ order }) => {
         <p className="text-sm text-gray-600">
           Thành tiền:{" "}
           <span className="text-lg font-bold text-red-500">
-            {order.total.toLocaleString("vi-VN", {
+            {order_checkout.totalCheckOut.toLocaleString("vi-VN", {
               style: "currency",
               currency: "VND",
             })}
@@ -60,7 +73,7 @@ const OrderItem = ({ order }) => {
         </p>
         {/* Button "Xem chi tiết" */}
         <Link
-          to={`/profile/order-list/detail/${order.id}`}
+          to={`/profile/order-list/${order._id}`}
           className="text-blue-600 text-sm font-semibold hover:underline"
         >
           Xem chi tiết

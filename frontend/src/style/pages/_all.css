@@ -4,8 +4,9 @@ body {
 }
 
 body {
-  font-family: "SF Pro Display", sans-serif; 
+  font-family: "SF Pro Display", sans-serif;
   background-color: #f3f4f6;
+  font-size: 16px; /* Kích thước chữ mặc định */
 }
 
 * {
@@ -19,4 +20,29 @@ body {
     format("otf");
   font-weight: normal;
   font-style: normal;
+}
+
+/* Responsive Typography */
+@media (max-width: 1200px) {
+  body {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 992px) {
+  body {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 576px) {
+  body {
+    font-size: 12px;
+  }
 }

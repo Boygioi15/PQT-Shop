@@ -3,11 +3,15 @@ import {
 } from '../core/success.response.js';
 
 import {
+    addNewAddress,
     changePassWordService,
+    changeUserRole,
+    changeUserStatus,
     checkLoginEmailTokenService,
-    createUserService,
-    updateUserService,
-    deleteUserService,
+    getDefaultAddress,
+    getListAddress,
+    getListUser,
+    updateProfileService,
 } from '../services/user.service.js';
 
 class UserController {
@@ -22,28 +26,93 @@ class UserController {
         // }).send(res);
     };
 
-    // Thêm user mới
-    createUser = async (req, res, next) => {
-        try {
-            const newUser = await createUserService(req.body);
-            return new SuccessResponse({
-                message: 'User created successfully',
-                metadata: newUser,
-            }).send(res);
-        } catch (error) {
-            next(error);
-        }
+    getListUser = async (req, res, next) => {};
+
+    deleteUser = async (req, res, next) => {};
+
+    changePassword = async (req, res, next) => {
+        return new SuccessResponse({
+            message: 'create new user',
+            metadata: await changePassWordService({
+                ...req.body,
+            }),
+        }).send(res);
     };
 
-    // Sửa thông tin user
-    updateUser = async (req, res, next) => {
-        try {
-            const updatedUser = await updateUserService({
-                userId: req.params.id,
+    addNewUserAddress = async (req, res, next) => {
+        return new SuccessResponse({
+            message: 'add new user address',
+            metadata: await addNewAddress({
                 ...req.body,
+            }),
+        }).send(res);
+    };
+
+    getUserAddress = async (req, res, next) => {
+        return new SuccessResponse({
+            message: 'add new user address',
+            metadata: await getListAddress({
+                ...req.params
+            }),
+        }).send(res);
+    };
+
+    getUserDefaultAddress = async (req, res, next) => {
+        return new SuccessResponse({
+            message: 'add new user address',
+            metadata: await getDefaultAddress({
+                ...req.params
+            }),
+        }).send(res);
+    };
+
+    getListUserForAddmin = async (req, res, next) => {
+        return new SuccessResponse({
+            message: 'add new user address',
+            metadata: await getListUser({
+                ...req.query
+            }),
+        }).send(res);
+    };
+
+    changeUserStatus = async (req, res, next) => {
+        return new SuccessResponse({
+            message: 'Change status',
+            metadata: await changeUserStatus({
+                ...req.body
+            }),
+        }).send(res);
+    };
+
+    updateUserProfile = async (req, res, next) => {
+        try {
+            const {
+                userId
+            } = req.user; // ID của người dùng từ route
+            console.log("🚀 ~ UserController ~ updateUserProfile= ~ req.user:", req.user)
+            const {
+                usr_name,
+                usr_phone,
+                usr_email,
+                usr_img,
+                usr_sex,
+                usr_date_of_birth
+            } = req.body;
+
+            // Gọi service để thực hiện cập nhật
+            const updatedUser = await updateProfileService({
+                id: userId,
+                usr_name,
+                usr_phone,
+                usr_email,
+                usr_img,
+                usr_sex,
+                usr_date_of_birth
             });
+
+            // Trả về kết quả sau khi cập nhật
             return new SuccessResponse({
-                message: 'User updated successfully',
+                message: "Profile updated successfully",
                 metadata: updatedUser,
             }).send(res);
         } catch (error) {
@@ -51,75 +120,13 @@ class UserController {
         }
     };
 
-    // Xóa user
-    deleteUser = async (req, res, next) => {
-        try {
-            const result = await deleteUserService({
-                userId: req.params.id
-            });
-            return new SuccessResponse({
-                message: 'User deleted successfully',
-                metadata: result,
-            }).send(res);
-        } catch (error) {
-            next(error);
-        }
-    };
-
-    changePassword = async (req, res, next) => {
+    changeUserRole = async (req, res, next) => {
         return new SuccessResponse({
-            message: 'Password changed successfully',
-            metadata: await changePassWordService({
-                email: req.user.email,
-                ...req.body,
+            message: 'Change status',
+            metadata: await changeUserRole({
+                ...req.body
             }),
         }).send(res);
     };
-
-    changeUserRole = async (req, res, next) => {
-        try {
-            const {
-                userId,
-                newRole
-            } = req.body;
-            const result = await changeUserRoleService({
-                userId,
-                newRole
-            });
-            return new SuccessResponse({
-                message: 'User role changed successfully',
-                metadata: result,
-            }).send(res);
-        } catch (error) {
-            next(error);
-        }
-    };
-
-    // Lấy danh sách người dùng đang hoạt động
-    getActiveUsers = async (req, res, next) => {
-        try {
-            const activeUsers = await getActiveUsersService();
-            return new SuccessResponse({
-                message: 'List of active users',
-                metadata: activeUsers,
-            }).send(res);
-        } catch (error) {
-            next(error);
-        }
-    };
-
-    // Lấy danh sách người dùng bị khóa
-    getBlockedUsers = async (req, res, next) => {
-        try {
-            const blockedUsers = await getBlockedUsersService();
-            return new SuccessResponse({
-                message: 'List of blocked users',
-                metadata: blockedUsers,
-            }).send(res);
-        } catch (error) {
-            next(error);
-        }
-    };
 }
-
 export default new UserController();

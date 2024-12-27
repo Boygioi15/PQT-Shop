@@ -2,9 +2,6 @@
 import mongoose, {
     Schema
 } from 'mongoose'; // Erase if already required
-import {
-    type
-} from 'os';
 
 const DOCUMENT_NAME = 'Order';
 const COLLECTION_NAME = 'Orders';
@@ -13,6 +10,7 @@ const COLLECTION_NAME = 'Orders';
 var orderSchema = new mongoose.Schema({
     order_userId: {
         type: String,
+        ref: "User",
         required: true,
     },
     order_checkout: {
@@ -28,10 +26,23 @@ var orderSchema = new mongoose.Schema({
         */
     },
     order_payment: {
-        type: Object,
-        default: {},
+        status: {
+            type: String,
+            enum: ['pending', 'succeeded', 'failed'],
+            default: 'pending',
+            required: true,
+        },
+        payment_method: {
+            type: String,
+            enum: ['STRIPE', 'COD'],
+            required: true,
+        },
+        checkout_session_id: {
+            type: String,
+            default: null,
+        },
     },
-    order_shipping: {
+    order_shipping: { // receive address
         type: Object,
         default: {},
     },
@@ -43,10 +54,16 @@ var orderSchema = new mongoose.Schema({
         type: String,
         default: 'SPX000',
     },
+    order_discount: {
+        type: Array,
+    },
+    order_note: {
+        type: String,
+    },
     order_status: {
         type: String,
-        enum: ['pending', 'confirmed', 'shipped', 'cancelled', 'delivered'],
-        default: 'pending',
+        enum: ["penging", 'confirmed', 'processing', 'shipped', 'cancelled', 'delivered'],
+        default: 'confirmed',
     },
 }, {
     timestamps: true,

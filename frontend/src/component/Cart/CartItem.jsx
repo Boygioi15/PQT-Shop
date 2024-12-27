@@ -198,7 +198,7 @@ const CartItem = ({
     }
   };
   return (
-    <div className="grid grid-cols-3 items-center gap-4">
+    <div className="grid grid-cols-3 items-center">
       <div className="col-span-2 flex items-center gap-4">
         <input
           type="checkbox"
@@ -221,7 +221,7 @@ const CartItem = ({
             {product.name}
           </h3>
 
-          <div className="flex gap-4 mt-4">
+          <div className="flex mt-4">
             <div className="relative group">
               <button
                 type="button"
@@ -258,7 +258,7 @@ const CartItem = ({
         </div>
       </div>
 
-      <div className="ml-auto flex flex-col md:flex-row items-center justify-between w-full md:w-auto space-y-4 md:space-y-0 md:space-x-7">
+      <div className="flex flex-col md:flex-row items-center justify-between w-full md:w-auto space-y-4 md:space-y-0 md:space-x-7">
         <div className="flex flex-col items-end">
           <span className="text-base font-bold text-gray-800">
             {product.price.toLocaleString("vi-VN", {

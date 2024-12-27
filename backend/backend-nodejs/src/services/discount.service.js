@@ -151,7 +151,6 @@ export default class DiscountService {
 
         return foundDiscount;
     }
-
     // user
     static async getAllProdcutWithDiscountCode({
         code,
@@ -204,7 +203,6 @@ export default class DiscountService {
         }
         return products;
     }
-
     // get all discount of shop
     static async getAllDiscountCodeByShop({
         limit,
@@ -408,24 +406,20 @@ export default class DiscountService {
 
         let discountAmount = 0;
 
-        // Tính giảm giá cho toàn bộ đơn hàng
         if (discount.discount_applies_to === "all") {
 
             if (discount.discount_type === "fixed_amount") {
                 discountAmount = discount.discount_value * products.length;
             } else {
-                discountAmount = totalOrderValue * (discount.discount_value / 100) * products.length;
+                discountAmount = totalOrderValue * (discount.discount_value / 100);
             }
         } else {
-            // Tính giảm giá cho sản phẩm cụ thể
             if (discount.discount_type === "fixed_amount") {
-                // Đếm số sản phẩm hợp lệ
                 const eligibleProducts = products.filter(product =>
                     discount.discount_product_ids.includes(product.spuId)
                 );
                 discountAmount = discount.discount_value * eligibleProducts.length;
             } else if (discount.discount_type === "percentage") {
-                // Tính tổng giá trị của các sản phẩm hợp lệ
                 const eligibleAmount = products.reduce((total, product) => {
                     if (discount.discount_product_ids.includes(product.spuId)) {
                         return total + (product.price * product.quantity);
@@ -433,6 +427,7 @@ export default class DiscountService {
                     return total;
                 }, 0);
                 discountAmount = (eligibleAmount * discount.discount_value) / 100;
+                console.log("🚀 ~ DiscountService ~ discountAmount: >>>", discountAmount)
             }
         }
 
@@ -461,7 +456,6 @@ export default class DiscountService {
         const availableDiscounts = [];
         const now = new Date();
         const currentDate = new Date(now.getTime() + 7 * 60 * 60 * 1000);
-        console.log("🚀 ~ DiscountService ~ currentDate:", currentDate)
 
         for (const discount of allDiscounts) {
             // 2. Kiểm tra thời gian hiệu lực
@@ -482,10 +476,10 @@ export default class DiscountService {
             if (discount.discount_max_uses_per_user && userId) {
                 const userUsedCount = discount.discount_user_used.filter(
                     used => used.userId.toString() === userId.toString()
-                ).length;
+                ).reduce((total, used) => total + used.use_count, 0);
 
                 if (userUsedCount >= discount.discount_max_uses_per_user) {
-                    continue;
+                    continue; // Bỏ qua giảm giá này nếu đã vượt quá giới hạn
                 }
             }
 
@@ -577,4 +571,64 @@ export default class DiscountService {
             discount_isPublic: false
         })
     }
+
+    static addDiscountUserUsage = async ({
+        discountId,
+        userId
+    }) => {
+        try {
+            // Lấy thông tin mã giảm giá
+            const discount = await discountModel.findById(discountId);
+            if (!discount) {
+                throw new Error('Mã giảm giá không tồn tại.');
+            }
+
+            // Kiểm tra trạng thái mã giảm giá
+            if (!discount.discount_is_active) {
+                throw new Error('Mã giảm giá không còn hiệu lực.');
+            }
+
+            // Tìm người dùng trong danh sách đã sử dụng
+            const userIndex = discount.discount_user_used.findIndex(
+                (entry) => entry.userId.toString() === userId
+            );
+
+            if (userIndex >= 0) {
+                // Người dùng đã tồn tại, kiểm tra giới hạn sử dụng
+                if (
+                    discount.discount_user_used[userIndex].use_count >=
+                    discount.discount_max_uses_per_user
+                ) {
+                    throw new Error('Người dùng đã sử dụng mã giảm giá tối đa.');
+                }
+                // Tăng số lần sử dụng
+                discount.discount_user_used[userIndex].use_count += 1;
+            } else {
+                // Người dùng mới, thêm vào mảng
+                discount.discount_user_used.push({
+                    userId,
+                    use_count: 1,
+                });
+            }
+
+            if (discount.discount_uses_count >= discount.discount_max_uses) {
+                throw new Error('Mã giảm giá đã hết lượt sử dụng.');
+            }
+
+            discount.discount_uses_count += 1;
+
+            // Lưu thay đổi vào cơ sở dữ liệu
+            await discount.save();
+
+            return {
+                success: true,
+                message: 'Lưu thông tin sử dụng mã giảm giá thành công.',
+                discount,
+            };
+        } catch (error) {
+            throw new Error(`Lỗi khi lưu thông tin sử dụng mã giảm giá: ${error.message}`);
+        }
+    };
+
+
 }
