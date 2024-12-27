@@ -44,6 +44,19 @@ router.get('/spu/filter', asyncErrorHandler(productController.findAllSpuWithCond
 
 router.post('/spu/filter-for-promotion', asyncErrorHandler(productController.filterSpuForPromotion));
 
+// for staff
+router.post('/staff/list-detail-product', asyncErrorHandler(productController.getListProdcutDetailsForAdmin));
+
+router.post('/staff/published/all', asyncErrorHandler(productController.getListPublishSpuByCategory));
+router.get('/staff/top-products', asyncErrorHandler(productController.getBestSoldSpuEachCategory));
+
+router.get('/staff/spu/get-all', asyncErrorHandler(productController.getAllSpu));
+router.get('/staff/spu/get-published', asyncErrorHandler(productController.getAllPublishedSpu));
+router.get('/staff/spu/get-draft', asyncErrorHandler(productController.getAllDraftSpu));
+
+router.get('/staff/spu/filter', asyncErrorHandler(productController.findAllSpuWithCondition));
+
+router.post('/staff/spu/filter-for-promotion', asyncErrorHandler(productController.filterSpuForPromotion));
 
 
 // for staff
