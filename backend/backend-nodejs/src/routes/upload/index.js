@@ -10,6 +10,24 @@ import {
 
 const router = express.Router();
 
+router.post('/products', asyncErrorHandler(uploadController.uploadFileImage));
+router.post('/product/thumsb', uploadDisk.single('file'), asyncErrorHandler(uploadController.uploadFileThumb));
+router.post(
+    '/product/multiplse',
+    uploadDisk.array('files', 3),
+    asyncErrorHandler(uploadController.uploadListImageFiles),
+);
+
+
+router.post('/producsts', asyncErrorHandler(uploadController.uploadFileImage));
+router.post('/product/tshumbs', uploadDisk.single('file'), asyncErrorHandler(uploadController.uploadFileThumb));
+router.post(
+    '/product/multiples',
+    uploadDisk.array('files', 3),
+    asyncErrorHandler(uploadController.uploadListImageFiles),
+);
+
+
 router.post('/product', asyncErrorHandler(uploadController.uploadFileImage));
 router.post('/product/thumb', uploadDisk.single('file'), asyncErrorHandler(uploadController.uploadFileThumb));
 router.post(

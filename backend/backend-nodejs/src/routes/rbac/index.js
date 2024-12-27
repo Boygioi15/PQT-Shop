@@ -1,9 +1,22 @@
 import express from 'express';
 
-import { asyncErrorHandler } from '../../helpers/asyncHandler.js';
+import {
+    asyncErrorHandler
+} from '../../helpers/asyncHandler.js';
 
-import { newRole, newResource, listRole, listResource } from '../../controllers/rbac.controller.js';
+import {
+    newRole,
+    newResource,
+    listRole,
+    listResource
+} from '../../controllers/rbac.controller.js';
 const router = express.Router();
+
+router.post('/roles', asyncErrorHandler(newRole));
+router.get('/roless', asyncErrorHandler(listRole));
+
+router.post('/resosurce', asyncErrorHandler(newResource));
+router.get('/resourcses', asyncErrorHandler(listResource));
 
 router.post('/role', asyncErrorHandler(newRole));
 router.get('/roles', asyncErrorHandler(listRole));
