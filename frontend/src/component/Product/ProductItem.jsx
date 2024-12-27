@@ -11,6 +11,7 @@ import { formatVND } from "../../utils/format";
 import { Link } from "react-router-dom";
 
 const ProductItem = ({ product, isForShow }) => {
+  console.log("🚀 ~ ProductItem ~ product:", product);
   if (!product) {
     return (
       <div className="p-6 text-center text-gray-500">Product not available</div>
@@ -29,7 +30,7 @@ const ProductItem = ({ product, isForShow }) => {
   };
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm relative flex flex-col">
+    <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm relative h-full flex flex-col">
       <div className="h-56 w-full">
         <a href={ROUTERS.USER.PRODUCT_DETAIL(id)} className="cursor-default">
           <img
@@ -39,59 +40,78 @@ const ProductItem = ({ product, isForShow }) => {
           />
         </a>
       </div>
-      <div className="pt-6 flex-grow">
-        {/* Sử dụng thẻ <a> với href để điều hướng, thêm điều kiện không cho bấm link khi isEdit */}
-        <Link
-          to={link}
-          className="text-lg font-semibold leading-tight text-gray-900 hover:underline cursor-pointer"
-        >
-          {name}
-        </Link>
-
-        <div className="mt-2 flex items-center gap-2">
-          {/* Star Rating */}
-          <div className="flex items-center">
-            {[...Array(5)].map((_, index) => (
-              <AiFillStar key={index} className="h-4 w-4 text-yellow-400" />
-            ))}
+      <div className="pt-6 flex flex-col flex-grow justify-between">
+        <div>
+          <div className="mb-4 flex items-center justify-end">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className="relative rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+                onMouseEnter={() => setShowTooltipFavorites(true)}
+                onMouseLeave={() => setShowTooltipFavorites(false)}
+              >
+                <span className="sr-only">Add to Favorites</span>
+                <AiOutlineHeart className="h-5 w-5" />
+                {showTooltipFavorites && (
+                  <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-sm rounded whitespace-nowrap">
+                    Add to favorites
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-800 rotate-45" />
+                  </div>
+                )}
+              </button>
+            </div>
           </div>
+
+          <Link
+            to={link}
+            className="text-lg font-semibold leading-tight text-gray-900 hover:underline cursor-pointer"
+          >
+            {name}
+          </Link>
+
+          <div className="mt-2 flex items-center gap-2">
+            <div className="flex items-center">
+              {[...Array(5)].map((_, index) => (
+                <AiFillStar key={index} className="h-4 w-4 text-yellow-400" />
+              ))}
+            </div>
+            <p className="text-sm font-medium text-gray-900">5.0</p>
+            <p className="text-sm font-medium text-gray-500">(455)</p>
+          </div>
+
+          <ul className="mt-2 flex items-center gap-4">
+            <li className="flex items-center gap-2">
+              <FaTruck className="h-4 w-4 text-gray-500" />
+              <p className="text-sm font-medium text-gray-500">Fast Delivery</p>
+            </li>
+            <li className="flex items-center gap-2">
+              <FaTag className="h-4 w-4 text-gray-500" />
+              <p className="text-sm font-medium text-gray-500">Best Price</p>
+            </li>
+          </ul>
         </div>
-
-        <ul className="mt-2 flex items-center gap-4">
-          <li className="flex items-center gap-2">
-            <FaTruck className="h-4 w-4 text-gray-500" />
-            <p className="text-sm font-medium text-gray-500">Fast Delivery</p>
-          </li>
-          <li className="flex items-center gap-2">
-            <FaTag className="h-4 w-4 text-gray-500" />
-            <p className="text-sm font-medium text-gray-500">Best Price</p>
-          </li>
-        </ul>
-
-        {/* Điều kiện để hiển thị giá và nút "Add to cart" hay nút "Edit" */}
-        {productPrice.originalPrice !== productPrice.priceAfterDiscount ? (
-          <div className="mt-5">
-            <p className="text-sm text-slate-900">
-              <span className="line-through">
-                {formatVND(productPrice.originalPrice)}
-              </span>
-              <span className="font-light underline">đ</span>{" "}
-              <span className="text-red-600">-{calculateDiscount()}%</span>
-            </p>
-            <p className="text-2xl font-bold mt-2 text-slate-900">
-              {formatVND(productPrice.priceAfterDiscount)}
-              <span className="text-xl font-bold text-slate-900 underline"></span>
-            </p>
-          </div>
-        ) : (
-          <div className="">
-            <p className="text-sm text-slate-900"></p>
-            <p className="text-2xl font-bold text-slate-900">
-              {formatVND(productPrice.priceAfterDiscount)}
-              <span className="text-xl font-bold text-slate-900 underline"></span>
-            </p>
-          </div>
-        )}
+        <div>
+          {productPrice.originalPrice !== productPrice.priceAfterDiscount ? (
+            <div className="mt-5">
+              <p className="text-sm text-slate-900">
+                <span className="line-through">
+                  {formatVND(productPrice.originalPrice)}
+                </span>
+                <span className="font-light underline">đ</span>{" "}
+                <span className="text-red-600">-{calculateDiscount()}%</span>
+              </p>
+              <p className="text-2xl font-bold mt-2 text-slate-900">
+                {formatVND(productPrice.priceAfterDiscount)}
+              </p>
+            </div>
+          ) : (
+            <div className="">
+              <p className="text-2xl font-bold text-slate-900">
+                {formatVND(productPrice.priceAfterDiscount)}
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

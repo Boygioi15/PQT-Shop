@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
 import {
   createCategory,
   getAllCategory,
@@ -16,29 +14,15 @@ import Loading from "../../../component/Loading";
 const CategoryCreate = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [description, setDescription] = useState("");
   const [allCategory, setAllCategory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  console.log("🚀 ~ CategoryCreate ~ allCategory:", allCategory);
   const [newCategory, setNewCategory] = useState({
     name: "",
     description: "",
     parentId: "",
     thumb: "",
   });
-  console.log("🚀 ~ CategoryCreate ~ newCategory:", newCategory);
-
-  const modules = {
-    toolbar: [
-      [{ header: "1" }, { header: "2" }, { font: [] }],
-      [{ list: "ordered" }, { list: "bullet" }],
-      ["bold", "italic", "underline"],
-      ["link"],
-      [{ align: [] }],
-      [{ color: [] }, { background: [] }],
-      ["image"],
-    ],
-  };
+  console.log("🚀 ~ CategoryCreate ~ newCategory:", newCategory)
 
   useEffect(() => {
     handleGetCategory();
@@ -69,7 +53,6 @@ const CategoryCreate = () => {
     setIsLoading(true);
     try {
       const response = await getCategoryById(id);
-      console.log("🚀 ~ handleGetCategoryById ~ response:", response);
       if (response && response.metadata) {
         const category = response.metadata;
         setNewCategory({
@@ -78,7 +61,6 @@ const CategoryCreate = () => {
           parentId: category.category_parentId || "",
           thumb: category.category_img || "",
         });
-        setDescription(category.category_description || "");
       } else {
         toast.error("Failed to fetch category details!");
         console.error("Failed to fetch category details: Invalid response.");
@@ -203,17 +185,14 @@ const CategoryCreate = () => {
           >
             Description
           </label>
-          <ReactQuill
+          <textarea
             id="categoryDescription"
-            value={description}
-            onChange={(value) => {
-              setDescription(value);
-              handleCategoryChange("description", value);
-            }}
-            modules={modules}
-            className="w-full max-h-screen overflow-y-auto border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+            value={newCategory.description}
+            onChange={(e) => handleCategoryChange("description", e.target.value)}
+            rows="5"
             placeholder="Enter category description"
-          />
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          ></textarea>
         </div>
 
         {/* Form Actions */}

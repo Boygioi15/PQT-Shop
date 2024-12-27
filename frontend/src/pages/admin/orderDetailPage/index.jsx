@@ -8,9 +8,7 @@ import { BsCoin } from "react-icons/bs";
 
 const OrderDetailPage = () => {
   const { orderId } = useParams(); // Lấy ID đơn hàng từ URL
-  console.log("🚀 ~ OrderDetailPage ~ orderId:", orderId);
   const [orderDetail, setOrderDetail] = useState();
-  console.log("🚀 ~ OrderDetailPage ~ orderDetail:", orderDetail);
 
   useEffect(() => {
     const fetchOrderDetail = async () => {

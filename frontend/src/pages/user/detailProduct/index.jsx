@@ -219,7 +219,7 @@ const DetailProduct = () => {
                 </div>
 
                 {/* Variations */}
-                <div className="space-y-5">
+                <div className="space-y-10 min-h-[100px] mt-9">
                   {spu?.product_variations.map((variation, variationIndex) => (
                     <div key={variationIndex}>
                       <h3 className="text-xl font-bold text-gray-800">

@@ -7,7 +7,7 @@ import { SortOptions } from "../../../component/Product/SortButton/sortOption";
 import { filterProduct } from "../../../config/api";
 import { AiOutlineLeft, AiOutlineRight } from "react-icons/ai";
 
-const ITEMS_PER_PAGE = 3;
+const ITEMS_PER_PAGE = 6;
 
 const ProductPage = () => {
   const { categorySlug } = useParams();
@@ -61,7 +61,7 @@ const ProductPage = () => {
   }, [categorySlug, minPrice, maxPrice, selectedOption, currentPage]); // Thêm currentPage vào dependencies
 
   return (
-    <section className="bg-[#f3f4f6] antialiased">
+    <section className="bg-[#f3f4f6] antialiased min-h-[800px]">
       <div className="mx-auto max-w-screen-xl">
         <div className="flex gap-6">
           <FilterSidebar

@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 
 const CategoryPage = () => {
   const [categories, setCategories] = useState([]);
+  console.log("🚀 ~ CategoryPage ~ categories:", categories)
   const [activeCollapse, setActiveCollapse] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [deleteModal, setDeleteModal] = useState({

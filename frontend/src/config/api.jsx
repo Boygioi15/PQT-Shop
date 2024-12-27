@@ -50,6 +50,9 @@ export const updateCategory = async (id, newCategory) => {
 };
 
 /*Product*/
+export const getHomePageProduct = async () => {
+  return axios.get("/product/home-page-product");
+};
 export const filterProduct = async ({
   product_status,
   stock_status,

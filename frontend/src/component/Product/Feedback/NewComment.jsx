@@ -134,7 +134,6 @@ const NewComment = ({ spuId, handleGetListComment }) => {
               rows="4"
               value={comment}
               onChange={handleCommentChange}
-              disabled={!hasPurchased}
               placeholder={"Hãy chia sẻ trải nghiệm của bạn về sản phẩm..."}
               className={`w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 resize-none transition-colors duration-200`}
             />
@@ -149,12 +148,8 @@ const NewComment = ({ spuId, handleGetListComment }) => {
           onClick={handleSubmit}
           className={`px-8 py-3 text-lg font-semibold rounded-full shadow-md
               transform hover:-translate-y-0.5 transition-all duration-300 
-              focus:outline-none focus:ring-2 focus:ring-offset-2
-              ${
-                hasPurchased
-                  ? "bg-blue-600 hover:bg-blue-700 text-white hover:shadow-lg focus:ring-blue-500 cursor-pointer"
-                  : "bg-gray-400 text-gray-200 cursor-not-allowed"
-              }`}
+              focus:outline-none focus:ring-2 focus:ring-offset-2 bg-blue-600 hover:bg-blue-700 text-white hover:shadow-lg focus:ring-blue-500 cursor-pointer
+             `}
           disabled={!hasPurchased}
         >
           Gửi đánh giá

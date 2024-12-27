@@ -2,23 +2,11 @@ import { useRef, useEffect, useState } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import ProductItem from "./ProductItem";
 
-const ProductSection = ({ title }) => {
+const ProductSection = ({ title, products }) => {
+  console.log("🚀 ~ ProductSection ~ products:", products);
   const scrollRef = useRef(null);
   const [cardWidth, setCardWidth] = useState(0);
   const [totalProductsToShow, setTotalProductsToShow] = useState(4); // Mặc định 4 sản phẩm trên md
-
-  const product = {
-    id: "123",
-    imageSrc:
-      "https://cdn2.fptshop.com.vn/unsafe/360x0/filters:quality(100)/iphone_16_pro_37987b6def.png",
-    link: "",
-    name: "Iphone",
-    productPrice: {
-      orignalPrice: 11000,
-      priceAfterDiscount: 1000,
-      discount: 100,
-    },
-  };
 
   useEffect(() => {
     const updateCardWidth = () => {
@@ -76,9 +64,9 @@ const ProductSection = ({ title }) => {
         <FaChevronLeft />
       </button>
       <div className="flex space-x-4 overflow-hidden px-4" ref={scrollRef}>
-        {[...Array(10)].map((_, index) => (
+        {products.map((product, index) => (
           <div
-            key={index}
+            key={product.id || index}
             className="flex-none"
             style={{
               width: `calc((100% - ${
