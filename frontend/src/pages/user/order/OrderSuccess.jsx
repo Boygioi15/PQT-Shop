@@ -38,7 +38,6 @@ export default function OrderSuccess() {
               <h2 className="text-lg font-semibold text-gray-800">
                 Đơn hàng #{id}
               </h2>
-              <p className="text-sm text-gray-600"> Ngày đặt: 23 / 12 / 2024</p>
             </div>
           </div>
           <div className="border-t border-b py-4 mb-4">

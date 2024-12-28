@@ -55,9 +55,9 @@ instance.interceptors.response.use(
     const statusCode = error?.response?.status;
     const originalRequest = error.config;
     switch (statusCode) {
-      // case 403:
-      //   window.location.href = "/access-denied";
-      //   break;
+      case 403:
+        window.location.href = "/access-denied";
+        break;
       case 401:
         try {
           if (
