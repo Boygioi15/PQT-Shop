@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { getAdminAllProduct } from "../../../config/api";
 import { FaTrashAlt } from "react-icons/fa"; // Import biểu tượng thùng rác
 import ProductSelectionModal from "../flashSale/ProductSeletionModal";
+import ProductSelectionModalForVoucher from "./ProductSelectionModalForVoucher";
 
 const VoucherVisibilitySetup = ({ voucherData, setVoucherData, type }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -164,7 +165,7 @@ const VoucherVisibilitySetup = ({ voucherData, setVoucherData, type }) => {
       )}
 
       {/* Product Selection Modal */}
-      <ProductSelectionModal
+      <ProductSelectionModalForVoucher
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleAddProducts}

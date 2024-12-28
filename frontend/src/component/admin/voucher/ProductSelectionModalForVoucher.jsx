@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { filterProductFlashSale, getAllProduct } from "../../../config/api";
+import {
+  filterProductFlashSale,
+  filterProductForVoucher,
+  getAllProduct,
+} from "../../../config/api";
 import { formatVND } from "../../../utils/format";
 import CategorySelect from "../../CategorySelect";
 
-const ProductSelectionModal = ({
+const ProductSelectionModalForVoucher = ({
   isOpen,
   onClose,
   onConfirm,
@@ -21,7 +25,7 @@ const ProductSelectionModal = ({
   // Fetch products when the modal opens
   const handleGetAllProduct = async () => {
     try {
-      const response = await filterProductFlashSale(
+      const response = await filterProductForVoucher(
         flashSaleData.startTime,
         flashSaleData.endTime
       );
@@ -45,7 +49,7 @@ const ProductSelectionModal = ({
 
     // Apply category filter
     if (filterCategory) {
-      const response = await filterProductFlashSale(
+      const response = await filterProductForVoucher(
         flashSaleData.startTime,
         flashSaleData.endTime,
         filterCategory,
@@ -187,4 +191,4 @@ const ProductSelectionModal = ({
   );
 };
 
-export default ProductSelectionModal;
+export default ProductSelectionModalForVoucher;

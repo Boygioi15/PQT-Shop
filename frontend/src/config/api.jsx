@@ -236,6 +236,7 @@ export const getListFlashSale = async (eventType) => {
 export const toggleFlashSale = async (promId) => {
   return axios.patch(`/promotion/toggle-disable/${promId}`);
 };
+
 export const filterProductFlashSale = async (
   startTime,
   endTime,
@@ -243,6 +244,20 @@ export const filterProductFlashSale = async (
   product_name
 ) => {
   return axios.post("/product/spu/filter-for-promotion", {
+    startTime,
+    endTime,
+    categoryId,
+    product_name,
+  });
+};
+
+export const filterProductForVoucher = async (
+  startTime,
+  endTime,
+  categoryId,
+  product_name
+) => {
+  return axios.post("/product/spu/filter-for-voucher", {
     startTime,
     endTime,
     categoryId,
