@@ -28,17 +28,14 @@ const EventCreate = () => {
     prom_name: "",
     prom_banner: "",
     appliedProduct: [],
-    eventType: "custom",
+    eventType: "Custom",
     startTime: "",
     endTime: "",
     status: "",
     disable: "",
   });
-  console.log("🚀 ~ FlashSaleCreate ~ flashSaleData:", flashSaleData);
-  console.log("🚀 ~ FlashSaleCreate ~ flashSaleData:", flashSaleData);
   const navigate = useNavigate();
   const [displayProducts, setDisplayProducts] = useState([]);
-  console.log("🚀 ~ FlashSaleCreate ~ displayProducts:", displayProducts);
   const { id } = useParams();
 
   useEffect(() => {
@@ -447,9 +444,11 @@ const EventCreate = () => {
       try {
         // Gọi API tạo sự kiện
         const response = await creatNewFlashSale(flashSaleData);
-        console.log("🚀 ~ handleConfirmAction ~ response:", response);
-
-        toast.success("Tạo sự kiện thành công");
+        if (response.status === 200) {
+          toast.success("Tạo sự kiện thành công");
+        } else {
+          toast.error("Lỗi khi tạo");
+        }
         navigate("/admin/event"); // Quay về trang danh sách Flash Sale
       } catch (error) {}
     } else {

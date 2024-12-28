@@ -117,7 +117,7 @@ const Header = () => {
                 )}
               </Link>
             </li>
-            {isAuthenticated && (
+            {/* {isAuthenticated && (
               <li
                 onMouseEnter={() => setNotifyIsOpen(true)}
                 onMouseLeave={() => setNotifyIsOpen(false)}
@@ -134,7 +134,7 @@ const Header = () => {
                   <NotificationMenu notifications={mockNotifications} />
                 )}
               </li>
-            )}
+            )} */}
             {/* Profile Section with Dropdown */}
             <li className="my-7 lg:my-0">
               <ProfileNavBar userAvatar={userAvatar} userName={userName} />

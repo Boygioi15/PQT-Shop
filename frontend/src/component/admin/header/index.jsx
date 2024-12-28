@@ -68,7 +68,7 @@ const Header = ({ setIsSidebarOpen }) => {
           </button>
 
           {/* Notification Section */}
-          <div
+          {/* <div
             onMouseEnter={() => setNotifyIsOpen(true)}
             onMouseLeave={() => setNotifyIsOpen(false)}
             className="relative text-3xl font-extrabold"
@@ -80,7 +80,7 @@ const Header = ({ setIsSidebarOpen }) => {
             {notifyIsOpen && (
               <NotificationMenu notifications={mockNotifications} />
             )}
-          </div>
+          </div> */}
 
           {/* User Avatar */}
           <Link to="/admin/profile" className="relative">

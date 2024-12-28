@@ -62,8 +62,6 @@ const ProfileNavBar = ({ userAvatar, userName }) => {
 
   // Tìm role name dựa trên role ID của user
   const roleName = roles.find((role) => role._id === roleId)?.rol_name;
-  console.log("🚀 ~ ProfileNavBar ~ roles:", roles);
-  console.log("🚀 ~ ProfileNavBar ~ roleName:", roleName);
 
   return (
     <div className="relative">
@@ -91,31 +89,31 @@ const ProfileNavBar = ({ userAvatar, userName }) => {
           </button>
 
           {/* Dropdown Menu */}
-          {dropdownOpen && roleName && (
+          {dropdownOpen && (
             <div
               className="absolute right-0 w-56 bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 z-50"
               style={{ animation: "fadeIn 0.2s ease-in-out" }}
             >
               <div className="py-2">
                 {/* Show Profile link only for regular users */}
-                {roleName === "user" && (
+                {
                   <Link
                     to="/profile"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition duration-150"
                   >
                     Profile
                   </Link>
-                )}
+                }
 
                 {/* Show Admin Page link only for admin or staff */}
-                {(roleName === "admin" || roleName === "staff") && (
+                {
                   <Link
                     to="/admin/dashboard"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition duration-150"
                   >
                     Admin Page
                   </Link>
-                )}
+                }
 
                 {/* Log out button */}
                 <button
