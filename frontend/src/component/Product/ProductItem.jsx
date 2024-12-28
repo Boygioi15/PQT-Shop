@@ -30,7 +30,7 @@ const ProductItem = ({ product, isForShow }) => {
   };
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm relative h-full flex flex-col">
+    <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm  h-full flex flex-col">
       <div className="h-56 w-full">
         <a href={ROUTERS.USER.PRODUCT_DETAIL(id)} className="cursor-default">
           <img

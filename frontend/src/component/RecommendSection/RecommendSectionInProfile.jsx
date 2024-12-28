@@ -86,7 +86,7 @@ const RecommendSectionForProfile = ({ title = "Có thể bạn sẽ thích" }) =
   }
 
   return (
-    <div className="p-6 relative shadow-2xl bg-white rounded-lg">
+    <div className="p-6 relative shadow-2xl bg-white rounded-lg z-1">
       <h2 className="text-2xl font-bold mb-6 text-black">{title}</h2>
 
       <button
