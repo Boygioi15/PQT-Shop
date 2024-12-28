@@ -53,7 +53,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             href="/admin/dashboard"
             className="font-bold text-3xl text-black text-start"
           >
-            AppleHouse
+            PQT shop
           </a>
           <ul className="space-y-3 my-8 flex-1 text-xl font-bold">
             {ROUTERS.ADMIN.map((item) => (

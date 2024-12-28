@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 
-const connectString = 'mongodb://appleshop:123456789@localhost:27017/appleshop?authSource=admin';
+const connectString = 'mongodb+srv://22521084:Jd2gqXdFSUCJXCZO@ecommerce-backend-nodej.lvutf.mongodb.net/shoeshop';
 //'mongodb://appleshop:123456789@mongodb:27017/appleshop?authSource=admin';
 class Database {
     constructor() {

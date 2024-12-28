@@ -39,7 +39,7 @@ const ProductDescription = ({ description, onClickThongSo }) => {
         <h1 className="text-lg md:text-xl lg:text-2xl font-bold">
           Thông tin sản phẩm
         </h1>
-        <a
+        {/* <a
           className="text-mainColor cursor-pointer flex items-center hover:text-blue-900"
           onClick={onClickThongSo}
         >
@@ -47,7 +47,7 @@ const ProductDescription = ({ description, onClickThongSo }) => {
             Thông số kỹ thuật
           </span>
           <MdNavigateNext className="text-xl" />
-        </a>
+        </a> */}
       </div>
 
       <div

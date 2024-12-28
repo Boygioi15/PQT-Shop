@@ -113,7 +113,9 @@ const StockPage = () => {
 
     try {
       setIsLoading(true);
-      await Promise.all(productsToPublish.map((id) => publishProcduct(id)));
+      await Promise.all(
+        productsToPublish.map(async (id) => await ublishProcduct(id))
+      );
       toast.success("Selected products published successfully!");
       await fetchTabData(); // Ensure data is refreshed
       await fetchTabCounts(); // Ensure counts are updated
@@ -144,7 +146,9 @@ const StockPage = () => {
 
     try {
       setIsLoading(true);
-      await Promise.all(productsToUnpublish.map((id) => unPublishProcduct(id)));
+      await Promise.all(
+        productsToUnpublish.map(async (id) => await unPublishProcduct(id))
+      );
       toast.success("Selected products unpublished successfully!");
       await fetchTabData(); // Ensure data is refreshed
       await fetchTabCounts(); // Ensure counts are updated

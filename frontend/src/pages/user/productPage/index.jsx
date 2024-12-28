@@ -12,7 +12,7 @@ const ITEMS_PER_PAGE = 6;
 const ProductPage = () => {
   const { categorySlug } = useParams();
   const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(50000000);
+  const [maxPrice, setMaxPrice] = useState(10000000);
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
   const [productList, setProductList] = useState([]);
   const [selectedOption, setSelectedOption] = useState(SortOptions.newest);

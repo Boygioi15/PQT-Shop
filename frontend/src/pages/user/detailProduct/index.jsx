@@ -144,7 +144,6 @@ const DetailProduct = () => {
                 <div className="px-4 py-10 rounded-lg relative">
                   <img
                     src={selectedImage}
-                    alt="iPhone 16 Pro Max"
                     className="w-10/12 rounded object-cover mx-auto"
                   />
                   <button type="button" className="absolute top-4 right-4">
@@ -251,14 +250,14 @@ const DetailProduct = () => {
                                   variationIndex,
                                   optionIndex
                                 );
-                                if (variation.images.length > 0) {
+                                if (variation?.images?.length > 0) {
                                   setSelectedImage(
                                     variation.images[optionIndex]
                                   );
                                 }
                               }}
                             >
-                              {variation.images.length > 0 && (
+                              {variation?.images.length > 0 && (
                                 <img
                                   src={variation.images[optionIndex]}
                                   className="w-8 h-8"

@@ -6,7 +6,7 @@ const CartEmpty = () => {
           Chưa có sản phẩm nào trong giỏ hàng
         </p>
         <p className="text-base sm:text-lg text-gray-600 mb-4">
-          Cùng mua sắm hàng ngàn sản phẩm tại AppleHouse nhé!
+          Cùng mua sắm hàng ngàn sản phẩm tại PQT shop nhé!
         </p>
         <a
           href="/"
