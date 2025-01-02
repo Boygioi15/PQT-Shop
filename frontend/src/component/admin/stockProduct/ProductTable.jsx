@@ -125,7 +125,7 @@ const ProductTable = ({
                 />
               </th>
               <th className="p-5 text-left">Image</th>
-              <th className="p-5 text-left w-[20%]">Product Name</th>
+              <th className="p-5 text-left w-[30%]">Product Name</th>
               <th className="p-5 text-left">Stock</th>
               <th className="p-5 text-left">Price</th>
               <th className="p-5 text-left">Category</th>

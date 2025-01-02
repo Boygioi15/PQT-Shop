@@ -32,10 +32,10 @@ const StockPage = () => {
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [filters, setFilters] = useState({
     stockStatus: "",
-    category: "",
-    seller: "",
-    productType: "",
+    categoryId: "",
   });
+  const [selectedCategoryName, setSelectedCategoryName] =
+    useState("Tất cả danh mục");
   const [activeTab, setActiveTab] = useState("all");
   const [activeCollapse, setActiveCollapse] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -53,11 +53,7 @@ const StockPage = () => {
   useEffect(() => {
     fetchTabCounts();
     fetchTabData();
-  }, [activeTab, currentPage]);
-
-  useEffect(() => {
-    handleFilterProducts();
-  }, [filters, products]);
+  }, [activeTab, currentPage, filters]);
 
   const fetchTabCounts = async () => {
     setIsLoading(true);
@@ -65,12 +61,14 @@ const StockPage = () => {
       const allResponse = await getAllProduct({
         page: currentPage,
         limit: ITEMS_PER_PAGE,
+        ...filters,
       });
       setAllCount(allResponse?.metadata?.pagination?.totalResult || 0);
 
       const publishedResponse = await getPublishedProduct({
         page: currentPage,
         limit: ITEMS_PER_PAGE,
+        ...filters,
       });
       setPublishedCount(
         publishedResponse?.metadata?.pagination?.totalResult || 0
@@ -79,6 +77,7 @@ const StockPage = () => {
       const draftResponse = await getDraftProduct({
         page: currentPage,
         limit: ITEMS_PER_PAGE,
+        ...filters,
       });
       setDraftCount(draftResponse?.metadata?.pagination?.totalResult || 0);
     } catch (error) {
@@ -100,16 +99,19 @@ const StockPage = () => {
         response = await getAllProduct({
           page: currentPage,
           limit: ITEMS_PER_PAGE,
+          ...filters,
         });
       if (activeTab === "published")
         response = await getPublishedProduct({
           page: currentPage,
           limit: ITEMS_PER_PAGE,
+          ...filters,
         });
       if (activeTab === "draft")
         response = await getDraftProduct({
           page: currentPage,
           limit: ITEMS_PER_PAGE,
+          ...filters,
         });
 
       if (response && response.metadata) {
@@ -148,8 +150,8 @@ const StockPage = () => {
         )
       );
       toast.success("Selected products published successfully!");
-      await fetchTabData(); // Ensure data is refreshed
-      await fetchTabCounts(); // Ensure counts are updated
+      await fetchTabData();
+      await fetchTabCounts();
       setSelectedProducts([]);
     } catch (error) {
       toast.error("Error publishing products. Please try again.");
@@ -218,31 +220,6 @@ const StockPage = () => {
       setIsLoading(false);
       setIsDeleteModalOpen(false); // Close the delete modal
     }
-  };
-
-  const handleFilterProducts = () => {
-    let filtered = [...products];
-    // if (filters.stockStatus) {
-    //   filtered = filtered.filter(
-    //     (product) => product.product_stockStatus === filters.stockStatus
-    //   );
-    // }
-    // if (filters.category) {
-    //   filtered = filtered.filter(
-    //     (product) => product.category === filters.category
-    //   );
-    // }
-    // if (filters.seller) {
-    //   filtered = filtered.filter(
-    //     (product) => product.seller === filters.seller
-    //   );
-    // }
-    // if (filters.productType) {
-    //   filtered = filtered.filter(
-    //     (product) => product.product_type === filters.productType
-    //   );
-    // }
-    setFilteredProducts(filtered);
   };
 
   const handleSelectProduct = (productId) => {
@@ -370,8 +347,14 @@ const StockPage = () => {
           {/* Filters */}
           <div className="mb-4 flex justify-between items-center">
             <div className="flex gap-4">
-              <ProductFilter filters={filters} setFilters={setFilters} />
+              <ProductFilter
+                filters={filters}
+                setFilters={setFilters}
+                selectedCategoryName={selectedCategoryName}
+                setSelectedCategoryName={setSelectedCategoryName}
+              />
             </div>
+
             <div className="flex gap-4">
               <button
                 onClick={handleUnpublishSelected}

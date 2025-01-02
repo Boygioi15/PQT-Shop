@@ -188,28 +188,50 @@ export const getImageLink = async (formData) => {
 };
 
 //ProductStock
-export const getAllProduct = async ({ limit, page, search }) => {
+export const getAllProduct = async ({
+  limit,
+  page,
+  search,
+  stockStatus = null,
+  categoryId = null,
+}) => {
   return axios.get("/product/spu/get-all", {
     params: {
       search,
       limit,
       page,
+      stockStatus,
+      categoryId,
     },
   });
 };
-export const getPublishedProduct = async ({ limit, page }) => {
+export const getPublishedProduct = async ({
+  limit,
+  page,
+  stockStatus = null,
+  categoryId = null,
+}) => {
   return axios.get("/product/spu/get-published", {
     params: {
       limit,
       page,
+      stockStatus,
+      categoryId,
     },
   });
 };
-export const getDraftProduct = async ({ limit, page }) => {
+export const getDraftProduct = async ({
+  limit,
+  page,
+  stockStatus = null,
+  categoryId = null,
+}) => {
   return axios.get("/product/spu/get-draft", {
     params: {
       limit,
       page,
+      stockStatus,
+      categoryId,
     },
   });
 };
