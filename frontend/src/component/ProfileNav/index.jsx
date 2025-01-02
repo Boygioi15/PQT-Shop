@@ -51,7 +51,7 @@ const ProfileNavBar = ({ userAvatar, userName }) => {
         dispatch(setLogoutAction());
         dispatch(clearRoleData());
         dispatch(resetCart());
-        navigate("/");
+        navigate("/login");
         toast.success("Logged out successfully!");
       } else {
         toast.error(response.message);

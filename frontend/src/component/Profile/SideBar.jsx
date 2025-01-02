@@ -50,7 +50,7 @@ const Sidebar = () => {
       if (response.status === 200 && response.metadata) {
         dispatch(setLogoutAction());
         dispatch(clearRoleData());
-        navigate("/"); // Điều hướng về trang chủ sau khi đăng xuất thành công
+        navigate("/login"); // Điều hướng về trang chủ sau khi đăng xuất thành công
       } else {
         console.error("Logout failed", response.message);
       }
