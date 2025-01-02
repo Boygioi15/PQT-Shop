@@ -161,8 +161,9 @@ export class SpuService {
             },
             status: 'active',
         }).lean()
+        console.log("🚀 ~ SpuService ~ isInPromotion:", isInPromotion)
 
-        if (isInPromotion) throw new BadRequestError(`Sản phẩm này đang trong thời gian sự kiện ${isInPromotion[0].prom_name} không thể xóa. Hãy thử lại khi sự kiện kết thúc`)
+        if (isInPromotion.length !== 0) throw new BadRequestError(`Sản phẩm này đang trong thời gian sự kiện ${isInPromotion[0].prom_name} không thể xóa. Hãy thử lại khi sự kiện kết thúc`)
 
         await skuModel.deleteMany({
             product_id: spuId

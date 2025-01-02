@@ -71,7 +71,7 @@ const TopProductPage = () => {
             {categoriesWithProducts
               .filter((category) => category.bestSold?.length > 0) // Lọc danh mục có sản phẩm
               .map((category, index) => (
-                <div key={index} className="space-y-6">
+                <div key={index} className=" mt-3">
                   {/* Category Info */}
                   <div className="flex items-center mb-4">
                     <img

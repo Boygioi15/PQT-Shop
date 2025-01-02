@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { filterProductFlashSale, getAllProduct } from "../../../config/api";
 import { formatVND } from "../../../utils/format";
 import CategorySelect from "../../CategorySelect";
+import { toast } from "react-toastify";
 
 const ProductSelectionModal = ({
   isOpen,
@@ -16,7 +17,6 @@ const ProductSelectionModal = ({
   const [isAllSelected, setIsAllSelected] = useState(false);
   const [filteredProducts, setFilteredProducts] = useState([]); // Filtered product list
   const [filterCategory, setFilterCategory] = useState(""); // Category filter
-  console.log("🚀 ~ filterCategory:", filterCategory);
   const [filterName, setFilterName] = useState("");
   // Fetch products when the modal opens
   const handleGetAllProduct = async () => {
@@ -25,6 +25,9 @@ const ProductSelectionModal = ({
         flashSaleData.startTime,
         flashSaleData.endTime
       );
+      if (response.status !== 200) {
+        toast.error(response.message);
+      }
       const products = response.metadata || [];
       setProductList(products);
       setFilteredProducts(products); // Initialize filteredProducts
@@ -51,6 +54,9 @@ const ProductSelectionModal = ({
         filterCategory,
         filterName
       );
+      if (response.status !== 200) {
+        toast.error(response.message);
+      }
       setFilteredProducts(response.metadata);
       console.log("🚀 ~ handleFilter ~ response:", response);
     } else {

@@ -117,7 +117,7 @@ const AddVariationsInfo = ({
 
   const handleStockChange = (skuIndexId, value) => {
     const updatedSkuList = sku_list.map((sku, i) =>
-      i === skuIndexId ? { ...sku, sku_stock: Number(value) } : sku
+      i === skuIndexId ? { ...sku, sku_stock: +value } : sku
     );
     setSkuListAndUpdate(updatedSkuList);
   };
@@ -147,7 +147,7 @@ const AddVariationsInfo = ({
       skuList.push({
         sku_index: skuIndex,
         sku_price: "",
-        sku_stock: "",
+        sku_stock: 0,
       });
     }
 
@@ -158,7 +158,7 @@ const AddVariationsInfo = ({
     const updatedSkuList = sku_list.map((sku) => ({
       ...sku,
       sku_price: price,
-      sku_stock: stock,
+      sku_stock: +stock,
     }));
     setSkuListAndUpdate(updatedSkuList);
   };

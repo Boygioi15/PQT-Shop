@@ -135,12 +135,19 @@ const FlashSaleCreate = () => {
   };
 
   const validateTimeRange = (startTime, endTime) => {
-    // Nếu không có thời gian bắt đầu hoặc kết thúc -> Mặc định là hợp lệ
     if (!startTime || !endTime) return true;
+    console.log("Ngày thiếu");
 
     // Chuyển đổi thời gian sang đối tượng Date
-    const start = new Date(startTime);
-    const end = new Date(endTime);
+    const utcStart = new Date(startTime);
+    const utcEnd = new Date(endTime);
+
+    // Chuyển đổi sang múi giờ GMT+7
+    const start = new Date(utcStart.getTime() + 7 * 60 * 60 * 1000);
+    const end = new Date(utcEnd.getTime() + 7 * 60 * 60 * 1000);
+
+    console.log("🚀 ~ validateTimeRange ~ start:", start);
+    console.log("🚀 ~ validateTimeRange ~ end:", end);
 
     // Kiểm tra ngày bắt đầu và ngày kết thúc có cùng ngày không
     if (
@@ -148,17 +155,22 @@ const FlashSaleCreate = () => {
       start.getMonth() !== end.getMonth() ||
       start.getDate() !== end.getDate()
     ) {
+      console.log("Không cùng ngày");
       return false; // Không cùng ngày
     }
 
     // Kiểm tra thứ tự thời gian: Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc
     if (start >= end) {
+      console.log(
+        "Kiểm tra thứ tự thời gian: Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc"
+      );
       return false;
     }
 
     // Nếu vượt qua tất cả các kiểm tra, thời gian là hợp lệ
     return true;
   };
+
   const handleGetSKU = async (selectedProducts) => {
     try {
       const existingSpuIds = new Set(
@@ -452,7 +464,6 @@ const FlashSaleCreate = () => {
     if (!isEdit) {
       try {
         const response = await creatNewFlashSale(flashSaleData);
-        console.log("🚀 ~ handleConfirmAction ~ response:", response);
 
         toast.success("Tạo Flash Sale thành công");
         navigate("/admin/flash-sale"); // Quay về trang danh sách Flash Sale

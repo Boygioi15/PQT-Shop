@@ -25,7 +25,6 @@ const AddProductPage = () => {
     attributes: [],
     more_imgs: [],
   });
-  console.log("🚀 ~ AddProductPage ~ productData:", productData)
   const [showDialog, setShowDialog] = useState(false);
 
   useEffect(() => {
@@ -75,7 +74,7 @@ const AddProductPage = () => {
         const cleanedSkuList = sku_list.map((sku) => ({
           sku_index: sku.sku_index,
           sku_price: sku.sku_price.originalPrice,
-          sku_stock: sku.sku_stock,
+          sku_stock: +sku.sku_stock,
         }));
 
         setProductData({
@@ -178,13 +177,13 @@ const AddProductPage = () => {
             />
           </div>
 
-          <div className="mt-10">
+          {/* <div className="mt-10">
             <AddAttributesInfo
               category={productData.category}
               productData={productData}
               onUpdateAttributes={handleUpdateAttributes}
             />
-          </div>
+          </div> */}
 
           <div className="flex justify-end mt-5">
             <button
