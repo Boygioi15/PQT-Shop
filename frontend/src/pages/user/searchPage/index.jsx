@@ -16,7 +16,7 @@ const SearchPage = () => {
   const searchTerm = queryParams.get("s");
   const [numberResult, setNumberResult] = useState(0);
   const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(50000000);
+  const [maxPrice, setMaxPrice] = useState(10000000);
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
   const [productList, setProductList] = useState([]);
   const [selectedOption, setSelectedOption] = useState(SortOptions.newest);

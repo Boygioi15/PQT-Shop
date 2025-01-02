@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { FaFacebook, FaInstagram, FaTwitter, FaYoutube } from 'react-icons/fa';
+import { FaFacebook, FaInstagram, FaTwitter, FaYoutube } from "react-icons/fa";
 
 const Footer = () => {
   return (
@@ -8,9 +8,10 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Information */}
           <div>
-            <h2 className="text-2xl font-bold mb-4">Apple House</h2>
+            <h2 className="text-2xl font-bold mb-4">PQT shop</h2>
             <p className="mb-4">
-              Trường Đại học Công nghệ thông tin - Đại học Quốc gia TP.Hồ Chí Minh
+              Trường Đại học Công nghệ thông tin - Đại học Quốc gia TP.Hồ Chí
+              Minh
             </p>
             <p>Số điện thoại: 0912345678 - 0987654321</p>
             <p>Email: contact@gmail.com</p>
@@ -21,19 +22,29 @@ const Footer = () => {
             <h3 className="text-xl font-bold mb-4">Liên kết nhanh</h3>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="hover:text-gray-400">Trang chủ</a>
+                <a href="#" className="hover:text-gray-400">
+                  Trang chủ
+                </a>
               </li>
               <li>
-                <a href="#" className="hover:text-gray-400">Sản phẩm</a>
+                <a href="#" className="hover:text-gray-400">
+                  Sản phẩm
+                </a>
               </li>
               <li>
-                <a href="#" className="hover:text-gray-400">Khuyến mãi</a>
+                <a href="#" className="hover:text-gray-400">
+                  Khuyến mãi
+                </a>
               </li>
               <li>
-                <a href="#" className="hover:text-gray-400">Liên hệ</a>
+                <a href="#" className="hover:text-gray-400">
+                  Liên hệ
+                </a>
               </li>
               <li>
-                <a href="#" className="hover:text-gray-400">Giới thiệu</a>
+                <a href="#" className="hover:text-gray-400">
+                  Giới thiệu
+                </a>
               </li>
             </ul>
           </div>
@@ -43,16 +54,24 @@ const Footer = () => {
             <h3 className="text-xl font-bold mb-4">Hỗ trợ khách hàng</h3>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="hover:text-gray-400">Chính sách bảo hành</a>
+                <a href="#" className="hover:text-gray-400">
+                  Chính sách bảo hành
+                </a>
               </li>
               <li>
-                <a href="#" className="hover:text-gray-400">Chính sách đổi trả</a>
+                <a href="#" className="hover:text-gray-400">
+                  Chính sách đổi trả
+                </a>
               </li>
               <li>
-                <a href="#" className="hover:text-gray-400">Chính sách vận chuyển</a>
+                <a href="#" className="hover:text-gray-400">
+                  Chính sách vận chuyển
+                </a>
               </li>
               <li>
-                <a href="#" className="hover:text-gray-400">Hướng dẫn mua hàng</a>
+                <a href="#" className="hover:text-gray-400">
+                  Hướng dẫn mua hàng
+                </a>
               </li>
             </ul>
           </div>
@@ -80,7 +99,7 @@ const Footer = () => {
 
       {/* Footer Bottom */}
       <div className="border-t border-gray-700 mt-8 pt-4 text-center text-sm">
-        <p>© 2024 Apple House. All rights reserved.</p>
+        <p>© 2024 PQT shop. All rights reserved.</p>
       </div>
     </div>
   );

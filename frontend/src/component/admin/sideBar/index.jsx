@@ -107,9 +107,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="relative mt-10 flex flex-col h-full">
-          <a className="font-bold text-3xl text-black text-start">
-            Apple house
-          </a>
+          <a className="font-bold text-3xl text-black text-start">PQT shop</a>
           <ul className="space-y-3 my-8 flex-1 text-xl font-bold">
             {authorizedRoutes.map((item) => (
               <li key={item.name}>

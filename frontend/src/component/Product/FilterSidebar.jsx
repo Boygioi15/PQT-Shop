@@ -4,7 +4,7 @@ const FilterSidebar = ({ minPrice, maxPrice, setMinPrice, setMaxPrice }) => {
   const trackRef = useRef(null);
 
   const MIN = 0;
-  const MAX = 50000000;
+  const MAX = 10000000;
 
   // Add a state to track which checkbox is selected
   const [selectedPriceRange, setSelectedPriceRange] = useState(null);
@@ -62,16 +62,16 @@ const FilterSidebar = ({ minPrice, maxPrice, setMinPrice, setMaxPrice }) => {
     setSelectedPriceRange(range); // Set the selected price range
 
     switch (range) {
-      case "20-25":
-        setMinPrice(20000000);
-        setMaxPrice(25000000);
+      case "1-2":
+        setMinPrice(1000000);
+        setMaxPrice(2000000);
         break;
-      case "25-30":
-        setMinPrice(25000000);
-        setMaxPrice(30000000);
+      case "2-5":
+        setMinPrice(2000000);
+        setMaxPrice(5000000);
         break;
-      case "above-30":
-        setMinPrice(30000000);
+      case "above-10":
+        setMinPrice(5000000);
         setMaxPrice(MAX);
         break;
       default:
@@ -97,29 +97,29 @@ const FilterSidebar = ({ minPrice, maxPrice, setMinPrice, setMaxPrice }) => {
               />
               Tất cả
             </label>
-            <label onClick={() => handleOnClick2("20-25")}>
+            <label onClick={() => handleOnClick2("1-2")}>
               <input
                 type="checkbox"
-                checked={selectedPriceRange === "20-25"}
+                checked={selectedPriceRange === "1-2"}
                 className="mr-2"
               />
-              Từ 20 - 25 triệu
+              Từ 1 - 2 triệu
             </label>
-            <label onClick={() => handleOnClick2("25-30")}>
+            <label onClick={() => handleOnClick2("2-5")}>
               <input
                 type="checkbox"
-                checked={selectedPriceRange === "25-30"}
+                checked={selectedPriceRange === "2-5"}
                 className="mr-2"
               />
-              Từ 25 - 30 triệu
+              Từ 2 - 5 triệu
             </label>
-            <label onClick={() => handleOnClick2("above-30")}>
+            <label onClick={() => handleOnClick2("above-10")}>
               <input
                 type="checkbox"
-                checked={selectedPriceRange === "above-30"}
+                checked={selectedPriceRange === "above-10"}
                 className="mr-2"
               />
-              Trên 30 triệu
+              Trên 10 triệu
             </label>
           </div>
           <p className="text-sm text-gray-700 mb-2">

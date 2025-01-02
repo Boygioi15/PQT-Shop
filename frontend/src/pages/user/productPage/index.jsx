@@ -13,7 +13,7 @@ const ITEMS_PER_PAGE = 9;
 const ProductPage = () => {
   const { categorySlug } = useParams();
   const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(50000000);
+  const [maxPrice, setMaxPrice] = useState(10000000);
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
   const [productList, setProductList] = useState([]);
   const [selectedOption, setSelectedOption] = useState(SortOptions.newest);
@@ -76,9 +76,7 @@ const ProductPage = () => {
           />
           <div className="flex-1">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
-                {categorySlug}
-              </h3>
+              <h3 className="text-lg font-semibold text-gray-900"></h3>
               <SortButton
                 isSortDropdownOpen={isSortDropdownOpen}
                 toggleSortDropdown={toggleSortDropdown}
