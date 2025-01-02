@@ -51,7 +51,7 @@ const CategorySelect = ({ productData, setProductData }) => {
 
   useEffect(() => {
     getCategory();
-  }, []);
+  }, [!productData]);
 
   const handleCategoryClick = (item, parentId = null, parentName = null) => {
     const isParent = !parentId; // Kiểm tra nếu là cha

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import VariationForm from "./VariationForm";
 import SkuTable from "./SkuTable";
 import { formatNumber, parseNumber } from "../../../utils/format";
+import { getImageLink } from "../../../config/api";
 
 const AddVariationsInfo = ({
   productData,
@@ -34,7 +35,10 @@ const AddVariationsInfo = ({
   };
 
   const addNewVariation = () => {
-    const newVariations = [...variationsList, { name: "", options: [""] }];
+    const newVariations = [
+      ...variationsList,
+      { name: "", options: [""], images: [] }, // Thêm trường images rỗng
+    ];
     setVariationsListAndUpdate(newVariations);
   };
 
@@ -55,7 +59,14 @@ const AddVariationsInfo = ({
       if (i === variationIndex) {
         const updatedOptions = [...variation.options];
         updatedOptions[optionIndex] = value;
-        return { ...variation, options: updatedOptions };
+
+        // Đảm bảo images khớp với options
+        const updatedImages = [...(variation.images || [])];
+        while (updatedImages.length < updatedOptions.length) {
+          updatedImages.push(""); // Thêm giá trị rỗng cho ảnh
+        }
+
+        return { ...variation, options: updatedOptions, images: updatedImages };
       }
       return variation;
     });
@@ -64,11 +75,14 @@ const AddVariationsInfo = ({
 
   const addOption = (variationIndex) => {
     const updatedVariations = variationsList.map((variation, i) => {
-      if (
-        i === variationIndex &&
-        variation.options[variation.options.length - 1] !== ""
-      ) {
-        return { ...variation, options: [...variation.options, ""] };
+      if (i === variationIndex) {
+        const updatedOptions = [...variation.options, ""];
+
+        // Đảm bảo images khớp với options
+        const updatedImages = [...(variation.images || [])];
+        updatedImages.push(""); // Thêm giá trị rỗng cho ảnh
+
+        return { ...variation, options: updatedOptions, images: updatedImages };
       }
       return variation;
     });
@@ -81,7 +95,13 @@ const AddVariationsInfo = ({
         const updatedOptions = variation.options.filter(
           (_, idx) => idx !== optionIndex
         );
-        return { ...variation, options: updatedOptions };
+
+        // Loại bỏ hình ảnh tương ứng
+        const updatedImages = variation.images.filter(
+          (_, idx) => idx !== optionIndex
+        );
+
+        return { ...variation, options: updatedOptions, images: updatedImages };
       }
       return variation;
     });
@@ -148,6 +168,43 @@ const AddVariationsInfo = ({
       generateSkuList();
     }
   }, [variationsList]);
+  const handleImageUpload = async (variationIndex, optionIndex, file) => {
+    if (!file) return;
+
+    try {
+      // Upload file và lấy link ảnh từ API
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await getImageLink(formData);
+      const uploadedImageUrl = response.metadata.image_url; // Lấy link ảnh từ API
+
+      // Cập nhật trường images của variation
+      const updatedVariations = variationsList.map((variation, i) => {
+        if (i === variationIndex) {
+          const updatedImages = [...(variation.images || [])];
+          updatedImages[optionIndex] = uploadedImageUrl;
+          return { ...variation, images: updatedImages };
+        }
+        return variation;
+      });
+
+      setVariationsListAndUpdate(updatedVariations);
+    } catch (error) {
+      console.error("Error uploading image:", error);
+    }
+  };
+  const handleRemoveImage = (variationIndex, optionIndex) => {
+    const updatedVariations = variationsList.map((variation, i) => {
+      if (i === variationIndex) {
+        const updatedImages = [...(variation.images || [])];
+        updatedImages[optionIndex] = ""; // Xóa ảnh tại vị trí optionIndex
+        return { ...variation, images: updatedImages };
+      }
+      return variation;
+    });
+
+    setVariationsListAndUpdate(updatedVariations);
+  };
 
   return (
     <div className="p-8 bg-white rounded-lg shadow-md">
@@ -169,6 +226,8 @@ const AddVariationsInfo = ({
                       onOptionChange={handleOptionChange}
                       onAddOption={addOption}
                       onRemoveOption={removeOption}
+                      onImageUpload={handleImageUpload}
+                      onRemoveImage={handleRemoveImage} // Truyền hàm xử lý xóa ảnh
                     />
                   ))}
                 </div>

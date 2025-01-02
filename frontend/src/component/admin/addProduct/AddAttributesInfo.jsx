@@ -33,11 +33,9 @@ const AddAttributesInfo = ({ category, productData, onUpdateAttributes }) => {
 
   // Lấy thông tin category và cập nhật attributes dựa trên category_name
   const handleGetCategory = async () => {
-    const response = await getCategoryById(category[0]); // category là id
-
     try {
       const response = await getCategoryById(category[0]); // category là id
-
+      console.log(123);
       if (response && response.status === 200 && response.metadata) {
         const categoryName = response.metadata.category_name.toLowerCase(); // Chuyển thành chữ thường
 
@@ -78,19 +76,18 @@ const AddAttributesInfo = ({ category, productData, onUpdateAttributes }) => {
 
   // Khi category thay đổi, lấy thông tin category_name và cập nhật attributes
   useEffect(() => {
-    if (productData.attributes && productData.attributes.length > 0) {
-      // Nếu đã có attributes, chỉ cần đồng bộ với state
-      setAttributes(productData.attributes);
-      setDefaultLength(0);
-    } else if (category && productData.attributes.length <= 0) {
-      // Nếu chưa có attributes, gọi API để lấy thông tin từ category
-      handleGetCategory();
-    } else {
-      // Nếu không có category và attributes, đặt về giá trị mặc định
-      setAttributes([]);
-      setDefaultLength(0);
+    if (JSON.stringify(productData.attributes) !== JSON.stringify(attributes)) {
+      if (productData.attributes && productData.attributes.length > 0) {
+        setAttributes(productData.attributes);
+        setDefaultLength(0);
+      } else if (category && productData.attributes.length <= 0) {
+        handleGetCategory();
+      } else {
+        setAttributes([]);
+        setDefaultLength(0);
+      }
     }
-  }, [category, productData.attributes]);
+  }, [category, JSON.stringify(productData.attributes)]);
 
   const handleToggleGroup = (groupName) => {
     setExpandedGroups((prev) =>

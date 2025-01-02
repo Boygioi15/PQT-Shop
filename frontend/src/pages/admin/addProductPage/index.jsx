@@ -25,6 +25,7 @@ const AddProductPage = () => {
     attributes: [],
     more_imgs: [],
   });
+  console.log("🚀 ~ AddProductPage ~ productData:", productData)
   const [showDialog, setShowDialog] = useState(false);
 
   useEffect(() => {

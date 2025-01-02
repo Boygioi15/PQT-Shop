@@ -26,6 +26,7 @@ const DetailProduct = () => {
   const [loading, setLoading] = useState(true);
   const [skus, setSkus] = useState([]);
   const [spu, setSpu] = useState(null);
+  console.log("🚀 ~ DetailProduct ~ spu:", spu)
   const [selectedVariants, setSelectedVariants] = useState(
     skus.find((sku) => sku.sku_default)?.sku_index || [0, 0]
   );

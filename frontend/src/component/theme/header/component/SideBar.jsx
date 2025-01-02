@@ -8,6 +8,7 @@ import "../../../../style/sideBar.css";
 import { getAllCategory } from "../../../../config/api";
 import ProfileNavBar from "../../../ProfileNav";
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 
 const SideBar = ({ isOpen, setIsOpen }) => {
   const [selectedItem, setSelectedItem] = useState(null);
@@ -124,8 +125,10 @@ const SideBar = ({ isOpen, setIsOpen }) => {
         </div>
         {selectedItem && (
           <div className="p-8">
-            <h2 className="sidebar-title">{selectedItem.name}</h2>
-            <div className="flex flex-col gap-4">
+            <Link to={selectedItem.link} className="sidebar-title">
+              {selectedItem.name}
+            </Link>
+            <div className="flex flex-col gap-4 mt-5">
               {selectedItem.subItems.length > 0 ? (
                 selectedItem.subItems.map((subItem, subIndex) => (
                   <a
