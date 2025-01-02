@@ -9,14 +9,15 @@ import {
 } from "../../../redux/slice/accountSlice";
 import { useNavigate } from "react-router-dom";
 import Loading from "../../../component/Loading";
+import { clearRoleData } from "../../../redux/slice/rbacSlice";
 
 const AdminProfilePage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.account?.user);
   const isLoading = useSelector((state) => state.account?.isLoading);
+  const role = useSelector((state) => state?.rbac?.userRole?.name);
   const [isUploading, setIsUploading] = useState(false);
-  console.log("🚀 ~ AdminProfilePage ~ user:", user);
   const fileInputRef = useRef(null);
   const [avatarPreview, setAvatarPreview] = useState(
     user?.avatar || "https://via.placeholder.com/150"
@@ -43,7 +44,6 @@ const AdminProfilePage = () => {
     usr_sex: user?.sex || "",
     usr_img: user?.avatar || "",
   });
-  console.log("🚀 ~ AdminProfilePage ~ formData:", formData);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -100,6 +100,7 @@ const AdminProfilePage = () => {
       const response = await callLogout();
       if (response.status === 200 && response.metadata) {
         dispatch(setLogoutAction());
+        dispatch(clearRoleData());
         navigate("/");
         toast.success("Logged out successfully!");
       } else {
@@ -161,7 +162,7 @@ const AdminProfilePage = () => {
             {formData.usr_name}
           </h2>
           <span className="text-sm bg-red-200 text-red-700 px-2 py-1 rounded-full mt-2">
-            Admin
+            {role}
           </span>
           <button
             onClick={handleLogOut}

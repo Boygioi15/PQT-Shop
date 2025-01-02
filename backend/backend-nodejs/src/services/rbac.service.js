@@ -86,12 +86,10 @@ const createRole = async ({
     return role;
 };
 
-const getListRole = async ({
-    userId, // admin mới xem được
-}) => {
+const getListRole = async () => {
 
-    const user = await userModel.findById(userId).populate('usr_role');
-    const roleName = user.usr_role.rol_name;
+    // const user = await userModel.findById(userId).populate('usr_role');
+    // const roleName = user.usr_role.rol_name;
 
     // if (!isAdmin) throw new AuthFailureError("You don't have permission");
 
@@ -130,6 +128,8 @@ const getListRole = async ({
 const getListRoleForSelect = async () => {
     return roleModel.find().select("rol_name rol_description _id")
 }
+
+
 const updateRolePermission = async ({
     id,
     name = null,
@@ -179,7 +179,6 @@ const updateRolePermission = async ({
 
     return updatedRole;
 };
-
 
 const getAllRoleWithGrant = async () => {
     return await roleModel.find()

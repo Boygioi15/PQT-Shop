@@ -10,6 +10,7 @@ const Address = () => {
   const [addresses, setAddresses] = useState([]);
   const fetchListAddress = async () => {
     const response = await getListUserAddress({ id: userId });
+    console.log("🚀 ~ fetchListAddress ~ response:", response);
     if (response.status === 200) {
       setAddresses(response.metadata);
     }
@@ -20,6 +21,12 @@ const Address = () => {
 
     fetchListAddress();
   }, [userId]);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    fetchListAddress();
+  }, []);
 
   return (
     <div className=" max-w-6xl mx-auto">
@@ -34,7 +41,7 @@ const Address = () => {
         </button>
       </div>
       <div className="space-y-4">
-        {addresses.map((address, index) => (
+        {addresses?.map((address, index) => (
           <div
             key={index}
             className="bg-white rounded-lg shadow p-4 flex items-start gap-4"
@@ -49,14 +56,6 @@ const Address = () => {
                   <h3 className="font-medium">{address.fullName}</h3>
                   <p className="text-gray-600">{address.phone}</p>
                   <p className="text-gray-600 mt-1">{address.fullAddress}</p>
-                </div>
-                <div className="flex gap-3">
-                  <button className="text-red-500 hover:text-red-600">
-                    Sửa
-                  </button>
-                  <button className="text-gray-600 hover:text-gray-700">
-                    Xoá
-                  </button>
                 </div>
               </div>
             </div>

@@ -3,7 +3,6 @@ import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import ProductItem from "./ProductItem";
 
 const ProductSection = ({ title, products }) => {
-  console.log("🚀 ~ ProductSection ~ products:", products);
   const scrollRef = useRef(null);
   const [cardWidth, setCardWidth] = useState(0);
   const [totalProductsToShow, setTotalProductsToShow] = useState(4); // Mặc định 4 sản phẩm trên md

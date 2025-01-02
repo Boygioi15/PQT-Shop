@@ -1,6 +1,7 @@
 import {
     SuccessResponse
 } from '../core/success.response.js';
+import userModel from '../models/user.model.js';
 
 import {
     addNewAddress,
@@ -11,6 +12,7 @@ import {
     getDefaultAddress,
     getListAddress,
     getListUser,
+    getUserStats,
     updateProfileService,
 } from '../services/user.service.js';
 
@@ -127,6 +129,45 @@ class UserController {
                 ...req.body
             }),
         }).send(res);
+    };
+
+    getUserStats = async (req, res, next) => {
+        return new SuccessResponse({
+            message: 'Change status',
+            metadata: await getUserStats(),
+        }).send(res);
+    };
+
+
+    getUserRole = async (req, res) => {
+        try {
+            const userId = req.user.userId;
+
+            const user = await userModel.findById(userId)
+                .populate({
+                    path: 'usr_role',
+                    populate: {
+                        path: 'rol_grants.resource'
+                    }
+                });
+
+            if (!user || !user.usr_role) {
+                return res.status(404).json({
+                    message: 'Role not found'
+                });
+            }
+
+            return new SuccessResponse({
+                message: 'Change status',
+                metadata: user.usr_role,
+            }).send(res);
+
+        } catch (error) {
+            console.error('Error fetching user role:', error);
+            res.status(500).json({
+                message: 'Error fetching user role'
+            });
+        }
     };
 }
 export default new UserController();

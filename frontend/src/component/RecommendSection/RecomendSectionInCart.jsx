@@ -1,39 +1,34 @@
 import { useRef, useEffect, useState } from "react";
-import {
-  FaChevronCircleLeft,
-  FaChevronLeft,
-  FaChevronRight,
-} from "react-icons/fa";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import ProductItem from "../Product/ProductItem";
-import {
-  getRecommendForCartPage,
-  getRecommendForHomePage,
-} from "../../config/api";
+import { getRecommendForCartPage } from "../../config/api";
 
 const RecommendSectionForCart = ({ title = "Sản phẩm liên quan" }) => {
   const scrollRef = useRef(null);
+  const containerRef = useRef(null);
   const [cardWidth, setCardWidth] = useState(0);
-  const [totalProductsToShow, setTotalProductsToShow] = useState(4); // Mặc định 4 sản phẩm trên md
-
+  const [totalProductsToShow, setTotalProductsToShow] = useState(4);
   const [listProduct, setListProduct] = useState([]);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
 
   useEffect(() => {
     const handleGetLsitProduct = async () => {
       const response = await getRecommendForCartPage();
       if (response.status === 200) {
-        const productsMap = response.metadata.map((product) => {
-          return {
-            id: product._id,
-            imageSrc: product.product_thumb,
-            link: `/products/${product?.product_slug}`,
-            name: product.product_name,
-            productPrice: {
-              originalPrice: product.product_price.originalPrice,
-              priceAfterDiscount: product.product_price.priceAfterDiscount,
-              discount: product.product_price.discount,
-            },
-          };
-        });
+        const productsMap = response.metadata.map((product) => ({
+          id: product._id,
+          imageSrc: product.product_thumb,
+          link: `/products/${product?.product_slug}`,
+          name: product.product_name,
+          productPrice: {
+            originalPrice: product.product_price.originalPrice,
+            priceAfterDiscount: product.product_price.priceAfterDiscount,
+            discount: product.product_price.discount,
+          },
+          rating: product?.product_ratingAverage,
+          tags: product?.product_tags,
+        }));
         setListProduct(productsMap);
       }
     };
@@ -42,79 +37,121 @@ const RecommendSectionForCart = ({ title = "Sản phẩm liên quan" }) => {
 
   useEffect(() => {
     const updateCardWidth = () => {
-      if (scrollRef.current) {
-        const firstCard = scrollRef.current.firstChild;
-        if (firstCard) {
-          setCardWidth(firstCard.offsetWidth + 16); // Tính chiều rộng của card và khoảng cách
-        }
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.clientWidth;
+        const gap = 16; // space-x-4 = 16px
+        const calculatedWidth =
+          (containerWidth - gap * (totalProductsToShow - 1)) /
+          totalProductsToShow;
+        setCardWidth(calculatedWidth);
       }
     };
 
     const handleResize = () => {
-      // Điều chỉnh số lượng sản phẩm hiển thị dựa vào kích thước màn hình
       if (window.innerWidth < 640) {
-        setTotalProductsToShow(1); // Hiển thị 1 sản phẩm
+        setTotalProductsToShow(1);
       } else if (window.innerWidth < 800) {
-        setTotalProductsToShow(2); // Hiển thị 2 sản phẩm
+        setTotalProductsToShow(2);
       } else if (window.innerWidth < 1180) {
-        setTotalProductsToShow(3); // Hiển thị 3 sản phẩm
+        setTotalProductsToShow(3);
       } else {
-        setTotalProductsToShow(4); // Hiển thị 4 sản phẩm
+        setTotalProductsToShow(4);
       }
-      updateCardWidth();
     };
 
     handleResize();
-    window.addEventListener("resize", handleResize);
+    updateCardWidth();
+
+    window.addEventListener("resize", () => {
+      handleResize();
+      updateCardWidth();
+    });
 
     return () => {
       window.removeEventListener("resize", handleResize);
     };
+  }, [totalProductsToShow]);
+
+  const checkScroll = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
+    }
+  };
+
+  useEffect(() => {
+    const scrollElement = scrollRef.current;
+    if (scrollElement) {
+      scrollElement.addEventListener("scroll", checkScroll);
+      checkScroll();
+      return () => scrollElement.removeEventListener("scroll", checkScroll);
+    }
   }, []);
 
   const scrollLeft = () => {
-    scrollRef.current.scrollBy({
-      left: -cardWidth * totalProductsToShow,
-      behavior: "smooth",
-    });
+    if (scrollRef.current) {
+      const scrollAmount =
+        cardWidth * totalProductsToShow + 16 * totalProductsToShow; // Add gap
+      scrollRef.current.scrollBy({
+        left: -scrollAmount,
+        behavior: "smooth",
+      });
+    }
   };
 
   const scrollRight = () => {
-    scrollRef.current.scrollBy({
-      left: cardWidth * totalProductsToShow,
-      behavior: "smooth",
-    });
+    if (scrollRef.current) {
+      const scrollAmount =
+        cardWidth * totalProductsToShow + 16 * totalProductsToShow; // Add gap
+      scrollRef.current.scrollBy({
+        left: scrollAmount,
+        behavior: "smooth",
+      });
+    }
   };
+
   return (
-    <div className="p-6 shadow-2xl bg-white rounded-lg z-1">
+    <div className="flex flex-col bg-white rounded-lg shadow-2xl p-6">
       <h2 className="text-2xl font-bold mb-6 text-black">{title}</h2>
-      <button
-        onClick={scrollLeft}
-        className="absolute left-0 top-1/2 transform -translate-y-1/2 text-2xl pl-2 z-10"
-      >
-        <FaChevronLeft />
-      </button>
-      <div className="flex space-x-4 overflow-hidden px-4" ref={scrollRef}>
-        {listProduct.map((product, index) => (
-          <div
-            key={index}
-            className="flex-none"
-            style={{
-              width: `calc((100% - ${
-                16 * (totalProductsToShow - 1)
-              }px) / ${totalProductsToShow})`,
-            }}
-          >
-            <ProductItem product={product} isForShow={true} />
+
+      <div className="flex items-center">
+        <button
+          onClick={scrollLeft}
+          className={`flex-none p-2 mr-2 transition-opacity duration-200 ${
+            canScrollLeft ? "opacity-100" : "opacity-100"
+          }`}
+        >
+          <FaChevronLeft className="text-2xl" />
+        </button>
+
+        <div
+          ref={scrollRef}
+          className="flex-1 overflow-x-auto overflow-y-hidden scrollbar-hide"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
+          <div ref={containerRef} className="flex space-x-4">
+            {listProduct.map((product, index) => (
+              <div
+                key={index}
+                className="flex-none"
+                style={{ width: `${cardWidth}px` }}
+              >
+                <ProductItem product={product} isForShow={true} />
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
+
+        <button
+          onClick={scrollRight}
+          className={`flex-none p-2 ml-2 transition-opacity duration-200 ${
+            canScrollRight ? "opacity-100" : "opacity-100"
+          }`}
+        >
+          <FaChevronRight className="text-2xl" />
+        </button>
       </div>
-      <button
-        onClick={scrollRight}
-        className="absolute right-0 top-1/2 transform -translate-y-1/2 text-2xl pr-2"
-      >
-        <FaChevronRight />
-      </button>
     </div>
   );
 };

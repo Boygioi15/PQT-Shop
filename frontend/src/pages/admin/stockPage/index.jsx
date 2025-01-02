@@ -22,6 +22,7 @@ import Loading from "../../../component/Loading";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { formatDate } from "../../../utils";
+import Pagination from "../../../component/Pagiantion";
 
 const ITEMS_PER_PAGE = 8;
 
@@ -29,7 +30,6 @@ const StockPage = () => {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState({
     stockStatus: "",
     category: "",
@@ -45,12 +45,15 @@ const StockPage = () => {
   const [draftCount, setDraftCount] = useState(0);
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [deleteProductIds, setDeleteProductIds] = useState([]); // Sản phẩm sẽ được xóa
+  const [deleteProductIds, setDeleteProductIds] = useState([]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     fetchTabCounts();
     fetchTabData();
-  }, [activeTab]);
+  }, [activeTab, currentPage]);
 
   useEffect(() => {
     handleFilterProducts();
@@ -59,36 +62,62 @@ const StockPage = () => {
   const fetchTabCounts = async () => {
     setIsLoading(true);
     try {
-      const allResponse = await getAllProduct();
-      setAllCount(allResponse?.metadata?.length || 0);
+      const allResponse = await getAllProduct({
+        page: currentPage,
+        limit: ITEMS_PER_PAGE,
+      });
+      setAllCount(allResponse?.metadata?.pagination?.totalResult || 0);
 
-      const publishedResponse = await getPublishedProduct();
-      setPublishedCount(publishedResponse?.metadata?.length || 0);
+      const publishedResponse = await getPublishedProduct({
+        page: currentPage,
+        limit: ITEMS_PER_PAGE,
+      });
+      setPublishedCount(
+        publishedResponse?.metadata?.pagination?.totalResult || 0
+      );
 
-      const draftResponse = await getDraftProduct();
-      setDraftCount(draftResponse?.metadata?.length || 0);
+      const draftResponse = await getDraftProduct({
+        page: currentPage,
+        limit: ITEMS_PER_PAGE,
+      });
+      setDraftCount(draftResponse?.metadata?.pagination?.totalResult || 0);
     } catch (error) {
-      console.error("Error fetching counts:", error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const fetchTabData = async () => {
     setIsLoading(true);
     try {
       let response;
-      if (activeTab === "all") response = await getAllProduct();
-      if (activeTab === "published") response = await getPublishedProduct();
-      if (activeTab === "draft") response = await getDraftProduct();
+      if (activeTab === "all")
+        response = await getAllProduct({
+          page: currentPage,
+          limit: ITEMS_PER_PAGE,
+        });
+      if (activeTab === "published")
+        response = await getPublishedProduct({
+          page: currentPage,
+          limit: ITEMS_PER_PAGE,
+        });
+      if (activeTab === "draft")
+        response = await getDraftProduct({
+          page: currentPage,
+          limit: ITEMS_PER_PAGE,
+        });
 
       if (response && response.metadata) {
-        setProducts(response.metadata);
-        setFilteredProducts(response.metadata);
-        setCurrentPage(1);
+        setProducts(response.metadata.products);
+        setFilteredProducts(response.metadata.products);
+        setTotalPages(response.metadata.pagination.totalPages);
       }
     } catch (error) {
-      console.error("Error fetching products:", error);
     } finally {
       setIsLoading(false);
     }
@@ -114,7 +143,9 @@ const StockPage = () => {
     try {
       setIsLoading(true);
       await Promise.all(
-        productsToPublish.map(async (id) => await ublishProcduct(id))
+        productsToPublish.map(
+          async (product) => await publishProcduct(product._id)
+        )
       );
       toast.success("Selected products published successfully!");
       await fetchTabData(); // Ensure data is refreshed
@@ -122,7 +153,6 @@ const StockPage = () => {
       setSelectedProducts([]);
     } catch (error) {
       toast.error("Error publishing products. Please try again.");
-      console.error("Error publishing products:", error);
     } finally {
       setIsLoading(false);
     }
@@ -147,7 +177,9 @@ const StockPage = () => {
     try {
       setIsLoading(true);
       await Promise.all(
-        productsToUnpublish.map(async (id) => await unPublishProcduct(id))
+        productsToUnpublish.map(
+          async (product) => await unPublishProcduct(product._id)
+        )
       );
       toast.success("Selected products unpublished successfully!");
       await fetchTabData(); // Ensure data is refreshed
@@ -155,7 +187,6 @@ const StockPage = () => {
       setSelectedProducts([]);
     } catch (error) {
       toast.error("Error unpublishing products. Please try again.");
-      console.error("Error unpublishing products:", error);
     } finally {
       setIsLoading(false);
     }
@@ -178,12 +209,11 @@ const StockPage = () => {
       setIsLoading(true);
       await Promise.all(deleteProductIds.map((id) => deleteProduct(id))); // Call API to delete products
       toast.success("Selected products deleted successfully!");
-      await fetchTabData(); // Refresh data
-      await fetchTabCounts(); // Update counts
+      await fetchTabData();
+      await fetchTabCounts();
       setSelectedProducts([]); // Clear selected products
     } catch (error) {
       toast.error("Error deleting products. Please try again.");
-      console.error("Error deleting products:", error);
     } finally {
       setIsLoading(false);
       setIsDeleteModalOpen(false); // Close the delete modal
@@ -192,28 +222,27 @@ const StockPage = () => {
 
   const handleFilterProducts = () => {
     let filtered = [...products];
-    if (filters.stockStatus) {
-      filtered = filtered.filter(
-        (product) => product.product_stockStatus === filters.stockStatus
-      );
-    }
-    if (filters.category) {
-      filtered = filtered.filter(
-        (product) => product.category === filters.category
-      );
-    }
-    if (filters.seller) {
-      filtered = filtered.filter(
-        (product) => product.seller === filters.seller
-      );
-    }
-    if (filters.productType) {
-      filtered = filtered.filter(
-        (product) => product.product_type === filters.productType
-      );
-    }
+    // if (filters.stockStatus) {
+    //   filtered = filtered.filter(
+    //     (product) => product.product_stockStatus === filters.stockStatus
+    //   );
+    // }
+    // if (filters.category) {
+    //   filtered = filtered.filter(
+    //     (product) => product.category === filters.category
+    //   );
+    // }
+    // if (filters.seller) {
+    //   filtered = filtered.filter(
+    //     (product) => product.seller === filters.seller
+    //   );
+    // }
+    // if (filters.productType) {
+    //   filtered = filtered.filter(
+    //     (product) => product.product_type === filters.productType
+    //   );
+    // }
     setFilteredProducts(filtered);
-    setCurrentPage(1);
   };
 
   const handleSelectProduct = (productId) => {
@@ -249,8 +278,6 @@ const StockPage = () => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     return filteredProducts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
   };
-
-  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
 
   const toggleCollapse = (id) => {
     setActiveCollapse((prev) => (prev === id ? null : id));
@@ -370,10 +397,12 @@ const StockPage = () => {
           {/* Product Table */}
           <div className="hidden md:block">
             <ProductTable
-              products={paginatedProducts()}
+              products={products}
               selectedProducts={selectedProducts}
               setSelectedProducts={setSelectedProducts}
               handleEditProduct={handleEditProduct}
+              fetchTabCounts={fetchTabCounts}
+              fetchTabData={fetchTabData}
             />
           </div>
 
@@ -452,51 +481,18 @@ const StockPage = () => {
               </div>
             ))}
           </div>
+
+          {products.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              isDeleteModalOpen={isDeleteModalOpen}
+              onPageChange={handlePageChange}
+            />
+          )}
         </>
       )}
 
-      {/* Pagination */}
-      <ul className="flex space-x-5 justify-center mt-6">
-        {/* Previous Button */}
-        <li
-          className={`flex items-center justify-center bg-gray-100 w-9 h-9 rounded-md cursor-pointer ${
-            currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-          onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
-        >
-          <AiOutlineLeft className="text-gray-500" />
-        </li>
-
-        {/* Page Numbers */}
-        {Array.from({ length: totalPages }, (_, index) => index + 1).map(
-          (page) => (
-            <li
-              key={page}
-              onClick={() => setCurrentPage(page)}
-              className={`flex items-center justify-center w-9 h-9 rounded-md cursor-pointer ${
-                currentPage === page
-                  ? "bg-blue-500 text-white"
-                  : "text-gray-800 hover:bg-gray-200"
-              }`}
-            >
-              {page}
-            </li>
-          )
-        )}
-
-        {/* Next Button */}
-        <li
-          className={`flex items-center justify-center bg-gray-100 w-9 h-9 rounded-md cursor-pointer ${
-            currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-          onClick={() =>
-            currentPage < totalPages && setCurrentPage(currentPage + 1)
-          }
-        >
-          <AiOutlineRight className="text-gray-500" />
-        </li>
-      </ul>
-      {/* Delete Confirmation Modal */}
       <DeleteModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}

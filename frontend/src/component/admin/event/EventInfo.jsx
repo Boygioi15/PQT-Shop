@@ -3,7 +3,6 @@ import ThumbnailUpload from "../addProduct/ThumbnailUpload";
 
 // Hàm format lại thời gian khi cần
 const formatDate = (dateString) => {
-  const date = new Date(dateString);
   // Định dạng theo kiểu dd/MM/yyyy HH:mm
   const formattedDate = date.toLocaleString("vi-VN", {
     year: "numeric",
@@ -15,20 +14,16 @@ const formatDate = (dateString) => {
   return formattedDate;
 };
 
-// Hàm chuyển đổi thời gian từ datetime-local sang ISO với múi giờ địa phương
 const convertToISOWithLocalTime = (dateString) => {
   const date = new Date(dateString);
-  // Chuyển đổi thời gian sang ISO với múi giờ địa phương
   const isoString = new Date(
     date.getTime() - date.getTimezoneOffset() * 60000
   ).toISOString();
   return isoString;
 };
 
-// Hàm chuyển đổi thời gian từ ISO sang datetime-local
 const convertToLocalDateTime = (isoString) => {
   const date = new Date(isoString);
-  // Chuyển đổi thời gian sang định dạng datetime-local
   return date.toISOString().slice(0, 16);
 };
 

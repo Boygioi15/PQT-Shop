@@ -13,12 +13,12 @@ import { AiOutlineLeft, AiOutlineRight, AiOutlineDown } from "react-icons/ai";
 import { formatVND } from "../../../utils";
 import { FaInfoCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import Pagination from "../../../component/Pagiantion";
 
-const ITEMS_PER_PAGE = 8; // Số lượng đơn hàng mỗi trang
+const ITEMS_PER_PAGE = 7; // Số lượng đơn hàng mỗi trang
 
 const OrderPage = () => {
   const [listOrder, setListOrder] = useState([]); // State cho danh sách đơn hàng
-  console.log("🚀 ~ OrderPage ~ listOrder:", listOrder);
   const [isLoading, setIsLoading] = useState(false); // State cho trạng thái loading
   const [statusCounts, setStatusCounts] = useState({
     confirmed: 0,
@@ -27,13 +27,18 @@ const OrderPage = () => {
     cancelled: 0,
     delivered: 0,
   }); // State đếm trạng thái đơn hàng
-  const [currentPage, setCurrentPage] = useState(1); // State theo dõi trang hiện tại
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [activeCollapse, setActiveCollapse] = useState(null); // State collapse cho đơn hàng
   const navigate = useNavigate(); // Hook for navigation
   useEffect(() => {
     handleGetAllOrder();
     handleGetCountOrderStatus();
   }, []);
+
+  useEffect(() => {
+    handleGetAllOrder();
+  }, [currentPage]);
 
   const handleGetCountOrderStatus = async () => {
     try {
@@ -66,9 +71,13 @@ const OrderPage = () => {
   const handleGetAllOrder = async () => {
     setIsLoading(true);
     try {
-      const response = await getAllOrder();
+      const response = await getAllOrder({
+        page: currentPage,
+        limit: ITEMS_PER_PAGE,
+      });
       if (response && response.metadata) {
-        setListOrder(response.metadata);
+        setTotalPages(response.metadata.pagination.totalPages);
+        setListOrder(response.metadata.orders);
       } else {
         console.error("Không tìm thấy đơn hàng trong phản hồi.");
       }
@@ -79,12 +88,15 @@ const OrderPage = () => {
     }
   };
 
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const paginatedOrders = () => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     return listOrder.slice(startIndex, startIndex + ITEMS_PER_PAGE);
   };
-
-  const totalPages = Math.ceil(listOrder.length / ITEMS_PER_PAGE);
 
   const toggleCollapse = (id) => {
     setActiveCollapse((prev) => (prev === id ? null : id));
@@ -154,7 +166,7 @@ const OrderPage = () => {
 
           {/* Order List for Small Screens */}
           <div className="md:hidden">
-            {paginatedOrders().map((order) => (
+            {listOrder.map((order) => (
               <div
                 key={order._id}
                 className="bg-white shadow rounded-lg mb-4 p-4"
@@ -217,52 +229,15 @@ const OrderPage = () => {
 
           {/* Order Table for Larger Screens */}
           <div className="hidden md:block">
-            <OrderTable
-              listOrder={paginatedOrders()}
-              setListOrder={setListOrder}
-            />
+            <OrderTable listOrder={listOrder} setListOrder={setListOrder} />
           </div>
-
-          {/* Pagination */}
-          <ul className="flex space-x-5 justify-center mt-6">
-            <li
-              className={`flex items-center justify-center bg-gray-100 w-9 h-9 rounded-md cursor-pointer ${
-                currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
-            >
-              <AiOutlineLeft className="text-gray-500" />
-            </li>
-
-            {Array.from({ length: totalPages }, (_, index) => index + 1).map(
-              (page) => (
-                <li
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`flex items-center justify-center w-9 h-9 rounded-md cursor-pointer ${
-                    currentPage === page
-                      ? "bg-blue-500 text-white"
-                      : "text-gray-800 hover:bg-gray-200"
-                  }`}
-                >
-                  {page}
-                </li>
-              )
-            )}
-
-            <li
-              className={`flex items-center justify-center bg-gray-100 w-9 h-9 rounded-md cursor-pointer ${
-                currentPage === totalPages
-                  ? "opacity-50 cursor-not-allowed"
-                  : ""
-              }`}
-              onClick={() =>
-                currentPage < totalPages && setCurrentPage(currentPage + 1)
-              }
-            >
-              <AiOutlineRight className="text-gray-500" />
-            </li>
-          </ul>
+          {totalPages > 1 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          )}
         </>
       )}
     </div>

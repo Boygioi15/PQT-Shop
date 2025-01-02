@@ -23,7 +23,6 @@ import DashBoard from "./pages/admin/dashBoard";
 import OrderHistory from "./component/Profile/OrderList"; // Thêm trang OrderHistory
 import { ROUTERS } from "./utils/router";
 import Info from "./component/Profile/Info";
-import Favorites from "./component/Profile/ChangePass";
 import Address from "./component/Profile/Address";
 import SearchPage from "./pages/user/searchPage";
 import AddProductPage from "./pages/admin/addProductPage";
@@ -51,6 +50,7 @@ import CategoryPage from "./pages/admin/categoryPage";
 import AdminProfilePage from "./pages/admin/adminProfilePage";
 import TopProductPage from "./pages/admin/topProductPage";
 import ChangePass from "./component/Profile/ChangePass";
+import StatictisPage from "./pages/admin/StatisticPromotions";
 
 const RouterCustom = () => {
   const dispatch = useDispatch();
@@ -119,6 +119,10 @@ const RouterCustom = () => {
           />
           <Route path="/admin/event" element={<EventPage />} />
           <Route path="/admin/event/create" element={<EventCreate />} />
+          <Route
+            path="/admin/event/statistic/:id"
+            element={<StatictisPage />}
+          />
           <Route path="/admin/event/edit/:id" element={<EventCreate />} />
           <Route path="/admin/voucher" element={<VoucherPage />} />
           <Route

@@ -221,7 +221,7 @@ const CartItem = ({
             {product.name}
           </h3>
 
-          <div className="flex mt-4">
+          {/* <div className="flex mt-4">
             <div className="relative group">
               <button
                 type="button"
@@ -254,7 +254,7 @@ const CartItem = ({
                 />
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
 

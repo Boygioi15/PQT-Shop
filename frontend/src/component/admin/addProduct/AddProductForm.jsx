@@ -134,13 +134,14 @@ const AddProductForm = ({ productData, handleChange, setProductData }) => {
           id="description"
           name="description"
           value={productData.description}
+          theme="snow"
           onChange={(value) => {
             handleChange({
               target: { name: "description", value: value },
             });
           }}
           modules={modules}
-          className="w-full max-h-screen overflow-y-auto border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full max-h-screen overflow-y-auto border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-[400px]"
           placeholder="Nhập mô tả sản phẩm"
         />
       </div>

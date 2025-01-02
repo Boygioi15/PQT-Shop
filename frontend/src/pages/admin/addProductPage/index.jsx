@@ -152,7 +152,10 @@ const AddProductPage = () => {
       setShowDialog(false);
     }
   };
-
+  const handleSubmit = (event) => {
+    event.preventDefault(); // Chặn hành vi mặc định của form
+    console.log("Form submitted");
+  };
   return (
     <div className="p-6">
       {isLoading ? (
@@ -163,6 +166,7 @@ const AddProductPage = () => {
             productData={productData}
             handleChange={handleChange}
             setProductData={setProductData}
+            handleSubmit={handleSubmit}
           />
 
           <div className="mt-10">

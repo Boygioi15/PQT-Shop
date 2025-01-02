@@ -3,12 +3,15 @@ import NewComment from "./NewComment";
 import { createComment, getListCommentBySpuId } from "../../../config/api";
 import { useSelector } from "react-redux";
 import CommentItem from "./CommentItem";
+import Pagination from "../../Pagiantion";
+
+const ITEMS_PER_PAGE = 7;
 
 const CommentSection = ({ productId }) => {
   const [comments, setComments] = useState([]);
-  console.log("🚀 ~ CommentSection ~ comments:", comments);
   const userId = useSelector((state) => state.account?.user?._id);
-
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const handleSendNewComment = async (comment) => {
     const newComment = await createComment({
       productId,
@@ -21,16 +24,30 @@ const CommentSection = ({ productId }) => {
       throw new Error("Không thể tạo bình luận");
     }
   };
+
   const handleGetListComment = async () => {
-    const response = await getListCommentBySpuId({ productId });
+    const response = await getListCommentBySpuId({
+      productId,
+      page: currentPage,
+      limit: ITEMS_PER_PAGE,
+    });
     if (response.status === 200) {
-      setComments(response.metadata);
+      setComments(response.metadata.comments);
+      setTotalPages(response.metadata.pagination.totalPages);
     }
   };
 
   useEffect(() => {
     handleGetListComment();
   }, []);
+
+  useEffect(() => {
+    handleGetListComment();
+  }, [currentPage]);
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
 
   return (
     <div className="space-y-10">
@@ -47,13 +64,13 @@ const CommentSection = ({ productId }) => {
           comments.map((comment) => (
             <CommentItem key={comment._id} comment={comment} />
           ))}
-
-        <button
-          type="button"
-          className="w-full mt-10 px-4 py-2.5 bg-transparent hover:bg-gray-50 border border-blue-600 text-gray-800 font-bold rounded"
-        >
-          Read all reviews
-        </button>
+        {totalPages > 1 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        )}
       </div>
     </div>
   );

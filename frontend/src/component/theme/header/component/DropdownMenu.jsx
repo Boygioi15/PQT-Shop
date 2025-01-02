@@ -47,7 +47,8 @@ const DropdownMenu = ({ headerHeight }) => {
         return iconMapping[keyword];
       }
     }
-    return <RiBattery2ChargeLine className="mr-2" />; // Biểu tượng mặc định
+    // return <RiBattery2ChargeLine className="mr-2" />; // Biểu tượng mặc định
+    return <></>;
   };
 
   // Gọi API để lấy các danh mục

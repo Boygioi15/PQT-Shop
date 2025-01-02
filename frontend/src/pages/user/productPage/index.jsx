@@ -6,32 +6,32 @@ import SortButton from "../../../component/Product/SortButton";
 import { SortOptions } from "../../../component/Product/SortButton/sortOption";
 import { filterProduct } from "../../../config/api";
 import { AiOutlineLeft, AiOutlineRight } from "react-icons/ai";
+import Pagination from "../../../component/Pagiantion";
 
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 9;
 
 const ProductPage = () => {
   const { categorySlug } = useParams();
   const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(10000000);
+  const [maxPrice, setMaxPrice] = useState(50000000);
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
   const [productList, setProductList] = useState([]);
   const [selectedOption, setSelectedOption] = useState(SortOptions.newest);
   const [loading, setLoading] = useState(true);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [total, setTotal] = useState(0);
 
   const handleGetListProduct = async () => {
     setLoading(true);
-    const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
     const response = await filterProduct({
       categorySlug,
       minPrice,
       maxPrice,
       sortBy: selectedOption,
+      page: currentPage,
       limit: ITEMS_PER_PAGE,
-      offset: offset,
     });
 
     if (response && response.status === 200) {
@@ -41,13 +41,12 @@ const ProductPage = () => {
         imageSrc: product?.product_thumb,
         productPrice: product?.product_price,
         link: `/products/${product?.product_slug}`,
+        rating: product?.product_ratingAverage,
+        tags: product?.product_tags,
       }));
 
       setProductList(products);
-      setTotal(response.metadata.pagination.total);
-      setTotalPages(
-        Math.ceil(response.metadata.pagination.total / ITEMS_PER_PAGE)
-      );
+      setTotalPages(response.metadata.pagination.totalPages);
     }
     setLoading(false);
   };
@@ -56,9 +55,14 @@ const ProductPage = () => {
     setIsSortDropdownOpen((prev) => !prev);
   };
 
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   useEffect(() => {
     handleGetListProduct();
-  }, [categorySlug, minPrice, maxPrice, selectedOption, currentPage]); // Thêm currentPage vào dependencies
+  }, [categorySlug, minPrice, maxPrice, selectedOption, currentPage]);
 
   return (
     <section className="bg-[#f3f4f6] antialiased min-h-[800px]">
@@ -102,50 +106,11 @@ const ProductPage = () => {
                     />
                   ))}
                 </div>
-
-                <ul className="flex space-x-5 justify-center mt-6">
-                  <li
-                    className={`flex items-center justify-center bg-gray-100 w-9 h-9 rounded-md cursor-pointer ${
-                      currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                    onClick={() =>
-                      currentPage > 1 && setCurrentPage(currentPage - 1)
-                    }
-                  >
-                    <AiOutlineLeft className="text-gray-500" />
-                  </li>
-
-                  {Array.from(
-                    { length: totalPages },
-                    (_, index) => index + 1
-                  ).map((page) => (
-                    <li
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      className={`flex items-center justify-center w-9 h-9 rounded-md cursor-pointer ${
-                        currentPage === page
-                          ? "bg-blue-500 text-white"
-                          : "text-gray-800 hover:bg-gray-200"
-                      }`}
-                    >
-                      {page}
-                    </li>
-                  ))}
-
-                  <li
-                    className={`flex items-center justify-center bg-gray-100 w-9 h-9 rounded-md cursor-pointer ${
-                      currentPage === totalPages
-                        ? "opacity-50 cursor-not-allowed"
-                        : ""
-                    }`}
-                    onClick={() =>
-                      currentPage < totalPages &&
-                      setCurrentPage(currentPage + 1)
-                    }
-                  >
-                    <AiOutlineRight className="text-gray-500" />
-                  </li>
-                </ul>
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
               </>
             )}
           </div>

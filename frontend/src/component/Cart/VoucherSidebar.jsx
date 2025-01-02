@@ -185,7 +185,7 @@ const VoucherSideBar = ({
             onClick={handleClose}
           />
 
-          <div className="fixed right-0 top-0 h-full w-full sm:w-[480px] bg-white shadow-2xl flex flex-col">
+          <div className="fixed right-0 top-0 h-full w-full sm:w-[480px] bg-white shadow-2xl flex flex-col z-50 ">
             {/* Header - Always visible */}
             <div className="flex items-center justify-between p-4 border-b bg-white">
               <h2 className="text-lg font-semibold">Khuyến mãi và ưu đãi</h2>
@@ -243,17 +243,23 @@ const VoucherSideBar = ({
                 <h3 className="text-base font-semibold mb-4">
                   Voucher khả dụng
                 </h3>
-                <div className="space-y-3 mb-6">
-                  {vouchers.map((voucher) => (
-                    <VoucherItem
-                      key={voucher._id}
-                      voucher={voucher}
-                      isAvailable={
-                        !unAvailableVoucher.some((uv) => uv._id === voucher._id)
-                      }
-                    />
-                  ))}
-                </div>
+                {vouchers.length > 0 ? (
+                  <div className="space-y-3 mb-6">
+                    {vouchers.map((voucher) => (
+                      <VoucherItem
+                        key={voucher._id}
+                        voucher={voucher}
+                        isAvailable={
+                          !unAvailableVoucher.some(
+                            (uv) => uv._id === voucher._id
+                          )
+                        }
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div>Hiện tại chưa có voucher nào </div>
+                )}
 
                 {unAvailableVoucher.length > 0 && (
                   <>

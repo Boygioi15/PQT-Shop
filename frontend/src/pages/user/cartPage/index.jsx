@@ -200,7 +200,6 @@ const CartPage = () => {
             isOpen={showLoginModal}
             onClose={() => setShowLoginModal(false)}
           />
-          {/* Hiển thị CheckOut */}
           {cartItems.length > 0 && (
             <CheckOut
               products_order={cartItemSelected}
@@ -217,11 +216,12 @@ const CartPage = () => {
       ) : (
         <CartEmpty />
       )}
-      {!isCheckout && (
+      {!isCheckout && userId && cartItems.length > 0 && (
         <div className="py-14">
           <RecommendSectionForCart />
         </div>
       )}
+      <div className="py-5"></div>
     </div>
   );
 };

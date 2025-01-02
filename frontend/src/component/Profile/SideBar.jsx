@@ -9,6 +9,7 @@ import { RiLogoutBoxLine } from "react-icons/ri";
 import { callLogout } from "../../config/api"; // Import API gọi logout
 import { setLogoutAction } from "../../redux/slice/accountSlice"; // Import action logout
 import { RiLockPasswordLine } from "react-icons/ri";
+import { clearRoleData } from "../../redux/slice/rbacSlice";
 
 const Sidebar = () => {
   const [activeItem, setActiveItem] = useState();
@@ -47,7 +48,8 @@ const Sidebar = () => {
       const response = await callLogout();
 
       if (response.status === 200 && response.metadata) {
-        dispatch(setLogoutAction()); // Gọi action logout để cập nhật trạng thái trong Redux
+        dispatch(setLogoutAction());
+        dispatch(clearRoleData());
         navigate("/"); // Điều hướng về trang chủ sau khi đăng xuất thành công
       } else {
         console.error("Logout failed", response.message);

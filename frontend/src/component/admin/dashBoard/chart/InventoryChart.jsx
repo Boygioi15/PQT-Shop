@@ -135,7 +135,6 @@ const InventoryChart = () => {
               <option value="AirPods">AirPods</option>
               <option value="Accessories">Accessories</option>
             </select>
-            {/* Đặt mũi tên icon ở bên ngoài <select> */}
             <span className="absolute top-1/2 right-3 transform -translate-y-1/2 pointer-events-none">
               <FaChevronDown size={14} color="#637381" />
             </span>

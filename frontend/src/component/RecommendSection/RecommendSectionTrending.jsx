@@ -29,6 +29,8 @@ const RecommendSectionTrending = ({ title = "Sản phẩm nổi bật" }) => {
               priceAfterDiscount: product.product_price.priceAfterDiscount,
               discount: product.product_price.discount,
             },
+            rating: product?.product_ratingAverage,
+            tags: product?.product_tags,
           };
         });
         setListProduct(productsMap);

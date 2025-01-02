@@ -1,26 +1,61 @@
 import React, { useEffect, useState } from "react";
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getListFlashSale, toggleFlashSale } from "../../../config/api";
 import { FaEdit } from "react-icons/fa"; // Import FaEdit icon
-
+import Pagination from "../../../component/Pagiantion";
+import { FcStatistics } from "react-icons/fc";
+const ITEMS_PER_PAGE = 5;
 const EventPage = () => {
   const [activeTab, setActiveTab] = useState("Tất cả");
   const [dateRange, setDateRange] = useState([null, null]);
   const [flashSales, setFlashSales] = useState([]);
   const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);
   };
 
+  const formatDateRange = (dateRange) => {
+    if (!dateRange[0] || !dateRange[1]) return [null, null];
+
+    // Với ngày bắt đầu
+    const startDate = new Date(dateRange[0]);
+    const utcStartDate = new Date(
+      Date.UTC(
+        startDate.getFullYear(),
+        startDate.getMonth(),
+        startDate.getDate(),
+        0,
+        0,
+        0,
+        0
+      )
+    );
+
+    // Với ngày kết thúc
+    const endDate = new Date(dateRange[1]);
+    const utcEndDate = new Date(
+      Date.UTC(
+        endDate.getFullYear(),
+        endDate.getMonth(),
+        endDate.getDate(),
+        23,
+        59,
+        59,
+        999
+      )
+    );
+
+    return [utcStartDate.toISOString(), utcEndDate.toISOString()];
+  };
+
   const handleToggleDisable = async (id) => {
     try {
       const response = await toggleFlashSale(id);
-      console.log("🚀 ~ handleToggleDisable ~ response:", response);
-
-      // Update the state after API call
       setFlashSales((prevSales) =>
         prevSales.map((sale) =>
           sale._id === id ? { ...sale, disable: !sale.disable } : sale
@@ -31,30 +66,43 @@ const EventPage = () => {
     }
   };
 
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const formatTimeRange = (startTime, endTime) => {
-    const formatOptionsFull = {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
+    const formatTime = (time) => {
+      const date = new Date(time); // Sử dụng đúng giá trị gốc
+      const day = String(date.getUTCDate()).padStart(2, "0");
+      const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+      const year = date.getUTCFullYear();
+      const hours = String(date.getUTCHours()).padStart(2, "0");
+      const minutes = String(date.getUTCMinutes()).padStart(2, "0");
+
+      return `${day}/${month}/${year} ${hours}:${minutes}`;
     };
 
-    const start = new Date(startTime).toLocaleString(
-      "en-GB",
-      formatOptionsFull
-    );
-    const end = new Date(endTime).toLocaleString("en-GB", formatOptionsFull);
+    const start = formatTime(startTime);
+    const end = formatTime(endTime);
 
     return `${start} - ${end}`;
   };
 
   const handleGetAllFlashSale = async () => {
     try {
-      const response = await getListFlashSale("Custom");
-      console.log("🚀 ~ handleGetAllFlashSale ~ response:", response);
-      console.log("🚀 ~ handleGetAllFlashSale ~ response:", response);
-      setFlashSales(response.metadata);
+      const formattedDateRange = formatDateRange(dateRange);
+
+      const response = await getListFlashSale({
+        eventType: "Custom",
+        status: activeTab === "Tất cả" ? null : activeTab,
+        page: currentPage,
+        dateRange: formattedDateRange, // Đã là ISO string rồi, không cần map lại
+        limit: ITEMS_PER_PAGE,
+      });
+
+      setFlashSales(response.metadata.promotions);
+      setTotalPages(response.metadata.pagination.totalPages);
     } catch (error) {
       console.error("Error fetching flash sales:", error);
     }
@@ -63,37 +111,22 @@ const EventPage = () => {
   const handleEditFlashSale = (id) => {
     navigate(`/admin/event/edit/${id}`);
   };
+  const handleStaticPage = (id) => {
+    navigate(`/admin/event/statistic/${id}`);
+  };
 
   useEffect(() => {
     handleGetAllFlashSale();
   }, []);
 
+  const location = useLocation();
+
+  useEffect(() => {
+    handleGetAllFlashSale();
+  }, [location, activeTab, currentPage, dateRange]);
+
   return (
     <div className="min-h-screen bg-gray-100 p-5">
-      {/* Flash Sale Overview */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h2 className="text-lg font-bold mb-3">Tổng quan sự kiện của Shop</h2>
-        <div className="grid grid-cols-4 gap-4">
-          <div>
-            <p className="text-sm">Doanh Số</p>
-            <p className="text-2xl font-semibold">₫ 0</p>
-          </div>
-          <div>
-            <p className="text-sm">Đơn hàng</p>
-            <p className="text-2xl font-semibold">0</p>
-          </div>
-          <div>
-            <p className="text-sm">Người mua</p>
-            <p className="text-2xl font-semibold">0</p>
-          </div>
-          <div>
-            <p className="text-sm">Tỷ lệ truy cập</p>
-            <p className="text-2xl font-semibold">0.00%</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Flash Sale Program List */}
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-bold">Danh sách chương trình</h2>
@@ -154,47 +187,83 @@ const EventPage = () => {
             </tr>
           </thead>
           <tbody>
-            {flashSales.map((sale) => (
-              <tr key={sale._id}>
-                <td className="px-4 py-2 border-b">
-                  {formatTimeRange(sale.startTime, sale.endTime)}
-                </td>
-                <td className="px-4 py-2 border-b">
-                  {sale.appliedProductLength}
-                </td>
-                <td className="px-4 py-2 border-b">
-                  <span className="px-2 py-1 rounded">{sale.status}</span>
-                </td>
-                <td className="px-4 py-2 border-b">
-                  <div
-                    className={`relative w-12 h-6 rounded-full cursor-pointer transition-colors duration-300 ${
-                      sale.disable
-                        ? "bg-gray-300 cursor-not-allowed"
-                        : "bg-blue-600"
-                    }`}
-                    onClick={() => {
-                      handleToggleDisable(sale._id);
-                    }}
-                  >
-                    <div
-                      className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
-                        sale.disable ? "translate-x-0" : "translate-x-6"
-                      }`}
-                    ></div>
-                  </div>
-                </td>
-                <td className="px-4 py-2 border-b">
-                  <button
-                    className="text-blue-500 hover:text-blue-700"
-                    onClick={() => handleEditFlashSale(sale._id)}
-                  >
-                    <FaEdit size={18} />
-                  </button>
+            {flashSales.length === 0 ? (
+              <tr>
+                <td colSpan="5" className="text-center py-4 text-gray-500">
+                  Chưa có dữ liệu
                 </td>
               </tr>
-            ))}
+            ) : (
+              flashSales.map((sale) => (
+                <tr
+                  key={sale._id}
+                  className={`${
+                    sale.status === "Đã kết thúc"
+                      ? "opacity-50 cursor-not-allowed text-gray-500 bg-gray-200"
+                      : "text-black"
+                  }`}
+                >
+                  <td className="px-4 py-2 border-b">
+                    {formatTimeRange(sale.startTime, sale.endTime)}
+                  </td>
+                  <td className="px-4 py-2 border-b">
+                    {sale.appliedProductLength}
+                  </td>
+                  <td className="px-4 py-2 border-b">
+                    <span className="px-2 py-1 rounded">{sale.status}</span>
+                  </td>
+                  <td className="px-4 py-2 border-b">
+                    <div
+                      className={`relative w-12 h-6 rounded-full cursor-pointer transition-colors duration-300 ${
+                        sale.disable
+                          ? "bg-gray-300 cursor-not-allowed"
+                          : "bg-blue-600"
+                      }`}
+                      onClick={() => {
+                        handleToggleDisable(sale._id);
+                      }}
+                    >
+                      <div
+                        className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
+                          sale.disable ? "translate-x-0" : "translate-x-6"
+                        }`}
+                      ></div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-2 border-b flex gap-2">
+                    <button
+                      className={`text-blue-500 hover:text-blue-700 ${
+                        sale.status === "Đã kết thúc"
+                          ? "pointer-events-none"
+                          : ""
+                      }`}
+                      onClick={() => handleEditFlashSale(sale._id)}
+                    >
+                      <FaEdit size={18} />
+                    </button>
+                    <button
+                      className={`text-blue-500 hover:text-blue-700 ${
+                        sale.status === "Đã kết thúc"
+                          ? "pointer-events-none"
+                          : ""
+                      }`}
+                      onClick={() => handleStaticPage(sale._id)}
+                    >
+                      <FcStatistics size={18} />
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
+        {flashSales.length > 0 && totalPages > 1 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        )}
       </div>
     </div>
   );

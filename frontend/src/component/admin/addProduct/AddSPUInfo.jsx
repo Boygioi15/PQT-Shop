@@ -13,7 +13,6 @@ const AddSPUInfo = ({
   setProductData,
   handleSubmit,
 }) => {
-  console.log("🚀 ~ productData:", productData)
   return (
     <div className="flex w-full justify-center items-center bg-white rounded-lg shadow-md p-10">
       <div className="grid grid-cols-1 md:grid-cols-2 w-full gap-8">

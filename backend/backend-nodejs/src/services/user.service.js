@@ -384,17 +384,19 @@ const updateProfileService = async ({
     }
 };
 
-const getListUser = async (filters = {}) => {
+const getListUser = async (filters) => {
     const {
         name,
-        role
+        role,
+        limit = 10,
+        page = 1,
     } = filters;
 
     const query = {};
     if (name) {
         query.usr_name = {
             $regex: name,
-            $options: 'i'
+            $options: 'i',
         };
     }
     if (role) {
@@ -402,14 +404,30 @@ const getListUser = async (filters = {}) => {
     }
 
     try {
-        // Query the database with filters
-        const users = await userModel.find(query).populate('usr_role', 'rol_name');
-        return users;
+        const skip = (page - 1) * limit;
+
+        const users = await userModel
+            .find(query)
+            .populate('usr_role', 'rol_name')
+            .skip(skip)
+            .limit(limit);
+
+        const totalResults = await userModel.countDocuments(query);
+
+        return {
+            users,
+            pagination: {
+                totalResults,
+                totalPages: Math.ceil(totalResults / limit),
+                currentPage: page,
+            },
+        };
     } catch (error) {
         console.error('Error fetching users:', error);
         throw new Error('Failed to fetch users.');
     }
 };
+
 
 const changeUserStatus = async ({
     userId,
@@ -453,6 +471,139 @@ const changeUserRole = async ({
     return updatedUser;
 };
 
+const getUserStats = async () => {
+    try {
+        const stats = await Promise.all([
+            // Total users count
+            userModel.countDocuments(),
+            // Active users count
+            userModel.countDocuments({
+                usr_status: 'active'
+            }),
+            // Blocked users count
+            userModel.countDocuments({
+                usr_status: 'block'
+            }),
+            // Users with Google login
+            userModel.countDocuments({
+                googleId: {
+                    $exists: true,
+                    $ne: null
+                }
+            }),
+            // Users by gender
+            userModel.aggregate([{
+                $group: {
+                    _id: '$usr_sex',
+                    count: {
+                        $sum: 1
+                    }
+                }
+            }]),
+            // Users registration by month (current year)
+            userModel.aggregate([{
+                    $match: {
+                        createdAt: {
+                            $gte: new Date(new Date().getFullYear(), 0, 1)
+                        }
+                    }
+                },
+                {
+                    $group: {
+                        _id: {
+                            $month: '$createdAt'
+                        },
+                        count: {
+                            $sum: 1
+                        }
+                    }
+                },
+                {
+                    $sort: {
+                        '_id': 1
+                    }
+                }
+            ]),
+            // Top users by loyal points
+            userModel.find({
+                usr_loyalPoint: {
+                    $gt: 0
+                }
+            })
+            .sort({
+                usr_loyalPoint: -1
+            })
+            .limit(10)
+            .select('usr_name usr_loyalPoint usr_email'),
+            // Users by city
+            userModel.aggregate([{
+                    $unwind: '$usr_address'
+                },
+                {
+                    $match: {
+                        'usr_address.isDefault': true
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$usr_address.city',
+                        count: {
+                            $sum: 1
+                        }
+                    }
+                },
+                {
+                    $sort: {
+                        count: -1
+                    }
+                },
+                {
+                    $limit: 10
+                }
+            ])
+        ]);
+
+        const [
+            totalUsers,
+            activeUsers,
+            blockedUsers,
+            googleUsers,
+            genderStats,
+            monthlyRegistrations,
+            topLoyalUsers,
+            cityStats
+        ] = stats;
+
+        // Process monthly data to include all months
+        const months = Array.from({
+            length: 12
+        }, (_, i) => i + 1);
+        const monthlyData = months.map(month => {
+            const found = monthlyRegistrations.find(item => item._id === month);
+            return {
+                month: new Date(0, month - 1).toLocaleString('default', {
+                    month: 'long'
+                }),
+                count: found ? found.count : 0
+            };
+        });
+
+        return {
+            overview: {
+                totalUsers,
+                activeUsers,
+                blockedUsers,
+                googleUsers
+            },
+            genderDistribution: genderStats,
+            monthlyRegistrations: monthlyData,
+            topLoyalUsers,
+            cityDistribution: cityStats
+        };
+    } catch (error) {
+        throw new Error(`Error getting user statistics: ${error.message}`);
+    }
+}
 export {
     newUserService,
     checkLoginEmailTokenService,
@@ -466,5 +617,6 @@ export {
     updateProfileService,
     getListUser,
     changeUserStatus,
-    changeUserRole
+    changeUserRole,
+    getUserStats
 };

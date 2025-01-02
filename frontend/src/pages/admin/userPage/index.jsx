@@ -2,28 +2,46 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import UserTable from "../../../component/admin/user/UserTable";
-import { getListRole, getAllUsers, lockUser, changeRole } from "../../../config/api";
+import {
+  getListRole,
+  getAllUsers,
+  lockUser,
+  changeRole,
+} from "../../../config/api";
 import Loading from "../../../component/Loading";
 import CustomSelect from "../../../component/CustomSelect";
 import RoleUpdateModal from "../../../component/admin/user/RoleUpdateModal";
-import { AiOutlineDown, AiOutlineEdit, AiOutlineLock, AiOutlineUnlock } from "react-icons/ai";
+import {
+  AiOutlineDown,
+  AiOutlineEdit,
+  AiOutlineLock,
+  AiOutlineUnlock,
+} from "react-icons/ai";
+import Pagination from "../../../component/Pagiantion";
 
-const ITEMS_PER_PAGE = 8;
+const ITEMS_PER_PAGE = 4;
 
 const UserPage = () => {
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState({ name: "", role: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [activeCollapse, setActiveCollapse] = useState(null);
   const [modalUser, setModalUser] = useState(null);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
   useEffect(() => {
     fetchRoles();
     fetchUsers();
-  }, [filters]);
+  }, [filters, currentPage]);
+
+  useEffect(() => {
+    fetchRoles();
+    fetchUsers();
+  }, []);
 
   const fetchRoles = async () => {
     try {
@@ -39,9 +57,15 @@ const UserPage = () => {
   const fetchUsers = async () => {
     setIsLoading(true);
     try {
-      const response = await getAllUsers(filters);
+      const response = await getAllUsers({
+        ...filters,
+        page: currentPage,
+        limit: ITEMS_PER_PAGE,
+      });
+
       if (response && response.metadata) {
-        setUsers(response.metadata);
+        setUsers(response.metadata.users);
+        setTotalPages(response.metadata.pagination.totalPages);
       }
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -56,7 +80,9 @@ const UserPage = () => {
       const response = await lockUser(userId, status);
       if (response && response.status === 200) {
         toast.success(
-          `User has been ${status === "active" ? "unlocked" : "locked"} successfully!`
+          `User has been ${
+            status === "active" ? "unlocked" : "locked"
+          } successfully!`
         );
         await fetchUsers();
       } else {
@@ -68,6 +94,11 @@ const UserPage = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleUpdateRole = async (userId, roleId) => {
@@ -92,13 +123,6 @@ const UserPage = () => {
   const toggleCollapse = (userId) => {
     setActiveCollapse((prev) => (prev === userId ? null : userId));
   };
-
-  const paginatedUsers = () => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return users.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  };
-
-  const totalPages = Math.ceil(users.length / ITEMS_PER_PAGE);
 
   return (
     <div className="p-6 min-h-screen">
@@ -140,7 +164,7 @@ const UserPage = () => {
         <>
           <div className="hidden md:block">
             <UserTable
-              users={paginatedUsers()}
+              users={users}
               selectedUsers={selectedUsers}
               setSelectedUsers={setSelectedUsers}
               handleToggleLockUser={handleToggleLockUser}
@@ -149,7 +173,7 @@ const UserPage = () => {
           </div>
 
           <div className="md:hidden">
-            {paginatedUsers().map((user) => (
+            {users.map((user) => (
               <div key={user._id} className="bg-white shadow rounded-lg mb-4">
                 <div className="p-4 flex justify-between items-center">
                   <div className="flex items-center gap-4">
@@ -205,43 +229,11 @@ const UserPage = () => {
               </div>
             ))}
           </div>
-
-          <ul className="flex space-x-5 justify-center mt-6">
-            <li
-              className={`flex items-center justify-center bg-gray-100 w-9 h-9 rounded-md cursor-pointer ${
-                currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
-            >
-              Previous
-            </li>
-            {Array.from({ length: totalPages }, (_, index) => index + 1).map(
-              (page) => (
-                <li
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`flex items-center justify-center w-9 h-9 rounded-md cursor-pointer ${
-                    currentPage === page
-                      ? "bg-blue-500 text-white"
-                      : "text-gray-800 hover:bg-gray-200"
-                  }`}
-                >
-                  {page}
-                </li>
-              )
-            )}
-            <li
-              className={`flex items-center justify-center bg-gray-100 w-9 h-9 rounded-md cursor-pointer ${
-                currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              onClick={() =>
-                currentPage < totalPages && setCurrentPage(currentPage + 1)
-              }
-            >
-              Next
-            </li>
-          </ul>
-
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
           {modalUser && (
             <RoleUpdateModal
               user={modalUser}

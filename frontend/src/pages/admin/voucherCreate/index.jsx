@@ -49,7 +49,6 @@ const VoucherCreate = () => {
       };
 
   const [voucherData, setVoucherData] = useState(initialVoucherData);
-  console.log("🚀 ~ VoucherCreate ~ voucherData:", voucherData);
 
   const handleConfirmCreate = () => {
     const requiredFields = [

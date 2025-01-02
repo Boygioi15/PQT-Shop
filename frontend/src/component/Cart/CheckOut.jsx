@@ -99,7 +99,7 @@ const CheckOut = ({
       const { sessionId, order } = response.metadata;
 
       if (!sessionId) {
-        navigate(`/order-success/${order._id}`);
+        navigate(`/order/order-success/${order._id}`);
         return;
       }
 
@@ -119,7 +119,7 @@ const CheckOut = ({
   };
 
   return (
-    <div className="bg-white rounded-md p-4 md:self-start shadow-md sticky top-20">
+    <div className="bg-white rounded-md p-4 md:self-start shadow-md top-20">
       {products_order.length > 0 && (
         <div
           className="flex items-center justify-between bg-gray-100 px-4 py-3 rounded-md cursor-pointer"

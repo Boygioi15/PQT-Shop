@@ -83,7 +83,9 @@ class CheckOutController {
     getListOrderForAdmin = async (req, res, next) => {
         new SuccessResponse({
             message: 'get  order ',
-            metadata: await OrderService.getListOrderByAdmin(),
+            metadata: await OrderService.getListOrderByAdmin({
+                ...req.query
+            }),
         }).send(res);
     };
 
@@ -96,6 +98,13 @@ class CheckOutController {
         }).send(res);
     };
 
-
+    getOrdersAnalyticsByTimeRange = async (req, res, next) => {
+        new SuccessResponse({
+            message: 'Check purchase',
+            metadata: await OrderService.getOrdersAnalyticsByTimeRange({
+                ...req.query
+            }),
+        }).send(res);
+    };
 }
 export default new CheckOutController();

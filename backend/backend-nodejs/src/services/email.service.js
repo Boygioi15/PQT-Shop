@@ -21,7 +21,7 @@ const sendEmailLinkVerify = async ({
 }) => {
     try {
         await transporter.sendMail({
-            from: '"PQT -shop" <hoangphonghp04@gmail.com>',
+            from: '"Apple House" <hoangphonghp04@gmail.com>',
             to: toEmail,
             subject: subject,
             html: html,

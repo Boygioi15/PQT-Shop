@@ -49,12 +49,10 @@ const Header = ({ setIsSidebarOpen }) => {
             <IoIosMenu />
           </button>
         </div>
-
-        {/* Desktop Search */}
+        {/* Desktop Search
         <div className="hidden lg:flex lg:ml-10 flex-1">
           <Search />
-        </div>
-
+        </div> */}
         {/* Notification, Home, and Profile Section */}
         <div className="flex items-center space-x-8">
           {/* Home Button */}
@@ -96,29 +94,6 @@ const Header = ({ setIsSidebarOpen }) => {
           />
         </div>
       </div>
-
-      {/* Search Dialog */}
-      {isSearchOpen && (
-        <motion.div
-          className="fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex justify-center items-center"
-          onClick={() => setIsSearchOpen(false)}
-          initial="hidden"
-          animate="visible"
-          exit="hidden"
-          variants={overlayVariants}
-        >
-          <motion.div
-            className="bg-white p-4 w-80 rounded-md"
-            onClick={(e) => e.stopPropagation()}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            variants={dialogVariants}
-          >
-            <Search className="w-full" />
-          </motion.div>
-        </motion.div>
-      )}
     </div>
   );
 };

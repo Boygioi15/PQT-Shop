@@ -8,18 +8,24 @@ import {
   Shield,
 } from "lucide-react";
 import RoleDetailsPanel from "../../../component/admin/rolePermission/RoleDetailsPanel";
-import { createRole, getAllRole } from "../../../config/api";
+import { createRole, deleteRole, getAllRole } from "../../../config/api";
 import { toast } from "react-toastify";
 
 const RBACManager = () => {
-  // States remain the same as your original code
   const [roles, setRoles] = useState([]);
-  console.log("🚀 ~ RBACManager ~ roles:", roles);
+  const [selectedRole, setSelectedRole] = useState(null);
+  const [showRoleModal, setShowRoleModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [roleToDelete, setRoleToDelete] = useState(null);
+  const [newRole, setNewRole] = useState({
+    name: "",
+    description: "",
+    grants: [],
+  });
 
   const handleGetALLRole = async () => {
     const response = await getAllRole();
-    console.log("🚀 ~ handleGetALLRole ~ response:", response);
-    const roleMap = response.metadata.map((role, index) => {
+    const roleMap = response.metadata.map((role) => {
       return {
         id: role._id,
         name: role.rol_name,
@@ -35,14 +41,6 @@ const RBACManager = () => {
     handleGetALLRole();
   }, []);
 
-  const [selectedRole, setSelectedRole] = useState(null);
-  const [showRoleModal, setShowRoleModal] = useState(false);
-  const [newRole, setNewRole] = useState({
-    name: "",
-    description: "",
-    grants: [],
-  });
-
   const addRole = async () => {
     const response = await createRole({ ...newRole });
     if (response.status === 200) {
@@ -55,10 +53,20 @@ const RBACManager = () => {
     }
   };
 
-  const removeRole = (slug) => {
-    if (window.confirm("Are you sure you want to delete this role?")) {
-      setRoles(roles.filter((role) => role.slug !== slug));
-      if (selectedRole === slug) setSelectedRole(null);
+  const handleDeleteClick = (roleId, roleName) => {
+    setRoleToDelete({ id: roleId, name: roleName });
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    const response = await deleteRole(roleToDelete.id);
+    if (response.status === 200) {
+      toast.success("Xóa thành công");
+      handleGetALLRole();
+      setShowDeleteModal(false);
+      setRoleToDelete(null);
+    } else {
+      toast.error(response.message);
     }
   };
 
@@ -114,7 +122,7 @@ const RBACManager = () => {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    removeRole(role.slug);
+                    handleDeleteClick(role.id, role.name);
                   }}
                   className="p-2 hover:bg-red-50 rounded-full text-red-500 hover:text-red-600 transition-colors duration-200"
                 >
@@ -134,9 +142,9 @@ const RBACManager = () => {
         </div>
       </div>
 
-      {/* Modal remains mostly the same but with enhanced styling */}
+      {/* Add Role Modal */}
       {showRoleModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center ">
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
           <div className="bg-white rounded-xl shadow-lg w-96 p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-900">
@@ -185,6 +193,53 @@ const RBACManager = () => {
               >
                 Add Role
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+          <div className="bg-white rounded-xl shadow-lg w-96 p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Confirm Delete
+              </h3>
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setRoleToDelete(null);
+                }}
+                className="p-1.5 hover:bg-gray-100 rounded-full text-gray-500 hover:text-gray-700 transition-colors duration-200"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-gray-600">
+                Are you sure you want to delete the role "{roleToDelete?.name}"?
+                This action cannot be undone.
+              </p>
+
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setRoleToDelete(null);
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmDelete}
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
         </div>

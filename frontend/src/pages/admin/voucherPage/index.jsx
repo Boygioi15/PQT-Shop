@@ -3,12 +3,15 @@ import { getListVoucher } from "../../../config/api";
 import { formatVND } from "../../../utils/format";
 import { Link, useNavigate } from "react-router-dom";
 import { FaEdit, FaTrashAlt } from "react-icons/fa";
+import Pagination from "../../../component/Pagiantion";
+
+const ITEMS_PER_PAGE = 7;
 
 const VoucherPage = () => {
-  const [activeTab, setActiveTab] = useState("Tất cả");
   const [voucherList, setVoucherList] = useState([]);
-  const tabs = ["Tất cả", "Đang diễn ra", "Sắp diễn ra", "Đã kết thúc"];
   const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const handleEditVoucher = (voucher) => {
     navigate(`/admin/voucher/edit/${voucher._id}`, {
@@ -20,10 +23,23 @@ const VoucherPage = () => {
     handleGetAllVoucher();
   }, []);
 
+  useEffect(() => {
+    handleGetAllVoucher();
+  }, [currentPage]);
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const handleGetAllVoucher = async () => {
     try {
-      const response = await getListVoucher();
-      setVoucherList(response.metadata);
+      const response = await getListVoucher({
+        page: currentPage,
+        limit: ITEMS_PER_PAGE,
+      });
+      setTotalPages(response.metadata.pagination.totalPages);
+      setVoucherList(response.metadata.discounts);
     } catch (error) {
       console.error("Error fetching vouchers:", error);
     }
@@ -54,7 +70,7 @@ const VoucherPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="border rounded-lg p-4 shadow-md hover:shadow-lg transition">
             <h2 className="font-bold text-base md:text-lg mb-2">
-              Voucher toàn Shop
+              Voucher sản phẩm
             </h2>
             <p className="text-gray-500 text-sm mb-4">
               Voucher áp dụng cho tất cả sản phẩm trong Shop của bạn.
@@ -68,7 +84,7 @@ const VoucherPage = () => {
           </div>
           <div className="border rounded-lg p-4 shadow-md hover:shadow-lg transition">
             <h2 className="font-bold text-base md:text-lg mb-2">
-              Voucher sản phẩm
+              Voucher toàn shop
             </h2>
             <p className="text-gray-500 text-sm mb-4">
               Voucher chỉ áp dụng cho những sản phẩm nhất định mà Shop chọn.
@@ -88,21 +104,6 @@ const VoucherPage = () => {
         <h1 className="text-xl font-bold mb-4">Danh sách mã giảm giá</h1>
 
         {/* Tabs */}
-        <div className="flex space-x-2 md:space-x-4 border-b border-gray-200 mb-4 overflow-x-auto">
-          {tabs.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 whitespace-nowrap ${
-                activeTab === tab
-                  ? "border-b-2 border-blue-500 text-blue-500 font-bold"
-                  : "text-gray-500 hover:text-blue-500"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
 
         {/* Bảng */}
         <div className="overflow-x-auto">
@@ -203,6 +204,11 @@ const VoucherPage = () => {
             </tbody>
           </table>
         </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       </div>
     </div>
   );

@@ -333,11 +333,38 @@ export default class DiscountService {
         return result;
     }
 
-    static async findAll() {
-        return await discountModel.find({
+    static async findAll({
+        page = 1,
+        limit = 10
+    }) {
+        const skip = (page - 1) * limit; // Tính toán số bản ghi cần bỏ qua
+        const discounts = await discountModel
+            .find({
+                discount_is_active: true
+            }).sort({
+                createdAt: -1
+            })
+            .skip(skip)
+            .limit(limit)
+            .lean();
+
+        const totalItems = await discountModel.countDocuments({
             discount_is_active: true,
-        }).lean();
+        }); // Tổng số bản ghi
+
+        const totalPages = Math.ceil(totalItems / limit); // Tổng số trang
+
+        return {
+            discounts,
+            pagination: {
+                currentPage: page,
+                totalPages,
+                totalItems,
+                limit,
+            },
+        };
     }
+
 
     static async validateDiscount({
         selectedProducts, //{spuId,skuId,price,quantity}
@@ -576,6 +603,7 @@ export default class DiscountService {
         discountId,
         userId
     }) => {
+        console.log("🚀 ~ DiscountService ~ discountId:", discountId)
         try {
             // Lấy thông tin mã giảm giá
             const discount = await discountModel.findById(discountId);

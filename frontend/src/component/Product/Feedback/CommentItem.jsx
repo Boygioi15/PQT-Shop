@@ -5,8 +5,8 @@ import {
   getListCommentBySpuId,
   toggleLikeComment,
 } from "../../../config/api";
-import { formatDistance } from "date-fns";
 import { useSelector } from "react-redux";
+import { formatTimeAgo } from "../../../utils";
 
 const CommentItem = ({ comment, depth = 0 }) => {
   console.log("🚀 ~ CommentItem ~ comment:", comment);
@@ -48,7 +48,8 @@ const CommentItem = ({ comment, depth = 0 }) => {
     });
 
     if (response.status === 200) {
-      setReplies(response.metadata);
+      console.log("🚀 ~ handleGetListComment ~ response:", response);
+      setReplies(response.metadata.comments);
     }
   };
 
@@ -65,10 +66,27 @@ const CommentItem = ({ comment, depth = 0 }) => {
     }
   };
 
-  const indentClass = depth > 0 ? `ml-${Math.min(depth * 8, 40)} mt-4` : "";
+  const getIndentClass = (depth) => {
+    switch (depth) {
+      case 1:
+        return "ml-8";
+      case 2:
+        return "ml-16";
+      case 3:
+        return "ml-24";
+      case 4:
+        return "ml-32";
+      default:
+        return depth > 4 ? "ml-40" : "";
+    }
+  };
 
   return (
-    <div className={`group flex flex-col ${indentClass} animate-fadeIn`}>
+    <div
+      className={`group flex flex-col ${getIndentClass(
+        depth
+      )} mt-4 animate-fadeIn`}
+    >
       <div className="flex items-start space-x-4 p-4 rounded-lg hover:bg-gray-50 transition-colors duration-200">
         <img
           src={comment?.comment_userId?.usr_avatar}
@@ -85,9 +103,7 @@ const CommentItem = ({ comment, depth = 0 }) => {
             </h4>
             <span className="text-xs text-gray-500">•</span>
             <p className="text-xs text-gray-500">
-              {formatDistance(new Date(comment.createdAt), new Date(), {
-                addSuffix: true,
-              })}
+              {formatTimeAgo(comment.createdAt)}
             </p>
           </div>
 

@@ -150,7 +150,6 @@ const NewComment = ({ spuId, handleGetListComment }) => {
               transform hover:-translate-y-0.5 transition-all duration-300 
               focus:outline-none focus:ring-2 focus:ring-offset-2 bg-blue-600 hover:bg-blue-700 text-white hover:shadow-lg focus:ring-blue-500 cursor-pointer
              `}
-          disabled={!hasPurchased}
         >
           Gửi đánh giá
         </button>

@@ -1,20 +1,78 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ROUTERS from "../../../utils/router";
-import { AiOutlineDown } from "react-icons/ai"; // For dropdown toggle
+import { AiOutlineDown } from "react-icons/ai";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  checkPermission,
+  selectUserRole,
+  selectRbacLoading,
+  fetchUserRole,
+} from "../../../redux/slice/rbacSlice";
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
+  const dispatch = useDispatch();
+  const userRole = useSelector(selectUserRole);
+  const loading = useSelector(selectRbacLoading);
+  const state = useSelector((state) => state);
+
   const [activeItem, setActiveItem] = useState("Dashboard");
   const [openItems, setOpenItems] = useState({});
+  const [authorizedRoutes, setAuthorizedRoutes] = useState([]);
 
-  // Toggle dropdown visibility by name
+  useEffect(() => {
+    dispatch(fetchUserRole());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (loading || !userRole) return;
+
+    const filterRoutes = () => {
+      return ROUTERS.ADMIN.reduce((acc, route) => {
+        if (route.links) {
+          const authorizedLinks = route.links.filter((link) => {
+            if (!link.permission) return false;
+
+            return checkPermission(
+              state,
+              link.permission.resourceId,
+              link.permission.action
+            );
+          });
+
+          if (authorizedLinks.length > 0) {
+            acc.push({
+              ...route,
+              links: authorizedLinks,
+            });
+          }
+        } else {
+          if (
+            !route.permission ||
+            checkPermission(
+              state,
+              route.permission.resourceId,
+              route.permission.action
+            )
+          ) {
+            acc.push(route);
+          }
+        }
+
+        return acc;
+      }, []);
+    };
+
+    setAuthorizedRoutes(filterRoutes());
+  }, [loading, userRole, state]);
+
   const toggleDropdown = (name) => {
     setOpenItems((prevState) => {
       const newOpenItems = { ...prevState };
       Object.keys(newOpenItems).forEach((key) => {
-        if (key !== name) delete newOpenItems[key]; // Close other items
+        if (key !== name) delete newOpenItems[key];
       });
-      newOpenItems[name] = !newOpenItems[name]; // Toggle current item
+      newOpenItems[name] = !newOpenItems[name];
       return newOpenItems;
     });
     setActiveItem(name);
@@ -49,14 +107,11 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="relative mt-10 flex flex-col h-full">
-          <a
-            href="/admin/dashboard"
-            className="font-bold text-3xl text-black text-start"
-          >
-            PQT shop
+          <a className="font-bold text-3xl text-black text-start">
+            Apple house
           </a>
           <ul className="space-y-3 my-8 flex-1 text-xl font-bold">
-            {ROUTERS.ADMIN.map((item) => (
+            {authorizedRoutes.map((item) => (
               <li key={item.name}>
                 {/* Dropdown for items with sub-links */}
                 {item.links ? (

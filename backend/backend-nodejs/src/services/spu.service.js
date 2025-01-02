@@ -148,6 +148,21 @@ export class SpuService {
     }) {
         const foundSpu = await spuModel.findById(spuId).lean();
         if (!foundSpu) throw new BadRequestError("Product not exists")
+        const currentTime = new Date();
+        currentTime.setHours(currentTime.getHours() + 7);
+
+        const isInPromotion = await promotionModel.find({
+            "appliedProduct.spuId": spuId,
+            startTime: {
+                $lte: currentTime
+            },
+            endTime: {
+                $gte: currentTime
+            },
+            status: 'active',
+        }).lean()
+
+        if (isInPromotion) throw new BadRequestError(`Sản phẩm này đang trong thời gian sự kiện ${isInPromotion[0].prom_name} không thể xóa. Hãy thử lại khi sự kiện kết thúc`)
 
         await skuModel.deleteMany({
             product_id: spuId
@@ -361,12 +376,19 @@ export class SpuService {
 
     static async findAlLDraftSpu({
         limit = 10,
-        skip = 0
+        page = 1
     }) {
         const query = {
             isDraft: true,
         };
 
+        const skip = (page - 1) * limit;
+        // Get total count of matching documents
+        const totalResult = await spuModel.countDocuments(query);
+
+        // Calculate total pages
+        const totalPages = Math.ceil(totalResult / limit);
+
         const spus = await spuModel
             .find(query)
             .skip(skip)
@@ -378,17 +400,31 @@ export class SpuService {
             .lean()
             .exec();
 
-        return spus
+        return ({
+            products: spus,
+            pagination: {
+                totalResult,
+                totalPages,
+                currentPage: page,
+            }
+        })
+
     }
 
     static async findAllPublishSpu({
         limit = 10,
-        skip = 0
+        page = 1
     }) {
         const query = {
             isDraft: false,
             isPublished: true,
         };
+        const skip = (page - 1) * limit;
+        // Get total count of matching documents
+        const totalResult = await spuModel.countDocuments(query);
+
+        // Calculate total pages
+        const totalPages = Math.ceil(totalResult / limit);
 
         const spus = await spuModel
             .find(query)
@@ -401,15 +437,39 @@ export class SpuService {
             .lean()
             .exec();
 
-        return spus
+        return ({
+            products: spus,
+            pagination: {
+                totalResult,
+                totalPages,
+                currentPage: page,
+            }
+        })
 
     }
 
     static async findAllSpu({
+        search,
         limit = 10,
-        skip = 0
+        page = 1
     }) {
         const query = {};
+
+        // Thêm điều kiện tìm kiếm theo tên (nếu có)
+        if (search) {
+            query.product_name = {
+                $regex: search,
+                $options: 'i'
+            }; // 'i' để không phân biệt hoa thường
+        }
+
+        const skip = (page - 1) * limit;
+
+        // Get total count of matching documents
+        const totalResult = await spuModel.countDocuments(query);
+
+        // Calculate total pages
+        const totalPages = Math.ceil(totalResult / limit);
 
         const spus = await spuModel
             .find(query)
@@ -422,8 +482,16 @@ export class SpuService {
             .lean()
             .exec();
 
-        return spus
+        return {
+            products: spus,
+            pagination: {
+                totalResult,
+                totalPages,
+                currentPage: page,
+            }
+        };
     }
+
 
     static updateStockSPU = async (spuId, quantity, mongoSession = null) => {
         try {
@@ -471,7 +539,7 @@ export class SpuService {
         minPrice,
         maxPrice,
         limit = 10,
-        skip = 0,
+        page = 1,
     }) {
         // Xây dựng query
         const category = await categoryModel.findOne({
@@ -486,6 +554,8 @@ export class SpuService {
             minPrice,
             maxPrice,
         });
+
+        const skip = (page - 1) * limit;
 
         const queryLast = {
             ...query,
@@ -523,6 +593,7 @@ export class SpuService {
             query: queryLast,
             sort: sortOptions,
             limit,
+            page,
             skip,
         });
     }
@@ -554,7 +625,7 @@ export class SpuService {
         endTime,
         product_name,
         categoryId,
-        limit = 100,
+        limit = 10,
         skip = 0,
     }) {
         const spuIds = await PromotionService.getSpuInPromotion({
@@ -619,5 +690,4 @@ export class SpuService {
 
         return spus;
     }
-
 }

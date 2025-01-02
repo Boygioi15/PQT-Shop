@@ -61,7 +61,7 @@ export const filterProduct = async ({
   categorySlug,
   sortBy,
   limit = 10,
-  skip = 0,
+  page = 0,
 }) => {
   return axios.get("/product/spu/filter", {
     params: {
@@ -72,7 +72,7 @@ export const filterProduct = async ({
       categorySlug,
       sortBy,
       limit,
-      skip,
+      page,
     },
   });
 };
@@ -96,12 +96,16 @@ export const searchProduct = async ({
   minPrice,
   maxPrice,
   sortBy,
+  page,
+  limit,
 }) => {
   return axios.get("/full-text-search", {
     params: {
       textSearch,
       minPrice,
       maxPrice,
+      page,
+      limit,
       sortBy,
     },
   });
@@ -184,15 +188,32 @@ export const getImageLink = async (formData) => {
 };
 
 //ProductStock
-export const getAllProduct = async () => {
-  return axios.get("/product/spu/get-all");
+export const getAllProduct = async ({ limit, page, search }) => {
+  return axios.get("/product/spu/get-all", {
+    params: {
+      search,
+      limit,
+      page,
+    },
+  });
 };
-export const getPublishedProduct = async () => {
-  return axios.get("/product/spu/get-published");
+export const getPublishedProduct = async ({ limit, page }) => {
+  return axios.get("/product/spu/get-published", {
+    params: {
+      limit,
+      page,
+    },
+  });
 };
-export const getDraftProduct = async () => {
-  return axios.get("/product/spu/get-draft");
+export const getDraftProduct = async ({ limit, page }) => {
+  return axios.get("/product/spu/get-draft", {
+    params: {
+      limit,
+      page,
+    },
+  });
 };
+
 export const publishProcduct = async (id) => {
   return axios.get(`/product/publish/${id}`);
 };
@@ -230,8 +251,22 @@ export const EditFlashSale = async (flashSaleData, promId) => {
 export const getFlashSale = async (promId) => {
   return axios.get(`/promotion/get-one/${promId}`);
 };
-export const getListFlashSale = async (eventType) => {
-  return axios.post("/promotion/get-list", { eventType });
+export const getListFlashSale = async ({
+  eventType,
+  status = null,
+  page = 1,
+  limit = 10,
+  dateRange = null,
+}) => {
+  return axios.get("/promotion/get-list", {
+    params: {
+      eventType,
+      status,
+      page,
+      limit,
+      dateRange,
+    },
+  });
 };
 export const toggleFlashSale = async (promId) => {
   return axios.patch(`/promotion/toggle-disable/${promId}`);
@@ -274,8 +309,18 @@ export const editVoucher = async (voucherData, id) => {
 };
 
 //Order
-export const getAllOrder = async () => {
-  return axios.get("/order/get-all-for-admin");
+export const getAllOrder = async ({
+  limit = 10,
+  page = 1,
+  order_status = null,
+}) => {
+  return axios.get("/order/get-all-for-admin", {
+    params: {
+      limit,
+      page,
+      order_status,
+    },
+  });
 };
 
 export const changeOrderStatus = async (orderId, status) => {
@@ -290,15 +335,15 @@ export const checkPurchase = async ({ userId, spuId }) => {
 export const getListCommentBySpuId = async ({
   productId,
   parentCommentId = null,
-  limit = 50,
-  offset = 0,
+  limit = 10,
+  page = 0,
 }) => {
   return axios.get("/comment", {
     params: {
       productId,
       parentCommentId,
       limit,
-      offset,
+      page,
     },
   });
 };
@@ -362,8 +407,13 @@ export const geLisPromotionEvent = async () => {
 };
 
 //voucher
-export const getListVoucher = async () => {
-  return axios.get(`/discount/find-all`);
+export const getListVoucher = async ({ page, limit }) => {
+  return axios.get(`/discount/find-all`, {
+    params: {
+      page,
+      limit,
+    },
+  });
 };
 
 export const getListVoucherAvailable = async ({ userId, products }) => {
@@ -517,4 +567,26 @@ export const getRecommendForCartPage = async () => {
 
 export const getRecommendForProfilePage = async () => {
   return axios.get(`/product/recommendations/profile`);
+};
+
+export const getStatisticPromotion = async (promotionId) => {
+  return axios.get(`/promotion/statictis/${promotionId}`);
+};
+
+export const getUserRole = async () => {
+  return axios.get(`/user/role`);
+};
+
+export const deleteRole = async (id) => {
+  return axios.delete(`rbac/role/${id}`);
+};
+
+export const getOrderStatistic = async (timeRange) => {
+  return axios.get(`order/statistic/value`, {
+    params: { timeRange },
+  });
+};
+
+export const getUserStatistic = async () => {
+  return axios.get(`/user/statistic`);
 };
