@@ -105,7 +105,7 @@ export default class CommentService {
         await comment.save();
 
         if (rating > 0) {
-            updateRatingSpu(productId, await this.calculateAverageRating(productId))
+            await updateRatingSpu(productId, await this.calculateAverageRating(productId))
         }
         // if(comment){
         //     sendNotifitoQueue("INDIVIDUAL",{
@@ -401,9 +401,11 @@ export default class CommentService {
 
     static calculateAverageRating = async (productId) => {
         try {
+            const objectIdProductId = new mongoose.Types.ObjectId(productId);
+
             const result = await commentModel.aggregate([{
                     $match: {
-                        comment_productId: productId,
+                        comment_productId: objectIdProductId,
                         comment_rating: {
                             $gt: 0
                         } // Lọc những comment có rating hợp lệ

@@ -22,6 +22,10 @@ router.patch('', asyncErrorHandler(userController.changePassword));
 router.use(authenticationV2);
 router.put("/profile", asyncErrorHandler(userController.updateUserProfile));
 
+router.put('/address/:addressId', asyncErrorHandler(userController.updateAddress));
+router.delete('/address/:addressId', asyncErrorHandler(userController.deleteAddress));
+router.patch('/update-default-address/:addressId', asyncErrorHandler(userController.updateDefaultAddress));
+
 router.get('/statistic', grantAccess("readAny", "dashboard"), asyncErrorHandler(userController.getUserStats));
 router.post('/new_user', grantAccess("createAny", "user"), asyncErrorHandler(userController.newUser));
 router.post('/change-status', grantAccess("updateAny", "user"), asyncErrorHandler(userController.changeUserStatus));

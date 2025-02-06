@@ -7,6 +7,7 @@ import {
 import {
     getListAppliedSpu,
     getTotalQuantityAppliedAndLimit,
+    getTotalQuantityAppliedAndLimitV2,
     isTimeSlotAvailable
 } from '../models/repositories/promotion.repo.js'
 import {
@@ -363,6 +364,10 @@ class PromotionService {
         } = await getTotalQuantityAppliedAndLimit(appliedProducts)
 
         const spuswithPrice = await Promise.all(spus.map(async spu => {
+            const {
+                totalQuantityLimit,
+                totalAppliedQuantity
+            } = await getTotalQuantityAppliedAndLimitV2(spu._id, appliedProducts)
             return {
                 ...spu,
                 product_price: await getPriceSpu(spu._id),
@@ -612,10 +617,5 @@ class PromotionService {
             totalRevenueAllSpus: totalRevenueAllSpus // Tổng doanh thu của tất cả SPU
         };
     };
-
-
-
-
-
 }
 export default PromotionService;

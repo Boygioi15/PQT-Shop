@@ -97,7 +97,7 @@ const LoginPage = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
 
-            <div className="flex items-center justify-between">
+            {/* <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <input
                   id="remember_me"
@@ -112,7 +112,7 @@ const LoginPage = () => {
                   Remember me
                 </label>
               </div>
-
+              {/* 
               <div className="text-sm">
                 <a
                   href="#"
@@ -120,8 +120,8 @@ const LoginPage = () => {
                 >
                   Forgot your password?
                 </a>
-              </div>
-            </div>
+              </div> */}
+            {/* </div> */}
 
             <div>
               <button

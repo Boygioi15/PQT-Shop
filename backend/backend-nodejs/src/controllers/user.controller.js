@@ -169,5 +169,45 @@ class UserController {
             });
         }
     };
+
+    updateAddress = async (req, res, next) => {
+        const {
+            userId
+        } = req.user
+        return new SuccessResponse({
+            message: 'update user address',
+            metadata: await updateAddress({
+                userId,
+                ...req.params,
+                updatedAddress: {
+                    ...req.body
+                }
+            }),
+        }).send(res);
+    };
+    deleteAddress = async (req, res, next) => {
+        const {
+            userId
+        } = req.user
+        return new SuccessResponse({
+            message: 'add new user address',
+            metadata: await deleteAddress({
+                userId,
+                ...req.params,
+            }),
+        }).send(res);
+    };
+    updateDefaultAddress = async (req, res, next) => {
+        const {
+            userId
+        } = req.user
+        return new SuccessResponse({
+            message: 'add new user address',
+            metadata: await updateDefaultAddress({
+                userId,
+                ...req.params,
+            }),
+        }).send(res);
+    };
 }
 export default new UserController();
