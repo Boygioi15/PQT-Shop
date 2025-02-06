@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { checkPurchase, createComment, ratingCount } from "../../../config/api";
 import { useSelector } from "react-redux";
 
-const RatingStar = ({ spuId = null, numberOfRating }) => {
+const RatingStar = ({ spuId = null, numberOfRating, haveNewRating }) => {
   const [hasPurchased, setHasPurchased] = useState(false);
   const [ratingPercentages, setRatingPercentages] = useState([]);
   const handleCheckPurchase = async () => {
@@ -15,6 +15,11 @@ const RatingStar = ({ spuId = null, numberOfRating }) => {
     handleCheckPurchase();
     getRatingPercentages(spuId);
   }, []);
+
+  useEffect(() => {
+    handleCheckPurchase();
+    getRatingPercentages(spuId);
+  }, [haveNewRating]);
 
   const getRatingPercentages = async (productId) => {
     const response = await ratingCount({ productId });

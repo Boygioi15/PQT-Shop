@@ -7,7 +7,7 @@ import Pagination from "../../Pagiantion";
 
 const ITEMS_PER_PAGE = 7;
 
-const CommentSection = ({ productId }) => {
+const CommentSection = ({ productId, setHaveNewRating }) => {
   const [comments, setComments] = useState([]);
   const userId = useSelector((state) => state.account?.user?._id);
   const [currentPage, setCurrentPage] = useState(1);
@@ -56,6 +56,7 @@ const CommentSection = ({ productId }) => {
           onSend={handleSendNewComment}
           spuId={productId}
           handleGetListComment={handleGetListComment}
+          setHaveNewRating={setHaveNewRating}
         />
       </div>
 

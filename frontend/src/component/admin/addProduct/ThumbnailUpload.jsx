@@ -4,7 +4,7 @@ import { getImageLink } from "../../../config/api";
 import Loading from "../../../component/Loading";
 
 const ThumbnailUpload = ({ productData, setProductData }) => {
-  console.log("🚀 ~ ThumbnailUpload ~ productData:", productData)
+  console.log("🚀 ~ ThumbnailUpload ~ productData:", productData);
   const [previewUrl, setPreviewUrl] = useState(null); // State để lưu URL xem trước hình ảnh
   const [isLoading, setIsLoading] = useState(false); // State để quản lý trạng thái tải lên
 
@@ -25,7 +25,7 @@ const ThumbnailUpload = ({ productData, setProductData }) => {
         // Cập nhật thông tin ảnh vào productData
         setProductData({
           ...productData, // Duy trì các thuộc tính hiện có
-          thumb: response.metadata.thumb_url, // Cập nhật thumb bằng URL từ API
+          thumb: response.metadata.image_url, // Cập nhật thumb bằng URL từ API
         });
       } catch (error) {
         console.error("Lỗi khi tải hình ảnh lên:", error);

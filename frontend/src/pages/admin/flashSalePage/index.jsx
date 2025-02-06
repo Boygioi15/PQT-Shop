@@ -200,62 +200,65 @@ const FlashSalePage = () => {
                 </td>
               </tr>
             ) : (
-              flashSales.map((sale) => (
-                <tr
-                  key={sale._id}
-                  className={`${
-                    sale.status === "Đã kết thúc"
-                      ? "opacity-50 cursor-not-allowed text-gray-500 bg-gray-200"
-                      : "text-black"
-                  }`}
-                >
-                  <td className="px-4 py-2 border-b">
-                    {formatTimeRange(sale.startTime, sale.endTime)}
-                  </td>
-                  <td className="px-4 py-2 border-b">
-                    {sale.appliedProductLength}
-                  </td>
-                  <td className="px-4 py-2 border-b">
-                    <span className="px-2 py-1 rounded">{sale.status}</span>
-                  </td>
-                  <td className="px-4 py-2 border-b">
-                    <div
-                      className={`relative w-12 h-6 rounded-full cursor-pointer transition-colors duration-300 ${
-                        sale.disable
-                          ? "bg-gray-300 cursor-not-allowed"
-                          : "bg-blue-600"
-                      }`}
-                      onClick={() => {
-                        handleToggleDisable(sale._id);
-                      }}
-                    >
+              flashSales.map((sale) => {
+                const isEnded = sale.status === "Đã kết thúc";
+                return (
+                  <tr
+                    key={sale._id}
+                    className={`${
+                      isEnded
+                        ? "opacity-50 text-gray-500 bg-gray-200"
+                        : "text-black"
+                    }`}
+                  >
+                    <td className="px-4 py-2 border-b">
+                      {formatTimeRange(sale.startTime, sale.endTime)}
+                    </td>
+                    <td className="px-4 py-2 border-b">
+                      {sale.appliedProductLength}
+                    </td>
+                    <td className="px-4 py-2 border-b">
+                      <span className="px-2 py-1 rounded">{sale.status}</span>
+                    </td>
+                    <td className="px-4 py-2 border-b">
                       <div
-                        className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
-                          sale.disable ? "translate-x-0" : "translate-x-6"
+                        className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${
+                          sale.disable || isEnded
+                            ? "bg-gray-300 cursor-not-allowed"
+                            : "bg-blue-600 cursor-pointer"
                         }`}
-                      ></div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-2 border-b flex gap-2">
-                    <button
-                      className="text-blue-500 hover:text-blue-700"
-                      onClick={() => handleEditFlashSale(sale._id)}
-                    >
-                      <FaEdit size={18} />
-                    </button>
-                    <button
-                      className={`text-blue-500 hover:text-blue-700 ${
-                        sale.status === "Đã kết thúc"
-                          ? "pointer-events-none"
-                          : ""
-                      }`}
-                      onClick={() => handleStaticPage(sale._id)}
-                    >
-                      <FcStatistics size={18} />
-                    </button>
-                  </td>
-                </tr>
-              ))
+                        onClick={() => {
+                          if (!isEnded) handleToggleDisable(sale._id);
+                        }}
+                      >
+                        <div
+                          className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
+                            sale.disable ? "translate-x-0" : "translate-x-6"
+                          }`}
+                        ></div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-2 border-b flex gap-2">
+                      <button
+                        className={`text-blue-500 opacity-100 ${
+                          isEnded ? " cursor-not-allowed" : " cursor-pointer"
+                        }`}
+                        disabled={isEnded}
+                        onClick={() => handleEditFlashSale(sale._id)}
+                      >
+                        <FaEdit size={18} />
+                      </button>
+                      {/* Statistics icon remains clickable */}
+                      <button
+                        className="text-blue-500 hover:text-blue-700 cursor-pointer"
+                        onClick={() => handleStaticPage(sale._id)}
+                      >
+                        <FcStatistics size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

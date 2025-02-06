@@ -6,7 +6,7 @@ import {
 } from "../../../config/api";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-const NewComment = ({ spuId, handleGetListComment }) => {
+const NewComment = ({ spuId, handleGetListComment, setHaveNewRating }) => {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState("");
@@ -71,6 +71,7 @@ const NewComment = ({ spuId, handleGetListComment }) => {
 
     if (newComment && newComment.metadata) {
       await handleGetListComment();
+      setHaveNewRating((prev) => !prev);
       toast.success("Gửi đánh giá thành công");
     } else {
       toast.error("Lỗi không thể gửi bình luận lúc này ");
