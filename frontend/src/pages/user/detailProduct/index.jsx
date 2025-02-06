@@ -372,9 +372,11 @@ const DetailProduct = () => {
           </div>
         </div>
       )}
-      <div className="py-10">
-        <RecommendSectionForDetailPage productId={productId} />
-      </div>
+      {userId && (
+        <div className="py-10">
+          <RecommendSectionForDetailPage productId={productId} />
+        </div>
+      )}
     </>
   );
 };

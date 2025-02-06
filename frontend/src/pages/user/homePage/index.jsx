@@ -103,9 +103,7 @@ const HomePage = () => {
           <RecommendSection />
         </div>
       ) : (
-        <div>
-          <RecommendSectionTrending />
-        </div>
+        <></>
       )}
 
       {/* Dynamic Product Sections */}

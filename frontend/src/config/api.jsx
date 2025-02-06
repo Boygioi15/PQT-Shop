@@ -612,3 +612,13 @@ export const getOrderStatistic = async (timeRange) => {
 export const getUserStatistic = async () => {
   return axios.get(`/user/statistic`);
 };
+
+export const updateUserAddress = async ({ addressId, updatedAddress }) => {
+  return axios.put(`/user/address/${addressId}`, { ...updatedAddress });
+};
+export const deleteUserAddress = async (addressId) => {
+  return axios.delete(`/user/address/${addressId}`);
+};
+export const changeDefaultAddress = async ({ addressId }) => {
+  return axios.patch(`/user/update-default-address/${addressId}`);
+};

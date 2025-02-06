@@ -9,10 +9,12 @@ import {
     changeUserRole,
     changeUserStatus,
     checkLoginEmailTokenService,
+    deleteAddress,
     getDefaultAddress,
     getListAddress,
     getListUser,
     getUserStats,
+    updateAddress,
     updateProfileService,
 } from '../services/user.service.js';
 

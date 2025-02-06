@@ -46,6 +46,7 @@ const LoginPage = () => {
             userId: user._id,
             carts: localCartItems,
           });
+          console.log("🚀 ~ handleSubmit ~ response:", response);
           dispatch(fetchCart(user._id));
           if (response.status === 200) {
             dispatch(clearLocalCart());

@@ -40,6 +40,7 @@ const RecommendSectionForDetailPage = ({
         setListProduct(productsMap);
       }
     };
+
     handleGetLsitProduct();
   }, []);
 
