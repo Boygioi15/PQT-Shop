@@ -1,15 +1,29 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import OrderStatus from "../../../component/Profile/OrderStatus"; // Import OrderStatus component
 import { getOneOrderForAdmin } from "../../../config/api";
 import { toast } from "react-toastify";
 import { formatDate } from "../../../utils";
 import { BsCoin } from "react-icons/bs";
+import { useReactToPrint } from "react-to-print";
 
 const OrderDetailPage = () => {
   const { orderId } = useParams(); // Lấy ID đơn hàng từ URL
   const [orderDetail, setOrderDetail] = useState();
 
+  // Ref để in hóa đơn
+  const printRef = useRef();
+  // Hàm in
+  const handlePrint = useReactToPrint({
+    contentRef: printRef, // Dùng contentRef
+    documentTitle: "Chi tiết vé",
+    onAfterPrint: () => {
+      console.log("In hoàn tất!");
+    },
+    onPrintError: (errorLocation, error) => {
+      console.error(`Lỗi in tại ${errorLocation}:`, error);
+    },
+  });
   useEffect(() => {
     const fetchOrderDetail = async () => {
       const response = await getOneOrderForAdmin({ orderId });
@@ -64,10 +78,10 @@ const OrderDetailPage = () => {
       </div>
 
       {/* Main content: Thông tin người nhận, danh sách sản phẩm và thanh toán */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div ref={printRef} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Thông tin người nhận và danh sách sản phẩm */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-md p-4 shadow-md">
+          <div className="bg-white rounded-md p-4 shadow-md no-print">
             <h3 className="font-bold text-gray-800 mb-2">
               Thông tin người đặt
             </h3>
@@ -178,7 +192,7 @@ const OrderDetailPage = () => {
               <span>Phí vận chuyển</span>
               <span>{orderDetail?.order_checkout.feeShip}</span>
             </li>
-            <li className="flex justify-between text-base">
+            <li className="flex justify-between text-base no-print">
               <span>Điểm tích lũy</span>
               <span className="flex items-center font-semibold text-yellow-500">
                 <BsCoin color="#e5a624" className="mr-2" />+
@@ -201,7 +215,7 @@ const OrderDetailPage = () => {
               )}
             </span>
           </div>
-          <div className="mt-4">
+          <div className="mt-4 no-print">
             <p className="text-sm font-semibold text-gray-800 mb-2">
               Phương thức thanh toán
             </p>
@@ -215,6 +229,14 @@ const OrderDetailPage = () => {
             </div>
           </div>
         </div>
+      </div>
+      <div className="flex justify-end mb-4 mt-3">
+        <button
+          onClick={handlePrint}
+          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+        >
+          In hóa đơn
+        </button>
       </div>
     </div>
   );
