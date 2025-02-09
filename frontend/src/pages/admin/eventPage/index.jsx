@@ -232,23 +232,25 @@ const EventPage = () => {
                         ></div>
                       </div>
                     </td>
-                    <td className="px-4 py-2 border-b flex gap-2">
-                      <button
-                        className={`text-blue-500 opacity-100 ${
-                          isEnded ? " cursor-not-allowed" : " cursor-pointer"
-                        }`}
-                        disabled={isEnded}
-                        onClick={() => handleEditFlashSale(sale._id)}
-                      >
-                        <FaEdit size={18} />
-                      </button>
-                      {/* Statistics icon remains clickable */}
-                      <button
-                        className="text-blue-500 hover:text-blue-700 cursor-pointer"
-                        onClick={() => handleStaticPage(sale._id)}
-                      >
-                        <FcStatistics size={18} />
-                      </button>
+                    <td className="px-4 py-2 border-b">
+                      <div className="flex items-center space-x-4">
+                        <button
+                          className={`text-blue-500 opacity-100 ${
+                            isEnded ? " cursor-not-allowed" : " cursor-pointer"
+                          }`}
+                          disabled={isEnded}
+                          onClick={() => handleEditFlashSale(sale._id)}
+                        >
+                          <FaEdit size={18} />
+                        </button>
+                        {/* Statistics icon remains clickable */}
+                        <button
+                          className="text-blue-500 hover:text-blue-700 cursor-pointer"
+                          onClick={() => handleStaticPage(sale._id)}
+                        >
+                          <FcStatistics size={18} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );

@@ -78,7 +78,7 @@ const ProductItem = ({ product, isForShow }) => {
       <div className="pt-6 flex flex-col flex-grow justify-around">
         <div className="text-center">
           <Link
-            to={link}
+            to={ROUTERS.USER.PRODUCT_DETAIL(id)}
             className="text-lg font-semibold leading-tight text-gray-900 hover:underline cursor-pointer"
           >
             {name}
