@@ -1,10 +1,12 @@
 import React from "react";
 import { formatVND } from "../../../utils/format";
+import NoAvatar from "../../NoAvatar"
 import { changeOrderStatus } from "../../../config/api";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
 const OrderTable = ({ listOrder, setListOrder }) => {
+  console.log("🚀 ~ OrderTable ~ listOrder:", listOrder);
   const navigate = useNavigate(); // Hook for navigation
 
   const getStatusClass = (status) => {
@@ -79,12 +81,17 @@ const OrderTable = ({ listOrder, setListOrder }) => {
               </td>
               <td className="p-5 border-b text-gray-700 font-semibold">
                 <div className="flex items-center gap-4">
-                  <img
-                    src={order.order_userId.usr_avatar || "https://via.placeholder.com/50"}
-                    alt={order.order_userId.usr_name}
-                    className="w-10 h-10 rounded-full"
-                  />
-                  <span>{order.order_userId.usr_name}</span>
+                  {order.order_userId?.usr_avatar ? (
+                    <img
+                      src={order.order_userId.usr_avatar}
+                      alt={order.order_userId?.usr_name || "Unknown User"}
+                      className="w-10 h-10 rounded-full"
+                    />
+                  ) : (
+                    <NoAvatar />
+                  )}
+
+                  <span>{order.order_userId?.usr_name || "Unknown User"}</span>
                 </div>
               </td>
               <td className="p-5 border-b text-gray-700 font-semibold">
