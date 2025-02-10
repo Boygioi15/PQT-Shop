@@ -36,7 +36,7 @@ export default function OrderSuccess() {
             </div>
             <div>
               <h2 className="text-lg font-semibold text-gray-800">
-                Đơn hàng #{id}
+                Đơn hàng #{id.length > 10 ? id.slice(0, 15) + "..." : id}
               </h2>
             </div>
           </div>
