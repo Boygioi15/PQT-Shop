@@ -139,12 +139,12 @@ const FlashSaleCreate = () => {
     console.log("Ngày thiếu");
 
     // Chuyển đổi thời gian sang đối tượng Date
-    const utcStart = new Date(startTime);
-    const utcEnd = new Date(endTime);
+    const start = new Date(startTime);
+    const end = new Date(endTime);
 
     // Chuyển đổi sang múi giờ GMT+7
-    const start = new Date(utcStart.getTime() + 7 * 60 * 60 * 1000);
-    const end = new Date(utcEnd.getTime() + 7 * 60 * 60 * 1000);
+    // const start = new Date(utcStart.getTime() + 7 * 60 * 60 * 1000);
+    // const end = new Date(utcEnd.getTime() + 7 * 60 * 60 * 1000);
 
     console.log("🚀 ~ validateTimeRange ~ start:", start);
     console.log("🚀 ~ validateTimeRange ~ end:", end);
